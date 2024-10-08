@@ -1,11 +1,11 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, BeforeCreate } from '@mikro-orm/core';
 import { v4 as uuidv4 } from 'uuid';
 
 @Entity()
 export class Company {
 
   @PrimaryKey()
-  id: string = uuidv4();
+  id: string;
 
   @Property()
   name!: string;
@@ -21,4 +21,9 @@ export class Company {
 
   @Property()
   website!: string;
+
+  @BeforeCreate()
+  setId() {
+    this.id = uuidv4();
+  }
 }
