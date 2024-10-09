@@ -343,6 +343,16 @@
           "length": 255,
           "mappedType": "string"
         },
+        "password": {
+          "name": "password",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
         "type": {
           "name": "type",
           "type": "text",

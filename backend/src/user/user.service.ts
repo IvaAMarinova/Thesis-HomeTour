@@ -17,10 +17,11 @@ export class UserService {
     private readonly em: EntityManager,
   ) {}
 
-  async create(fullName: string, email: string, type: UserType, companyId?: string): Promise<User> {
+  async create(fullName: string, email: string, password: string, type: UserType, companyId?: string): Promise<User> {
     const user = new User();
     user.fullName = fullName;
     user.email = email;
+    user.password = password;
     user.type = type;
 
     if (companyId) {

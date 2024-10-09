@@ -9,9 +9,9 @@ export class UserController {
 
   @Post()
   async createUser(
-    @Body() body: { fullName: string; email: string; type: UserType; companyId?: string }
+    @Body() body: { fullName: string; email: string; password: string; type: UserType; companyId?: string }
   ): Promise<User> {
-    return this.userService.create(body.fullName, body.email, body.type, body.companyId);
+    return this.userService.create(body.fullName, body.email, body.password, body.type, body.companyId);
   }
 
   @Put(':id')

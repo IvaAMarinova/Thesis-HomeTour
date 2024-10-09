@@ -19,6 +19,9 @@ export class User {
   @Property()
   email!: string;
 
+  @Property()
+  password!: string;
+
   @Enum(() => UserType)
   type!: UserType;
 
