@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager } from '@mikro-orm/core';
 import { User } from './user.entity';
@@ -64,6 +64,17 @@ export class UserService {
     const user = await this.userRepository.findOne(User, { id });
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
+    }
+    return user;
+  }
+
+  async validateUser(email: string, password: string): Promise<User> {
+    const user = await this.userRepository.findOne(User, { email });
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+    if (user.password !== password) {
+      throw new UnauthorizedException(`Invalid password for user ${email}`);
     }
     return user;
   }

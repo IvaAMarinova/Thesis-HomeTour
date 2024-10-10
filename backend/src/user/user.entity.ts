@@ -33,4 +33,3 @@ export class User {
     this.id = uuidv4();
   }
 }
-

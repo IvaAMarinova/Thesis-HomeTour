@@ -59,4 +59,3 @@ This project is an online platform for virtual apartment tours. It allows buyers
 
 
 After completing these steps, both the frontend and backend should be running, connected to the database, and ready for development or testing.
-
