@@ -8,7 +8,7 @@ import { CompanyModule } from './company/company.module';
 import { BuildingModule } from './building/building.module';
 import { PropertyModule } from './property/property.module';
 import { UserPropertyModule } from './user-property/user-property.module';
-// import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,7 +18,7 @@ import { UserPropertyModule } from './user-property/user-property.module';
     BuildingModule,
     PropertyModule,
     UserPropertyModule,
-    // AuthModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
