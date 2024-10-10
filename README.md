@@ -32,7 +32,7 @@ This project is an online platform for virtual apartment tours. It allows buyers
    ```
 3. Start the development server:
    ```
-   npm start
+   npm run dev
    ```
    The frontend should now be running on `http://localhost:3000`.
 
