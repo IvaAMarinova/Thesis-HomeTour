@@ -34,7 +34,7 @@ This project is an online platform for virtual apartment tours. It allows buyers
    ```
    npm run dev
    ```
-   The frontend should now be running on `http://localhost:3000`.
+   The frontend should now be running on `http://localhost:5173`.
 
 ### Backend Setup
 1. Navigate to the backend directory:
