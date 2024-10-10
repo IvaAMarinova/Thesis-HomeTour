@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager } from '@mikro-orm/core';
-import { PropertyEntity } from './property.enity';
+import { EntityManager, EntityRepository } from '@mikro-orm/core';
+import { PropertyEntity } from './property.entity';
 import { Company } from '../company/company.entity';
 import { Building } from '../building/building.entity';
 
@@ -9,9 +9,11 @@ import { Building } from '../building/building.entity';
 export class PropertyService {
   constructor(
     @InjectRepository(PropertyEntity)
-    private readonly propertyRepository: EntityManager,
-    private readonly companyRepository: EntityManager,
-    private readonly buildingRepository: EntityManager,
+    private readonly propertyRepository: EntityRepository<PropertyEntity>,
+    @InjectRepository(Company)
+    private readonly companyRepository: EntityRepository<Company>,
+    @InjectRepository(Building)
+    private readonly buildingRepository: EntityRepository<Building>,
     private readonly em: EntityManager,
   ) {}
 
@@ -24,51 +26,55 @@ export class PropertyService {
     companyId: string,
     buildingId: string
   ): Promise<PropertyEntity> {
-    const company = await this.companyRepository.findOne(Company, { id: companyId });
-    const building = await this.buildingRepository.findOne(Building, { id: buildingId });
-  
+    const company = await this.companyRepository.findOne({ id: companyId });
+    if (!company) {
+      throw new NotFoundException(`Company with id ${companyId} not found`);
+    }
+    const building = await this.buildingRepository.findOne({ id: buildingId });
+    if (!building) {
+      throw new NotFoundException(`Building with id ${buildingId} not found`);
+    }
+
     const property = new PropertyEntity();
     property.floor = floor;
     property.address = address;
     property.phone_number = phone_number;
     property.email = email;
     property.resources = resources;
-    property.company = company as Company;
-    property.building = building as Building;
-  
-    return this.propertyRepository.create(PropertyEntity, property);
-  }
-  
+    property.company = company;
+    property.building = building;
 
-  async update(id: string, property: PropertyEntity): Promise<PropertyEntity | null> {
-    const existingProperty = await this.propertyRepository.findOne(PropertyEntity, { id });
+    await this.em.persistAndFlush(property);
+    return property;
+  }
+
+  async update(id: string, propertyData: Partial<PropertyEntity>): Promise<PropertyEntity> {
+    const existingProperty = await this.propertyRepository.findOne({ id });
     if (!existingProperty) {
-      return null;
+      throw new NotFoundException(`Property with id ${id} not found`);
     }
-    existingProperty.floor = property.floor;
-    existingProperty.address = property.address;
-    existingProperty.phone_number = property.phone_number;
-    existingProperty.email = property.email;
-    existingProperty.resources = property.resources;
-    existingProperty.company = property.company;
-    existingProperty.building = property.building;
-    await this.em.persistAndFlush(existingProperty);
+    this.em.assign(existingProperty, propertyData);
+    await this.em.flush();
     return existingProperty;
   }
 
   async delete(id: string): Promise<void> {
-    const property = await this.propertyRepository.findOne(PropertyEntity, { id });
-    if (property) {
-      await this.propertyRepository.removeAndFlush(property);
+    const property = await this.propertyRepository.findOne({ id });
+    if (!property) {
+      throw new NotFoundException(`Property with id ${id} not found`);
     }
+    await this.em.removeAndFlush(property);
   }
 
   async getAllProperties(): Promise<PropertyEntity[]> {
-    return this.propertyRepository.findAll(PropertyEntity);
+    return this.propertyRepository.findAll();
   }
 
-  async getPropertyById(id: string): Promise<PropertyEntity | null> {
-    return this.propertyRepository.findOne(PropertyEntity, { id });
+  async getPropertyById(id: string): Promise<PropertyEntity> {
+    const property = await this.propertyRepository.findOne({ id });
+    if (!property) {
+      throw new NotFoundException(`Property with id ${id} not found`);
+    }
+    return property;
   }
-
 }

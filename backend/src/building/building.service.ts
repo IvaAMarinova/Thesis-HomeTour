@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager } from '@mikro-orm/core';
+import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { Building } from './building.entity';
 import { Company } from '../company/company.entity';
 
@@ -8,14 +8,17 @@ import { Company } from '../company/company.entity';
 export class BuildingService {
   constructor(
     @InjectRepository(Building)
-    private readonly buildingRepository: EntityManager,
+    private readonly buildingRepository: EntityRepository<Building>,
     @InjectRepository(Company)
-    private readonly companyRepository: EntityManager,
+    private readonly companyRepository: EntityRepository<Company>,
     private readonly em: EntityManager,
   ) {}
 
   async create(name: string, address: Record<string, any>, companyId: string): Promise<Building> {
-    const company = await this.companyRepository.findOne(Company, { id: companyId });
+    const company = await this.companyRepository.findOne({ id: companyId });
+    if (!company) {
+      throw new NotFoundException(`Company with id ${companyId} not found`);
+    }
     const building = new Building();
     building.name = name;
     building.address = address;
@@ -24,32 +27,33 @@ export class BuildingService {
     return building;
   }
 
-  async update(id: string, building: Building): Promise<Building | null> {
-    const existingBuilding = await this.buildingRepository.findOne(Building, { id });
+  async update(id: string, buildingData: Partial<Building>): Promise<Building> {
+    const existingBuilding = await this.buildingRepository.findOne({ id });
     if (!existingBuilding) {
-      return null;
+      throw new NotFoundException(`Building with id ${id} not found`);
     }
-    existingBuilding.name = building.name;
-    existingBuilding.address = building.address;
-    existingBuilding.company = building.company;
-    await this.em.persistAndFlush(existingBuilding);
+    this.em.assign(existingBuilding, buildingData);
+    await this.em.flush();
     return existingBuilding;
   }
 
   async delete(id: string): Promise<void> {
-    const building = await this.buildingRepository.findOne(Building, { id });
-    if (building) {
-      await this.buildingRepository.removeAndFlush(building);
-    } else {
-      throw new NotFoundException('Building not found');
+    const building = await this.buildingRepository.findOne({ id });
+    if (!building) {
+      throw new NotFoundException(`Building with id ${id} not found`);
     }
+    await this.em.removeAndFlush(building);
   }
 
   async getAllBuildings(): Promise<Building[]> {
-    return this.buildingRepository.findAll(Building);
+    return this.buildingRepository.findAll();
   }
 
-  async getBuildingById(id: string): Promise<Building | null> {
-    return this.buildingRepository.findOne(Building, { id });
+  async getBuildingById(id: string): Promise<Building> {
+    const building = await this.buildingRepository.findOne({ id });
+    if (!building) {
+      throw new NotFoundException(`Building with id ${id} not found`);
+    }
+    return building;
   }
 }

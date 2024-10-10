@@ -1,7 +1,7 @@
 import { Entity, PrimaryKey, Property, BeforeCreate, OneToOne } from '@mikro-orm/core';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from '../user/user.entity';
-import { PropertyEntity } from '../property/property.enity';
+import { PropertyEntity } from '../property/property.entity';
 
 @Entity()
 export class UserProperty {

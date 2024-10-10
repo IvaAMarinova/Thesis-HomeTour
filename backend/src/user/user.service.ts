@@ -1,19 +1,15 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager } from '@mikro-orm/core';
+import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { User } from './user.entity';
-import { Company } from '../company/company.entity';
+import { CompanyService } from '../company/company.service';
 import { UserType } from './user.entity';
-
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: EntityManager,
-
-    @InjectRepository(Company)
-    private readonly companyRepository: EntityManager,
-    
+    private readonly userRepository: EntityRepository<User>,
+    private readonly companyService: CompanyService,
     private readonly em: EntityManager,
   ) {}
 
@@ -25,11 +21,11 @@ export class UserService {
     user.type = type;
 
     if (companyId) {
-      const company = await this.companyRepository.findOne(Company, { id: companyId });
+      const company = await this.companyService.getCompanyById(companyId);
       if (!company) {
         throw new NotFoundException(`Company with id ${companyId} not found`);
       }
-      user.company = company as Company;
+      user.company = company;
     }
 
     await this.em.persistAndFlush(user);
@@ -37,31 +33,31 @@ export class UserService {
   }
 
   async update(id: string, userData: Partial<User>): Promise<User> {
-    const existingUser = await this.userRepository.findOne(User, { id });
+    const existingUser = await this.userRepository.findOne({ id });
     if (!existingUser) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
 
-    Object.assign(existingUser, userData);
+    this.em.assign(existingUser, userData);
 
     await this.em.flush();
     return existingUser;
   }
 
   async delete(id: string): Promise<void> {
-    const user = await this.userRepository.findOne(User, { id });
+    const user = await this.userRepository.findOne({ id });
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
-    await this.userRepository.removeAndFlush(user);
+    await this.em.removeAndFlush(user);
   }
 
   async getAllUsers(): Promise<User[]> {
-    return this.userRepository.findAll(User);
+    return this.userRepository.findAll();
   }
 
   async getUserById(id: string): Promise<User> {
-    const user = await this.userRepository.findOne(User, { id });
+    const user = await this.userRepository.findOne({ id });
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
     }
@@ -69,7 +65,7 @@ export class UserService {
   }
 
   async validateUser(email: string, password: string): Promise<User> {
-    const user = await this.userRepository.findOne(User, { email });
+    const user = await this.userRepository.findOne({ email });
     if (!user) {
       throw new NotFoundException(`User with email ${email} not found`);
     }

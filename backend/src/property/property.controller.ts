@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
 import { PropertyService } from './property.service';
-import { PropertyEntity } from './property.enity';
+import { PropertyEntity } from './property.entity';
 
 @Controller('properties')
 export class PropertyController {
