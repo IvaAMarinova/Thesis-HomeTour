@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { IUser } from '../user/user.inteface';
-import { UserType } from '../user/user.entity'; 
+import { UserType } from '../user/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -12,18 +12,16 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.userService.findByEmail(email);
-    if (!user) {
-      throw new UnauthorizedException(`No user found with email: ${email}`);
+    try {
+      console.log(`[AuthService] validateUser: Attempting to validate user with email: ${email}`);
+      console.log(`[AuthService] validateUser: Password: ${password}`);
+      const user = await this.userService.validateUser(email, password);
+      
+      const { password: _, ...result } = user;
+      return result;
+    } catch (error) {
+      throw new UnauthorizedException('Invalid credentials');
     }
-
-    const isPasswordValid = await this.userService.validatePassword(user, password);
-    if (!isPasswordValid) {
-      throw new UnauthorizedException(`Invalid password for email: ${email}`);
-    }
-
-    const { password: _, ...result } = user;
-    return result;
   }
 
   async login(user: IUser) {
@@ -43,7 +41,11 @@ export class AuthService {
     
     const userType = this.validateAndConvertUserType(type);
     
-    return this.userService.create(fullName, email, password, userType, companyId);
+    try {
+      return await this.userService.create(fullName, email, password, userType, companyId);
+    } catch (error) {
+      throw new Error(`Failed to register user: ${error.message}`);
+    }
   }
 
   private validateAndConvertUserType(type: string): UserType {

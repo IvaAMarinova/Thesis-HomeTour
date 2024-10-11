@@ -15,8 +15,6 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() registerData: { email: string; password: string; fullName: string; type: string; companyId?: string }) {
-    console.log(` vajnoooooooooooooooooooooooooooooooooooooooooooooooooooo `);
-    console.log(registerData);
     const user = await this.authService.register(registerData.email, registerData.password, registerData.fullName, registerData.companyId, registerData.type);
     return this.authService.login(user);
   }

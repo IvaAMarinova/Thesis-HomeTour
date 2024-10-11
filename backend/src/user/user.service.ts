@@ -4,7 +4,7 @@ import { EntityManager, EntityRepository, UniqueConstraintViolationException } f
 import { User } from './user.entity';
 import { CompanyService } from '../company/company.service';
 import { UserType } from './user.entity';
-import { compare } from 'bcrypt';
+import { hash, compare } from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -24,7 +24,7 @@ export class UserService {
     const user = new User();
     user.fullName = fullName;
     user.email = email;
-    user.password = password;
+    user.password = await hash(password, 10);
     user.type = type;
 
     if (companyId) {
@@ -79,11 +79,13 @@ export class UserService {
   }
 
   async validateUser(email: string, password: string): Promise<User> {
+    console.log(`[UserService] validateUser: Password: ${password}`);
     const user = await this.userRepository.findOne({ email });
     if (!user) {
       throw new NotFoundException(`User with email ${email} not found`);
     }
-    if (user.password !== password) {
+    const isPasswordValid = await this.validatePassword(user, password);
+    if (!isPasswordValid) {
       throw new UnauthorizedException(`Invalid password for user ${email}`);
     }
     return user;
@@ -94,7 +96,6 @@ export class UserService {
   }
 
   async validatePassword(user: User, password: string): Promise<boolean> {
-    // return compare(password, user.password);
-    return password === user.password;
+    return await compare(password, user.password);
   }
 }
