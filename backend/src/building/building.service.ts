@@ -23,7 +23,12 @@ export class BuildingService {
     building.name = name;
     building.address = address;
     building.company = company;
-    await this.em.persistAndFlush(building);
+    
+    try {
+      await this.em.persistAndFlush(building);
+    } catch (error) {
+      throw new Error(`Failed to create building: ${error.message}`);
+    }
     return building;
   }
 

@@ -4,7 +4,7 @@ export interface IUser {
     id: string;
     email: string;
     password: string;
-    name: string;
+    fullName: string;
     type: UserType;
-    companyId: string;
+    companyId?: string;
 }

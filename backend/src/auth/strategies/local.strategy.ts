@@ -9,16 +9,17 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     super({
       usernameField: 'email',
       passwordField: 'password',
-      passReqToCallback: true
     });
-  }
+  }Y
 
-  async validate(req: any, email: string, password: string): Promise<any> {
-    console.log(`[LocalStrategy] validate: email=${email}, password=${password}`)
+  async validate(email: string, password: string): Promise<any> {
+    console.log(`[LocalStrategy] validate: Attempting to validate user with email: ${email}`);
     const user = await this.authService.validateUser(email, password);
     if (!user) {
-      throw new UnauthorizedException();
+      console.log(`[LocalStrategy] validate: User validation failed for email: ${email}`);
+      throw new UnauthorizedException('Invalid credentials');
     }
+    console.log(`[LocalStrategy] validate: User validation successful for email: ${email}`);
     return user;
   }
 }

@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { IUser } from '../user/user.inteface';
+import { UserType } from '../user/user.entity'; 
 
 @Injectable()
 export class AuthService {
@@ -11,17 +12,45 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
-    console.log(`[AuthService] validateUser: email=${email}, password=${password}`)
-    return await this.userService.validateUser(email, password);
+    const user = await this.userService.findByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException(`No user found with email: ${email}`);
+    }
+
+    const isPasswordValid = await this.userService.validatePassword(user, password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException(`Invalid password for email: ${email}`);
+    }
+
+    const { password: _, ...result } = user;
+    return result;
   }
 
   async login(user: IUser) {
-    console.log(`[AuthService] login: user=${JSON.stringify(user)}`)
-    const payload = { email: user.email, name: user.name };
+    const payload = { email: user.email, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
       email: user.email,
-      name: user.name
+      name: user.fullName
     };
+  }
+
+  async register(email: string, password: string, fullName: string, companyId: string, type: string): Promise<IUser> {
+    const existingUser = await this.userService.findByEmail(email);
+    if (existingUser) {
+      throw new UnauthorizedException('User already exists');
+    }
+    
+    const userType = this.validateAndConvertUserType(type);
+    
+    return this.userService.create(fullName, email, password, userType, companyId);
+  }
+
+  private validateAndConvertUserType(type: string): UserType {
+    const upperCaseType = type.toUpperCase();
+    if (upperCaseType in UserType) {
+      return UserType[upperCaseType as keyof typeof UserType];
+    }
+    throw new BadRequestException(`Invalid user type: ${type}`);
   }
 }

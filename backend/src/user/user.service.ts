@@ -1,9 +1,11 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager, EntityRepository } from '@mikro-orm/core';
+import { EntityManager, EntityRepository, UniqueConstraintViolationException } from '@mikro-orm/core';
 import { User } from './user.entity';
 import { CompanyService } from '../company/company.service';
 import { UserType } from './user.entity';
+import { compare } from 'bcrypt';
+
 @Injectable()
 export class UserService {
   constructor(
@@ -14,6 +16,11 @@ export class UserService {
   ) {}
 
   async create(fullName: string, email: string, password: string, type: UserType, companyId?: string): Promise<User> {
+    const existingUser = await this.findByEmail(email);
+    if (existingUser) {
+      throw new ConflictException(`User with email ${email} already exists`);
+    }
+
     const user = new User();
     user.fullName = fullName;
     user.email = email;
@@ -28,7 +35,14 @@ export class UserService {
       user.company = company;
     }
 
-    await this.em.persistAndFlush(user);
+    try {
+      await this.em.persistAndFlush(user);
+    } catch (error) {
+      if (error instanceof UniqueConstraintViolationException) {
+        throw new ConflictException(`User with email ${email} already exists`);
+      }
+      throw new Error(`Failed to create user: ${error.message}`);
+    }
     return user;
   }
 
@@ -73,5 +87,14 @@ export class UserService {
       throw new UnauthorizedException(`Invalid password for user ${email}`);
     }
     return user;
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOne({ email });
+  }
+
+  async validatePassword(user: User, password: string): Promise<boolean> {
+    // return compare(password, user.password);
+    return password === user.password;
   }
 }

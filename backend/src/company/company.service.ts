@@ -18,7 +18,12 @@ export class CompanyService {
     company.email = email;
     company.phone_number = phone_number;
     company.website = website;
-    await this.em.persistAndFlush(company);
+    
+    try {
+      await this.em.persistAndFlush(company);
+    } catch (error) {
+      throw new Error(`Failed to create company: ${error.message}`);
+    }
     return company;
   }
 

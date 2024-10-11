@@ -44,7 +44,11 @@ export class PropertyService {
     property.company = company;
     property.building = building;
 
-    await this.em.persistAndFlush(property);
+    try {
+      await this.em.persistAndFlush(property);
+    } catch (error) {
+      throw new Error(`Failed to create property: ${error.message}`);
+    }
     return property;
   }
 

@@ -30,7 +30,12 @@ export class UserPropertyService {
     userProperty.user = user;
     userProperty.property = property;
     userProperty.liked = liked;
-    await this.em.persistAndFlush(userProperty);
+    
+    try {
+      await this.em.persistAndFlush(userProperty);
+    } catch (error) {
+      throw new Error(`Failed to create user property: ${error.message}`);
+    }
     return userProperty;
   }
 
