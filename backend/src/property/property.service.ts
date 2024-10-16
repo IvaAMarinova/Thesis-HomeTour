@@ -4,6 +4,7 @@ import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { PropertyEntity } from './property.entity';
 import { Company } from '../company/company.entity';
 import { Building } from '../building/building.entity';
+import { UserProperty } from '../user-property/user-property.entity';
 
 @Injectable()
 export class PropertyService {
@@ -24,16 +25,13 @@ export class PropertyService {
     email: string,
     resources: Record<string, any>,
     companyId: string,
-    buildingId: string
+    buildingId?: string
   ): Promise<PropertyEntity> {
     const company = await this.companyRepository.findOne({ id: companyId });
     if (!company) {
       throw new NotFoundException(`Company with id ${companyId} not found`);
     }
-    const building = await this.buildingRepository.findOne({ id: buildingId });
-    if (!building) {
-      throw new NotFoundException(`Building with id ${buildingId} not found`);
-    }
+    
 
     const property = new PropertyEntity();
     property.floor = floor;
@@ -42,8 +40,13 @@ export class PropertyService {
     property.email = email;
     property.resources = resources;
     property.company = company;
-    property.building = building;
-
+    if(buildingId) {
+      const building = await this.buildingRepository.findOne({ id: buildingId });
+      if (!building) {
+        throw new NotFoundException(`Building with id ${buildingId} not found`);
+      }
+      property.building = building;
+    }
     try {
       await this.em.persistAndFlush(property);
     } catch (error) {
@@ -67,6 +70,12 @@ export class PropertyService {
     if (!property) {
       throw new NotFoundException(`Property with id ${id} not found`);
     }
+
+    const userProperties = await this.em.find(UserProperty, { property: property });
+    if (userProperties.length > 0) {
+      await this.em.removeAndFlush(userProperties);
+    }
+
     await this.em.removeAndFlush(property);
   }
 
@@ -80,5 +89,10 @@ export class PropertyService {
       throw new NotFoundException(`Property with id ${id} not found`);
     }
     return property;
+  }
+
+  async getAllAddresses(): Promise<Record<string, string>[]> {
+    const properties = await this.propertyRepository.findAll();
+    return properties.map(property => property.address);;
   }
 }

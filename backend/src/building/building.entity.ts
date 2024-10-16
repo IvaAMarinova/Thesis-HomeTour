@@ -1,4 +1,4 @@
-import { Entity, JsonType, OneToOne, PrimaryKey, Property, BeforeCreate} from '@mikro-orm/core';
+import { Entity, JsonType, ManyToOne, PrimaryKey, Property, BeforeCreate} from '@mikro-orm/core';
 import { v4 as uuidv4 } from 'uuid';
 import { Company } from '../company/company.entity';
   
@@ -13,7 +13,7 @@ export class Building {
     @Property({ type: JsonType })
     address!: Record<string, any>;
 
-    @OneToOne(() => Company)
+    @ManyToOne(() => Company)
     company!: Company;
 
     @BeforeCreate()

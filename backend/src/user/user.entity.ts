@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey, Property, BeforeCreate, OneToOne, Enum } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, BeforeCreate, ManyToOne, Enum } from '@mikro-orm/core';
 import { Company } from '../company/company.entity';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -25,7 +25,7 @@ export class User {
   @Enum(() => UserType)
   type!: UserType;
 
-  @OneToOne(() => Company, { nullable: true })
+  @ManyToOne(() => Company, { nullable: true })
   company?: Company;
 
   @BeforeCreate()

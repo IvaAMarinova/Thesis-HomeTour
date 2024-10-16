@@ -131,16 +131,6 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": [
-            "company_id"
-          ],
-          "composite": false,
-          "keyName": "building_company_id_unique",
-          "constraint": true,
-          "primary": false,
-          "unique": true
-        },
-        {
           "keyName": "building_pkey",
           "columnNames": [
             "id"
@@ -172,6 +162,16 @@
       "columns": {
         "id": {
           "name": "id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "name": {
+          "name": "name",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -243,7 +243,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "length": 255,
           "mappedType": "string"
         }
@@ -251,26 +251,6 @@
       "name": "property_entity",
       "schema": "public",
       "indexes": [
-        {
-          "columnNames": [
-            "company_id"
-          ],
-          "composite": false,
-          "keyName": "property_entity_company_id_unique",
-          "constraint": true,
-          "primary": false,
-          "unique": true
-        },
-        {
-          "columnNames": [
-            "building_id"
-          ],
-          "composite": false,
-          "keyName": "property_entity_building_id_unique",
-          "constraint": true,
-          "primary": false,
-          "unique": true
-        },
         {
           "keyName": "property_entity_pkey",
           "columnNames": [
@@ -306,6 +286,7 @@
             "id"
           ],
           "referencedTableName": "public.building",
+          "deleteRule": "set null",
           "updateRule": "cascade"
         }
       },
@@ -386,16 +367,6 @@
           ],
           "composite": false,
           "keyName": "user_email_unique",
-          "constraint": true,
-          "primary": false,
-          "unique": true
-        },
-        {
-          "columnNames": [
-            "company_id"
-          ],
-          "composite": false,
-          "keyName": "user_company_id_unique",
           "constraint": true,
           "primary": false,
           "unique": true
