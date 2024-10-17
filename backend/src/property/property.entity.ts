@@ -12,6 +12,9 @@ export class PropertyEntity {
   @Property()
   name!: string;
 
+  @Property()
+  description!: string;
+
   @Property({ nullable: true })
   floor: number;
 

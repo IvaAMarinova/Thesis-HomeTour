@@ -107,6 +107,16 @@
           "length": 255,
           "mappedType": "string"
         },
+        "description": {
+          "name": "description",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
         "address": {
           "name": "address",
           "type": "jsonb",
@@ -172,6 +182,16 @@
         },
         "name": {
           "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "description": {
+          "name": "description",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,

@@ -7,8 +7,8 @@ export class BuildingController {
   constructor(private readonly buildingService: BuildingService) {}
 
   @Post()
-  async createBuilding(@Body() body: {name: string, address: Record<string, any>, companyId: string}): Promise<Building> {
-    return this.buildingService.create(body.name, body.address, body.companyId);
+  async createBuilding(@Body() body: {name: string, description: string, address: Record<string, any>, companyId: string}): Promise<Building> {
+    return this.buildingService.create(body.name, body.description, body.address, body.companyId);
   }
 
   @Put(':id')

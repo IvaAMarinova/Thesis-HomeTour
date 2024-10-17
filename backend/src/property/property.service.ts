@@ -25,6 +25,8 @@ export class PropertyService {
     email: string,
     resources: Record<string, any>,
     companyId: string,
+    name: string,
+    description: string,
     buildingId?: string
   ): Promise<PropertyEntity> {
     const company = await this.companyRepository.findOne({ id: companyId });
@@ -40,6 +42,8 @@ export class PropertyService {
     property.email = email;
     property.resources = resources;
     property.company = company;
+    property.name = name;
+    property.description = description;
     if(buildingId) {
       const building = await this.buildingRepository.findOne({ id: buildingId });
       if (!building) {

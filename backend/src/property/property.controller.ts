@@ -7,7 +7,7 @@ export class PropertyController {
   constructor(private readonly propertyService: PropertyService) {}
 
   @Post()
-  async createProperty(@Body() body: {floor: number, address: Record<string, string>, phone_number: string, email: string, resources: Record<string, any>, companyId: string, buildingId?: string}): Promise<PropertyEntity> {
+  async createProperty(@Body() body: {floor: number, description: string, name: string, address: Record<string, string>, phone_number: string, email: string, resources: Record<string, any>, companyId: string, buildingId?: string}): Promise<PropertyEntity> {
     return this.propertyService.create(
       body.floor,
       body.address,
@@ -15,6 +15,8 @@ export class PropertyController {
       body.email,
       body.resources,
       body.companyId,
+      body.name,
+      body.description,
       body.buildingId
     );
   }

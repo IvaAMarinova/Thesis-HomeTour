@@ -14,13 +14,14 @@ export class BuildingService {
     private readonly em: EntityManager,
   ) {}
 
-  async create(name: string, address: Record<string, any>, companyId: string): Promise<Building> {
+  async create(name: string, description: string, address: Record<string, any>, companyId: string): Promise<Building> {
     const company = await this.companyRepository.findOne({ id: companyId });
     if (!company) {
       throw new NotFoundException(`Company with id ${companyId} not found`);
     }
     const building = new Building();
     building.name = name;
+    building.description = description;
     building.address = address;
     building.company = company;
     

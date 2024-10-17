@@ -10,6 +10,9 @@ export class Building {
     @Property()
     name!: string;
 
+    @Property()
+    description!: string;
+
     @Property({ type: JsonType })
     address!: Record<string, any>;
 
