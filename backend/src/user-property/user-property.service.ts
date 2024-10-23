@@ -64,4 +64,8 @@ export class UserPropertyService {
   async getPropertyUsers(propertyId: string): Promise<UserProperty[]> {
     return this.userPropertyRepository.find({ property: { id: propertyId } });
   }
+
+  async getAllUserProperties(): Promise<UserProperty[]> {
+    return this.userPropertyRepository.findAll();
+  }
 }

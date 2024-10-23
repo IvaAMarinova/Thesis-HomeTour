@@ -24,4 +24,3 @@ export class Building {
         this.id = uuidv4();
 }
 }
-  

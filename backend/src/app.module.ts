@@ -9,7 +9,8 @@ import { BuildingModule } from './building/building.module';
 import { PropertyModule } from './property/property.module';
 import { UserPropertyModule } from './user-property/user-property.module';
 import { AuthModule } from './auth/auth.module';
-
+import { UploadModule } from './upload/upload.module';
+import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [
     MikroOrmModule.forRoot(config),
@@ -19,6 +20,10 @@ import { AuthModule } from './auth/auth.module';
     PropertyModule,
     UserPropertyModule,
     AuthModule,
+    UploadModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
