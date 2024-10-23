@@ -14,7 +14,7 @@ export class User {
   id: string;
 
   @Property()
-  fullName!: string;
+  full_name!: string;
 
   @Property({ unique: true })
   email!: string;

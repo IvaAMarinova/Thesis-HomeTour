@@ -21,13 +21,17 @@ export class PropertyService {
   async create(
     floor: number,
     address: Record<string, string>,
-    phone_number: string,
+    phoneNumber: string,
     email: string,
-    resources: Record<string, any>,
     companyId: string,
     name: string,
     description: string,
-    buildingId?: string
+    buildingId?: string,
+    resources?: {
+      header_image?: string | null;
+      gallery_images?: string[];
+      visualization_folder?: string | null;
+    },
   ): Promise<PropertyEntity> {
     const company = await this.companyRepository.findOne({ id: companyId });
     if (!company) {
@@ -38,9 +42,9 @@ export class PropertyService {
     const property = new PropertyEntity();
     property.floor = floor;
     property.address = address;
-    property.phone_number = phone_number;
+    property.phone_number = phoneNumber;
     property.email = email;
-    property.resources = resources;
+    property.resources = resources || {};
     property.company = company;
     property.name = name;
     property.description = description;

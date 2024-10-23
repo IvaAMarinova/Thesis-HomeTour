@@ -7,17 +7,31 @@ export class PropertyController {
   constructor(private readonly propertyService: PropertyService) {}
 
   @Post()
-  async createProperty(@Body() body: {floor: number, description: string, name: string, address: Record<string, string>, phone_number: string, email: string, resources: Record<string, any>, companyId: string, buildingId?: string}): Promise<PropertyEntity> {
+  async createProperty(@Body() body: {
+    floor: number, 
+    description: string, 
+    name: string, 
+    address: Record<string, string>, 
+    phoneNumber: string, 
+    email: string, 
+    resources?: {
+      header_image?: string | null;
+      gallery_images?: string[];
+      visualization_folder?: string | null;
+    }, 
+    companyId: string, 
+    buildingId?: string
+  }): Promise<PropertyEntity> {
     return this.propertyService.create(
       body.floor,
       body.address,
-      body.phone_number,
+      body.phoneNumber,
       body.email,
-      body.resources,
       body.companyId,
       body.name,
       body.description,
-      body.buildingId
+      body.buildingId,
+      body.resources
     );
   }
 
@@ -41,13 +55,8 @@ export class PropertyController {
     return this.propertyService.getAllProperties();
   }
 
-  
-
   @Get(':id')
   async getPropertyById(@Param('id') id: string): Promise<PropertyEntity | null> {
     return this.propertyService.getPropertyById(id);
   }
-
-  
-
 }

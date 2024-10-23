@@ -27,8 +27,12 @@ export class PropertyEntity {
   @Property()
   email!: string;
 
-  @Property({ type: JsonType })
-  resources!: Record<string, any>;
+  @Property({ type: JsonType, nullable: true })
+  resources?: {
+    header_image?: string | null;
+    gallery_images?: string[];
+    visualization_folder?: string | null;
+  };
 
   @ManyToOne(() => Company)
   company!: Company;

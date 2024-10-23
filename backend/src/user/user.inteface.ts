@@ -1,10 +1,11 @@
 import { UserType } from "./user.entity";
+import { Company } from "../company/company.entity";
 
 export interface IUser {
     id: string;
     email: string;
     password: string;
-    fullName: string;
+    full_name: string;
     type: UserType;
-    companyId?: string;
+    company?: Company;
 }
