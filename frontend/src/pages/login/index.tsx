@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Eye, EyeOff } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { HttpService } from "@/services/http-service";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -39,7 +40,11 @@ const registerSchema = z.object({
   }),
 });
 
-export function Login() {
+interface LoginProps {
+  onLoginSuccess: () => void;
+}
+
+export function Login({ onLoginSuccess }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
@@ -61,20 +66,15 @@ export function Login() {
 
   async function onLogin(values: z.infer<typeof loginSchema>) {
     try {
-      const response = await fetch('http://localhost:3000/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(values),
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+      const response = await HttpService.post<{ accessToken: string }>('/auth/login', values);
+      if (response) {
+        console.log(response);
+        HttpService.setAccessToken(response.accessToken);
+        console.log('User logged in successfully');
+        onLoginSuccess();
+      } else {
+        throw new Error('Access token not found in the response');
       }
-
-      const data = await response.json();
-      console.log('User logged in:', data);
     } catch (error) {
       console.error('Error logging in:', error);
     }
@@ -86,20 +86,8 @@ export function Login() {
         ...values,
         type: "b2c",
       };
-      const response = await fetch('http://localhost:3000/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(registerData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const data = await response.json();
-      console.log('User registered:', data);
+      const response = await HttpService.post('/auth/register', registerData);
+      console.log('User registered:', response);
     } catch (error) {
       console.error('Error registering user:', error);
     }
