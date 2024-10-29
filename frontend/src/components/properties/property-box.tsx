@@ -1,57 +1,108 @@
 import { useState, useEffect } from "react";
 import { HttpService } from "../../services/http-service";
+import { Ar } from "@mynaui/icons-react";
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+} from "@/components/ui/hover-card"
 
-function PropertyBox({ property }: { property: Record<string, string> & { resources: { [key: string]: string } } }) {
+function truncateDescription(description: string) {
+    if (description.length <= 64) {
+        return description;
+    }
+
+    return (
+    <>
+        {description.substring(0, 64)}
+        <span className="text-gray-500 text-sm">... Learn more</span>
+    </>
+    );
+}
+
+function PropertyBox({
+    property,
+    whenClicked,
+}: {
+    property: {
+        name: string;
+        description: string;
+        company: string;
+        resources?: {  
+            header_image?: string | null;
+            visualization_folder?: string | null;
+        };
+    };
+    whenClicked: () => void;
+    }) {
     const [companyName, setCompanyName] = useState<string>("Unknown Company");
     const [imageUrl, setImageUrl] = useState<string>("");
 
     useEffect(() => {
         const fetchCompanyName = async () => {
-            try {
-                const response = await HttpService.get<Record<string, string>>(`/companies/${property.company}`);
-                setCompanyName(response.name || "Unknown Company");
-            } catch (error) {
-                console.error("Error fetching company name:", error);
-                setCompanyName("Unknown Company");
-            }
+        try {
+            const response = await HttpService.get<{ name: string }>(`/companies/${property.company}`);
+            setCompanyName(response.name || "Unknown Company");
+        } catch (error) {
+            console.error("Error fetching company name:", error);
+        }
         };
 
-        if (property.company) {
+        if (property.company) 
+        {
             fetchCompanyName();
         }
     }, [property.company]);
-    
 
     useEffect(() => {
         const fetchImageUrl = async () => {
-            try {
-                const response = await HttpService.get<Record<string, string>>(`/get-presigned-url/to-view?key=${property.resources.header_image}`);
-                console.log("Header image URL:", response.url);
-                
-                setImageUrl(response.url);
-            } catch (error) {
-                console.error("Error fetching header image URL:", error);
+        try {
+            const headerImageKey = property.resources?.header_image;
+            if (headerImageKey) {
+            const response = await HttpService.get<{ url: string }>(`/get-presigned-url/to-view?key=${headerImageKey}`);
+            setImageUrl(response.url);
             }
+        } catch (error) {
+            console.error("Error fetching header image URL:", error);
+        }
         };
 
-        if (property.resources) {
-            fetchImageUrl(); 
-        }
+    if (property.resources?.header_image) fetchImageUrl();
     }, [property.resources]);
 
     return (
-        <div className="border rounded-lg shadow-md p-4">
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">{property.name}</h1>
-            <p className="text-sm font-medium text-gray-600 mb-1 italic">{companyName}</p>
-            <p className="text-base text-gray-700">{property.description}</p>
+        <div className="border rounded-lg shadow-md p-4 cursor-pointer" onClick={whenClicked}>
+            <HoverCard>
+                <HoverCardTrigger>
+                    <div className="flex justify-end items-end mb-3">
+                        {property.resources?.visualization_folder ? (
+                            <Ar />
+                        ) : (
+                            <span className="invisible">
+                                <Ar />
+                            </span>
+                        )}
+                    </div>
+                </HoverCardTrigger>
+                <HoverCardContent>
+                    <p className="font-medium text-gray-600 mb-1 p-1">Try out our 3D visualization!</p>
+                    <p className="text-sm text-gray-700">Available for this property</p>
+                </HoverCardContent>
+            </HoverCard>
+            
             {imageUrl ? (
                 <img 
-                    src={imageUrl} 
-                    alt={property.name} 
-                    />
+                src={imageUrl} 
+                alt={property.name} 
+                className="w-full h-48 rounded-lg mb-4 object-cover"
+                />
             ) : (
                 <p>No image available</p>
             )}
+            
+            <h1 className="text-2xl font-bold text-gray-800 mb-1 p-1">{property.name}</h1>
+            <p className="text-sm font-medium text-gray-600 mb-1 italic p-1">{companyName}</p>
+            <p className="text-base text-gray-700 mb-3">{truncateDescription(property.description)}</p>
         </div>
     );
 }
