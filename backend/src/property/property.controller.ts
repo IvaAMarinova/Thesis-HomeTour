@@ -8,28 +8,28 @@ export class PropertyController {
 
   @Post()
   async createProperty(@Body() body: {
-    floor: number, 
     description: string, 
     name: string, 
     address: Record<string, string>, 
     phoneNumber: string, 
     email: string, 
+    companyId: string,
     resources?: {
       header_image?: string | null;
       gallery_images?: string[];
       visualization_folder?: string | null;
     }, 
-    companyId: string, 
+    floor?: number, 
     buildingId?: string
   }): Promise<PropertyEntity> {
     return this.propertyService.create(
-      body.floor,
       body.address,
       body.phoneNumber,
       body.email,
       body.companyId,
       body.name,
       body.description,
+      body.floor,
       body.buildingId,
       body.resources
     );

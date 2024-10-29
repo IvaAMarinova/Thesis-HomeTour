@@ -19,13 +19,13 @@ export class PropertyService {
   ) {}
 
   async create(
-    floor: number,
     address: Record<string, string>,
     phoneNumber: string,
     email: string,
     companyId: string,
     name: string,
     description: string,
+    floor?: number,
     buildingId?: string,
     resources?: {
       header_image?: string | null;

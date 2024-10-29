@@ -10,7 +10,7 @@ export class Company {
   @Property()
   name!: string;
 
-  @Property()
+  @Property({ columnType: 'text' })
   description!: string;
 
   @Property()

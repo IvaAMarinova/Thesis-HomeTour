@@ -10,7 +10,7 @@ export class Building {
     @Property()
     name!: string;
 
-    @Property()
+    @Property({ columnType: 'text' })
     description!: string;
 
     @Property({ type: JsonType })
