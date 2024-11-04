@@ -5,16 +5,13 @@ import ImagesCarousel from '../../components/property/images-carousel';
 import { ArrowLeft, ArrowUp } from "@mynaui/icons-react";
 import CompanyBox  from "../../components/property/company-box";
 import Visualization from '@/components/property/visualization';
+import GoUpButton from '../../components/go-up-button';
 
 function Property() {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const [propertyData, setPropertyData] = useState<any>(null);
     const [galleryImages, setGalleryImages] = useState<string[]>([]);
-
-    const scrollToTop = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
 
     useEffect(() => {
         const fetchProperty = async () => {
@@ -64,11 +61,11 @@ function Property() {
             <div className="p-9 w-full max-w-6xl mx-auto border rounded-lg">
                 <div className="self-start ml-4 mt-6">
                     <span
-                        onClick={() => navigate(`/properties`)}
+                        onClick={() => navigate(-1)}
                         className="text-gray-800 underline cursor-pointer flex items-center"
                     >
                         <ArrowLeft className="mr-2" />
-                        Back to properties
+                        Назад
                     </span>
                 </div>
 
@@ -117,7 +114,7 @@ function Property() {
                                 </div>
                             </div>
                             <div className="w-full md:w-1/3 p-4">
-                                <CompanyBox company={propertyData.company} />
+                                <CompanyBox company={propertyData.company} onClick={() => navigate(`/companies/${propertyData.company}`)} />
                             </div>
                         </div>
                     ) : (
@@ -133,22 +130,12 @@ function Property() {
                 </div>
 
                 <div className="w-full max-w-6xl mx-auto px-4 mt-4">
-                {propertyData?.resources?.visualization_folder && (
-                    <Visualization visualizationFolder={propertyData.resources.visualization_folder} />
-                )}
-            </div>
-
-
-
-                <div className="w-full max-w-6xl mx-auto px-4 mt-10 flex justify-center">
-                    <button
-                        onClick={scrollToTop}
-                        className="px-6 py-3 text-black border rounded-lg shadow transition duration-300 flex items-center hover:scale-105"
-                    >
-                        <ArrowUp className="mr-2" />
-                        Go Back Up
-                    </button>
+                    {propertyData?.resources?.visualization_folder && (
+                        <Visualization visualizationFolder={propertyData.resources.visualization_folder} />
+                    )}
                 </div>
+
+                <GoUpButton />
             </div>
         </div>
     );

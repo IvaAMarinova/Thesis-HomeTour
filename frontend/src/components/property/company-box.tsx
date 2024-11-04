@@ -14,7 +14,7 @@ function truncateDescription(description: string) {
     );
 }
 
-function CompanyBox({ company }: { company: string }) {
+function CompanyBox({ company, onClick }: { company: string; onClick: () => void }) {
     const [companyData, setCompanyData] = useState<any>(null);
 
     useEffect(() => {
@@ -33,7 +33,10 @@ function CompanyBox({ company }: { company: string }) {
     }, [company]);
 
     return (
-        <div className="border rounded-lg shadow-md p-4 text-center cursor-pointer transform transition-transform duration-300 hover:scale-105">
+        <div
+            className="border rounded-lg shadow-md p-4 text-center cursor-pointer transform transition-transform duration-300 hover:scale-105"
+            onClick={onClick}
+        >
             {companyData ? (
                 <>
                     <h1 className="text-2xl font-bold text-gray-800 mb-4">
@@ -56,7 +59,6 @@ function CompanyBox({ company }: { company: string }) {
                         </p>
                     </div>
                 </>
-
             ) : (
                 <p>Loading company information...</p>
             )}

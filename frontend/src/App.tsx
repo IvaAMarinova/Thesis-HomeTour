@@ -6,7 +6,8 @@ import { HttpService } from './services/http-service';
 import Properties from './pages/properties';
 import Property from './pages/property';
 import './App.css';
-import Header from './components/header/header';
+import Header from './components/header';
+import Company from './pages/company';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -31,6 +32,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/properties" element={<Properties />} />
             <Route path="/properties/:id" element={<Property />} />
+            <Route path="/companies/:id" element={<Company />} />
           </Routes>
         </div>
       </div>

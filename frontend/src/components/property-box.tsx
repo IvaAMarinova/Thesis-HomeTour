@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { HttpService } from "../../services/http-service";
+import { HttpService } from "../services/http-service";
 import { Ar } from "@mynaui/icons-react";
 import {
     HoverCard,
