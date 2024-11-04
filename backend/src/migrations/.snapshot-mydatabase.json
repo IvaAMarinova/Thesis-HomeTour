@@ -64,6 +64,15 @@
           "nullable": false,
           "length": 255,
           "mappedType": "string"
+        },
+        "resources": {
+          "name": "resources",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "json"
         }
       },
       "name": "company",
@@ -130,7 +139,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "length": 255,
           "mappedType": "string"
         }
@@ -161,6 +170,7 @@
             "id"
           ],
           "referencedTableName": "public.company",
+          "deleteRule": "set null",
           "updateRule": "cascade"
         }
       },

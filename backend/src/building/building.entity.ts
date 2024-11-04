@@ -16,8 +16,8 @@ export class Building {
     @Property({ type: JsonType })
     address!: Record<string, any>;
 
-    @ManyToOne(() => Company)
-    company!: Company;
+    @ManyToOne(() => Company, { nullable: true })
+    company?: Company;
 
     @BeforeCreate()
     setId() {
