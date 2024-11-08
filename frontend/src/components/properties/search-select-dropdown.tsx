@@ -1,8 +1,5 @@
-"use client"
-
-import * as React from "react"
-import { Check, ChevronsUpDown } from "lucide-react"
-
+import { ArrowUpDownIcon, Check} from "lucide-react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
@@ -26,9 +23,18 @@ interface SearchSelectDropdownProps {
   initialSelection?: string[];
 }
 
-export function SearchSelectDropdown({ options, placeholder, onSelectionChange, initialSelection = [] }: SearchSelectDropdownProps) {
-  const [open, setOpen] = React.useState(false)
-  const [selectedValues, setSelectedValues] = React.useState<string[]>(initialSelection)
+export function SearchSelectDropdown({
+  options,
+  placeholder,
+  onSelectionChange,
+  initialSelection = []
+}: SearchSelectDropdownProps) {
+  const [open, setOpen] = useState(false)
+  const [selectedValues, setSelectedValues] = useState<string[]>(initialSelection)
+
+  useEffect(() => {
+    setSelectedValues(initialSelection);
+  }, [initialSelection]);
 
   const handleSelect = (currentValue: string) => {
     const updatedSelection = selectedValues.includes(currentValue)
@@ -47,23 +53,23 @@ export function SearchSelectDropdown({ options, placeholder, onSelectionChange, 
           aria-expanded={open}
           className="w-[200px] justify-between"
         >
-          {selectedValues.length > 0
-            ? `${selectedValues.length} selected`
-            : placeholder}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          {selectedValues.length === 1
+            ? selectedValues[0]
+            : `${selectedValues.length} избрани`}
+          <ArrowUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
           <CommandInput placeholder={`Search ${placeholder.toLowerCase()}...`} />
           <CommandList>
-            <CommandEmpty>No option found.</CommandEmpty>
+            <CommandEmpty>Не бяха открити опции</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
                   key={option}
                   value={option}
-                  onSelect={handleSelect}
+                  onSelect={() => handleSelect(option)}
                 >
                   <Check
                     className={cn(

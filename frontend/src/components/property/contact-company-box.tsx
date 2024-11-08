@@ -14,7 +14,7 @@ function truncateDescription(description: string) {
     );
 }
 
-function CompanyBox({ company, onClick }: { company: string; onClick: () => void }) {
+function ContactCompanyBox({ company, onClick }: { company: string; onClick: () => void }) {
     const [companyData, setCompanyData] = useState<any>(null);
 
     useEffect(() => {
@@ -66,4 +66,4 @@ function CompanyBox({ company, onClick }: { company: string; onClick: () => void
     );
 }
 
-export default CompanyBox;
+export default ContactCompanyBox;

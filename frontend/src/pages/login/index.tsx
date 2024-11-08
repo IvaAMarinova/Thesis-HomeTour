@@ -7,6 +7,7 @@ import { z } from "zod";
 import { Eye, EyeOff } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HttpService } from "@/services/http-service";
+// import { setUserId } from "../../contexts/UserContext";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -66,10 +67,13 @@ export function Login({ onLoginSuccess }: LoginProps) {
 
   async function onLogin(values: z.infer<typeof loginSchema>) {
     try {
-      const response = await HttpService.post<{ accessToken: string }>('/auth/login', values);
+      const response = await HttpService.post<{ access_token: string; refresh_token: string }>('/auth/login', values);
       if (response) {
         console.log(response);
-        HttpService.setAccessToken(response.accessToken);
+        HttpService.setAccessToken(response.access_token);
+        HttpService.setRefreshToken(response.refresh_token);
+        console.log('[Login] Acces token', response.access_token);
+        console.log('[Login] refresh token', response.refresh_token);
         console.log('User logged in successfully');
         onLoginSuccess();
       } else {
@@ -86,8 +90,13 @@ export function Login({ onLoginSuccess }: LoginProps) {
         ...values,
         type: "b2c",
       };
-      const response = await HttpService.post('/auth/register', registerData);
+      const response = await HttpService.post<{ access_token: string; refresh_token: string }>('/auth/register', registerData);
       console.log('User registered:', response);
+      HttpService.setAccessToken(response.access_token);
+      HttpService.setRefreshToken(response.refresh_token);
+      console.log('[Login] Acces token', response.access_token);
+      console.log('[Login] Refresh token', response.refresh_token);
+      console.log('User logged in successfully');
     } catch (error) {
       console.error('Error registering user:', error);
     }

@@ -8,6 +8,7 @@ export interface RequestParams {
 
 export class HttpService {
   private static accessToken: string | null = null;
+  private static refreshToken: string | null = null;
 
   static async get<T>(url: string, params?: RequestParams): Promise<T> {
     return await HttpService.request<T>(url, 'GET', params);
@@ -53,12 +54,18 @@ export class HttpService {
           params?.body instanceof FormData
             ? (params.body as BodyInit)
             : params?.body
-              ? JSON.stringify(params.body)
-              : undefined,
+            ? JSON.stringify(params.body)
+            : undefined,
       });
 
       if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
+        if (response.status === 401) {
+          console.log('[HttpService] Token expired. Attempting to refresh...');
+          await this.refreshAccessToken();
+          return await this.request<T>(url, method, params);
+        } else {
+          throw new Error(`Request failed with status ${response.status}`);
+        }
       }
 
       const contentType = response.headers.get('Content-Type');
@@ -76,13 +83,53 @@ export class HttpService {
 
   public static setAccessToken(accessToken: string): void {
     this.accessToken = accessToken;
+    localStorage.setItem('accessToken', accessToken);
+  }
+
+  public static setRefreshToken(refreshToken: string): void {
+    this.refreshToken = refreshToken;
+    localStorage.setItem('refreshToken', refreshToken);
   }
 
   public static logout(): void {
     this.accessToken = null;
+    this.refreshToken = null;
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
   }
 
   public static isAuthenticated(): boolean {
     return !!this.accessToken;
+  }
+
+  private static async refreshAccessToken(): Promise<void> {
+    if (!this.refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    console.log('[HttpService] Refreshing access token');
+    console.log('[HttpService] Refresh token:', this.refreshToken);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refresh_token: this.refreshToken }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to refresh token');
+      }
+
+      const data = await response.json();
+      this.setAccessToken(data.access_token);
+      console.log('Access token refreshed');
+    } catch (error) {
+      console.error('Failed to refresh access token:', error);
+      this.logout();
+      throw new Error('Session expired. Please log in again');
+    }
   }
 }

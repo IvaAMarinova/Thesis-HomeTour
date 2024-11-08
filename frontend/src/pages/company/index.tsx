@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { HttpService } from '../../services/http-service';
-import { TelephoneCall, ArrowLeft } from "@mynaui/icons-react";
+import { TelephoneCall, ArrowLeft, Envelope, Globe } from "@mynaui/icons-react";
 import PropertyBox from '../../components/property-box';
 import GoUpButton from '../../components/go-up-button';
+import Footer from '../../components/footer';
 
 function Company() {
     const navigate = useNavigate();
@@ -144,13 +145,13 @@ function Company() {
 
                     <div className="flex flex-col items-center">
                         <h2 className="text-lg font-semibold text-gray-800">Имейл</h2>
-                        <TelephoneCall className="text-6xl mt-2" />
+                        <Envelope className="text-6xl mt-2" />
                         <p className="text-lg mt-2 text-gray-700">{company?.email}</p>
                     </div>
 
                     <div className="flex flex-col items-center">
                         <h2 className="text-lg font-semibold text-gray-800">Официален website</h2>
-                        <TelephoneCall className="text-6xl mt-2" />
+                        <Globe className="text-6xl mt-2" />
                         <a 
                             href={company?.website} 
                             target="_blank" 
@@ -176,10 +177,9 @@ function Company() {
                         ))}
                     </div>
                 </div>
-
-
                 <GoUpButton />
             </div>
+            <Footer />
         </div>
     );    
 }

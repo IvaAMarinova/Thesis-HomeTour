@@ -40,6 +40,11 @@ export class PropertyController {
     return this.propertyService.getAllAddresses();
   }
 
+  @Get('/floors')
+  async getAllFloors(): Promise<number[]> {
+    return this.propertyService.getAllFloors();
+  }
+
   @Put(':id')
   async updateProperty(@Param('id') id: string, @Body() body: PropertyEntity): Promise<PropertyEntity | null> {
     return this.propertyService.update(id, body);
@@ -59,4 +64,6 @@ export class PropertyController {
   async getPropertyById(@Param('id') id: string): Promise<PropertyEntity | null> {
     return this.propertyService.getPropertyById(id);
   }
+
+
 }

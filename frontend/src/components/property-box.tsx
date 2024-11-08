@@ -14,7 +14,7 @@ function truncateDescription(description: string) {
 
     return (
     <>
-        {description.substring(0, 64)}
+        {description.substring(0, 100)}
         <span className="text-gray-500 text-sm">... Learn more</span>
     </>
     );
@@ -27,7 +27,7 @@ function PropertyBox({
     property: {
         name: string;
         description: string;
-        company: string;
+        companyName: string;
         resources?: {  
             header_image?: string | null;
             visualization_folder?: string | null;
@@ -35,24 +35,7 @@ function PropertyBox({
     };
     whenClicked: () => void;
     }) {
-    const [companyName, setCompanyName] = useState<string>("Unknown Company");
     const [imageUrl, setImageUrl] = useState<string>("");
-
-    useEffect(() => {
-        const fetchCompanyName = async () => {
-        try {
-            const response = await HttpService.get<{ name: string }>(`/companies/${property.company}`);
-            setCompanyName(response.name || "Unknown Company");
-        } catch (error) {
-            console.error("Error fetching company name:", error);
-        }
-        };
-
-        if (property.company) 
-        {
-            fetchCompanyName();
-        }
-    }, [property.company]);
 
     useEffect(() => {
         const fetchImageUrl = async () => {
@@ -101,7 +84,7 @@ function PropertyBox({
             )}
             
             <h1 className="text-2xl font-bold text-gray-800 mb-1 p-1">{property.name}</h1>
-            <p className="text-sm font-medium text-gray-600 mb-1 italic p-1">{companyName}</p>
+            <p className="text-sm font-medium text-gray-600 mb-1 italic p-1">{property.companyName}</p>
             <p className="text-base text-gray-700 mb-3">{truncateDescription(property.description)}</p>
         </div>
     );

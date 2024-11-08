@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { HttpService } from '../../services/http-service';
 import ImagesCarousel from '../../components/property/images-carousel';
-import { ArrowLeft, ArrowUp } from "@mynaui/icons-react";
-import CompanyBox  from "../../components/property/company-box";
+import { ArrowLeft } from "@mynaui/icons-react";
+import ContactCompanyBox  from "../../components/property/contact-company-box";
 import Visualization from '@/components/property/visualization';
 import GoUpButton from '../../components/go-up-button';
+import Footer from '../../components/footer';
 
 function Property() {
     const navigate = useNavigate();
@@ -114,15 +115,13 @@ function Property() {
                                 </div>
                             </div>
                             <div className="w-full md:w-1/3 p-4">
-                                <CompanyBox company={propertyData.company} onClick={() => navigate(`/companies/${propertyData.company}`)} />
+                                <ContactCompanyBox company={propertyData.company} onClick={() => navigate(`/companies/${propertyData.company}`)} />
                             </div>
                         </div>
                     ) : (
                         <p>Loading property details...</p>
                     )}
                 </div>
-
-
                 <div className="w-full max-w-6xl mx-auto px-4 mt-4">
                     {galleryImages.length > 1 && (
                         <ImagesCarousel galleryImages={galleryImages.slice(1)} /> 
@@ -134,9 +133,9 @@ function Property() {
                         <Visualization visualizationFolder={propertyData.resources.visualization_folder} />
                     )}
                 </div>
-
                 <GoUpButton />
             </div>
+            <Footer />
         </div>
     );
 }

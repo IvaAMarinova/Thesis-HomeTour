@@ -103,4 +103,9 @@ export class PropertyService {
     const properties = await this.propertyRepository.findAll();
     return properties.map(property => property.address);;
   }
+
+  async getAllFloors(): Promise<number[]> {
+    const properties = await this.propertyRepository.findAll();
+    return properties.map(property => property.floor).filter(floor => floor !== undefined);;
+  }
 }
