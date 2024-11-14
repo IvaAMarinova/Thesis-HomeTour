@@ -1,5 +1,3 @@
-import { useState, useEffect } from "react";
-import { HttpService } from "../services/http-service";
 import { Ar } from "@mynaui/icons-react";
 import {
     HoverCard,
@@ -35,23 +33,6 @@ function PropertyBox({
     };
     whenClicked: () => void;
     }) {
-    const [imageUrl, setImageUrl] = useState<string>("");
-
-    useEffect(() => {
-        const fetchImageUrl = async () => {
-        try {
-            const headerImageKey = property.resources?.header_image;
-            if (headerImageKey) {
-            const response = await HttpService.get<{ url: string }>(`/get-presigned-url/to-view?key=${headerImageKey}`, undefined, false);
-            setImageUrl(response.url);
-            }
-        } catch (error) {
-            console.error("Error fetching header image URL:", error);
-        }
-        };
-
-    if (property.resources?.header_image) fetchImageUrl();
-    }, [property.resources]);
 
     return (
         <div className="border rounded-lg shadow-md p-4 cursor-pointer" onClick={whenClicked}>
@@ -73,9 +54,9 @@ function PropertyBox({
                 </HoverCardContent>
             </HoverCard>
             
-            {imageUrl ? (
+            {property.resources?.header_image ? (
                 <img 
-                src={imageUrl} 
+                src={property.resources?.header_image} 
                 alt={property.name} 
                 className="w-full h-48 rounded-lg mb-4 object-cover"
                 />

@@ -54,6 +54,7 @@ function Properties() {
     fetchData();
   }, []);
 
+
   useEffect(() => {
     const filterProperties = () => {
       setFilteredProperties(

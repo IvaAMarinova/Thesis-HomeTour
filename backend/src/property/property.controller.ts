@@ -1,10 +1,14 @@
 import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
 import { PropertyService } from './property.service';
 import { PropertyEntity } from './property.entity';
+import { FileUploadService } from '../upload/upload.service';
 
 @Controller('properties')
 export class PropertyController {
-  constructor(private readonly propertyService: PropertyService) {}
+  constructor(
+    private readonly propertyService: PropertyService,
+    private readonly fileUploadService: FileUploadService
+  ) {}
 
   @Post()
   async createProperty(@Body() body: {
@@ -57,13 +61,30 @@ export class PropertyController {
 
   @Get()
   async getAllProperties(): Promise<PropertyEntity[]> {
-    return this.propertyService.getAllProperties();
+    const properties = await this.propertyService.getAllProperties();
+    await Promise.all(properties.map(async (property) => this.mapPresignedUrlsToProperty(property)));
+    return properties;
   }
 
   @Get(':id')
   async getPropertyById(@Param('id') id: string): Promise<PropertyEntity | null> {
-    return this.propertyService.getPropertyById(id);
+    const property = await this.propertyService.getPropertyById(id);
+    await this.mapPresignedUrlsToProperty(property);
+    return property;
   }
 
-
+  async mapPresignedUrlsToProperty(property: PropertyEntity) {
+    if (property.resources?.header_image) {
+      property.resources.header_image = await this.fileUploadService.getPreSignedURLToViewObject(
+        property.resources.header_image
+      );
+    }
+    if (property.resources?.gallery_images) {
+      property.resources.gallery_images = await Promise.all(
+        property.resources.gallery_images.map(async (imageKey) => 
+          this.fileUploadService.getPreSignedURLToViewObject(imageKey)
+        )
+      );
+    }
+  }
 }

@@ -11,14 +11,14 @@ import Footer from '../../components/footer';
 function Property() {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
-    const [propertyData, setPropertyData] = useState<any>(null);
-    const [galleryImages, setGalleryImages] = useState<string[]>([]);
+    const [property, setProperty] = useState<any>(null);
 
     useEffect(() => {
         const fetchProperty = async () => {
             try {
                 const response = await HttpService.get(`/properties/${id}`, undefined, false);
-                setPropertyData(response);
+                console.log("Fetched property:", response);
+                setProperty(response);
             } catch (error) {
                 console.error("Error fetching property:", error);
             }
@@ -28,34 +28,7 @@ function Property() {
             fetchProperty();
         }
     }, [id]);
-
-    useEffect(() => {
-        const fetchImageUrls = async () => {
-            if (!propertyData || !propertyData.resources) return;
-
-            try {
-                const imageKeys = [
-                    propertyData.resources.header_image,
-                    ...(propertyData.resources.gallery_images || []),
-                ].filter(Boolean);
-
-                const imageUrls = await Promise.all(
-                    imageKeys.map(async (key) => {
-                        const response = await HttpService.get<{ url: string }>(
-                            `/get-presigned-url/to-view?key=${key}`, undefined, false
-                        );
-                        return response.url;
-                    })
-                );
-
-                setGalleryImages(imageUrls);
-            } catch (error) {
-                console.error("Error fetching image URLs:", error);
-            }
-        };
-
-        fetchImageUrls();
-    }, [propertyData]);
+    
 
     return (
         <div className="pt-16 align-middle flex flex-col items-center">
@@ -69,11 +42,12 @@ function Property() {
                         Назад
                     </span>
                 </div>
-
-                {galleryImages[0] && (
+    
+                {/* Check if property and property.resources.header_image exist */}
+                {property?.resources?.header_image && (
                     <div className="h-64 mt-10 overflow-hidden rounded-xl shadow-md">
                         <img
-                            src={galleryImages[0]}
+                            src={property.resources.header_image}
                             alt="Property header image"
                             className="w-full h-full object-cover transform transition-transform duration-300 hover:scale-105"
                         />
@@ -81,13 +55,13 @@ function Property() {
                 )}
                 
                 <div className="mt-10 w-full max-w-6xl mx-auto px-4">
-                    {propertyData ? (
+                    {property ? (
                         <div className="flex flex-wrap w-full max-w-6xl mx-auto mt-4 mb-10">
                             <div className="w-full md:w-2/3 p-4">
-                                <h1 className="text-3xl font-bold text-gray-800 mb-4">{propertyData.name}</h1>
-
+                                <h1 className="text-3xl font-bold text-gray-800 mb-4">{property.name}</h1>
+    
                                 <div className="text-base text-gray-700 whitespace-pre-line">
-                                    {propertyData.description.split("\n").map((paragraph: string, index: number) => (
+                                    {property.description?.split("\n").map((paragraph : string, index : string) => (
                                         <p
                                             key={index}
                                             className="mb-4"
@@ -97,17 +71,17 @@ function Property() {
                                         </p>
                                     ))}
                                 </div>
-
+    
                                 <div className="mt-4">
                                     <h2 className="text-xl font-semibold text-gray-800 mb-2">
                                         Property Address
                                     </h2>
                                     <p className="text-base text-gray-700">
                                         {[ 
-                                            propertyData.address.city,
-                                            propertyData.address.neighborhood,
-                                            propertyData.address.street,
-                                            ...Object.entries(propertyData.address)
+                                            property.address?.city,
+                                            property.address?.neighborhood,
+                                            property.address?.street,
+                                            ...Object.entries(property.address || {})
                                                 .filter(([key]) => !['city', 'neighborhood', 'street'].includes(key))
                                                 .map(([, value]) => value)
                                         ].filter(Boolean).join(', ')}
@@ -115,22 +89,23 @@ function Property() {
                                 </div>
                             </div>
                             <div className="w-full md:w-1/3 p-4">
-                                <ContactCompanyBox company={propertyData.company} onClick={() => navigate(`/companies/${propertyData.company}`)} />
+                                <ContactCompanyBox company={property.company} onClick={() => navigate(`/companies/${property.company}`)} />
                             </div>
                         </div>
                     ) : (
                         <p>Loading property details...</p>
                     )}
                 </div>
+    
                 <div className="w-full max-w-6xl mx-auto px-4 mt-4">
-                    {galleryImages.length > 1 && (
-                        <ImagesCarousel galleryImages={galleryImages.slice(1)} /> 
+                    {property?.resources?.gallery_images?.length > 1 && (
+                        <ImagesCarousel galleryImages={property.resources.gallery_images.slice(1)} /> 
                     )}
                 </div>
-
+    
                 <div className="w-full max-w-6xl mx-auto px-4 mt-4">
-                    {propertyData?.resources?.visualization_folder && (
-                        <Visualization visualizationFolder={propertyData.resources.visualization_folder} />
+                    {property?.resources?.visualization_folder && (
+                        <Visualization visualizationFolder={property.resources.visualization_folder} />
                     )}
                 </div>
                 <GoUpButton />
@@ -138,6 +113,7 @@ function Property() {
             <Footer />
         </div>
     );
+    
 }
 
 export default Property;

@@ -27,28 +27,11 @@ function CompanyBox({
     whenClicked: () => void;
     }) {
 
-    const [imageUrl, setImageUrl] = useState<string>("");
-    useEffect(() => {
-        const fetchImageUrl = async () => {
-        try {
-            const imageKey = company.resources?.logo;
-            if (imageKey) {
-            const response = await HttpService.get<{ url: string }>(`/get-presigned-url/to-view?key=${imageKey}`,undefined, false);
-            setImageUrl(response.url);
-            }
-        } catch (error) {
-            console.error("Error fetching header image URL:", error);
-        }
-        };
-
-    if (company.resources?.logo) fetchImageUrl();
-    }, [company.resources]);
-
     return (
         <div className="border rounded-lg shadow-md p-4 cursor-pointer" onClick={whenClicked}>
-            {imageUrl ? (
+            {company.resources?.logo ? (
                 <img 
-                src={imageUrl} 
+                src={company.resources?.logo} 
                 alt={company.name} 
                 className="w-20 h-20 rounded-lg mb-4 object-cover mx-auto"
                 />

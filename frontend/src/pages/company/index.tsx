@@ -10,8 +10,6 @@ function Company() {
     const navigate = useNavigate();
     const { id } = useParams();
     const [company, setCompany] = useState<any>(null);
-    const [logoUrl, setLogoUrl] = useState<string | null>(null);
-    const [galleryImages, setGalleryImages] = useState<string[]>([]);
     const [properties, setProperties] = useState<any[]>([]);
 
     useEffect(() => {
@@ -31,20 +29,6 @@ function Company() {
     }, []);
 
     useEffect(() => {
-        const fetchLogo = async () => {
-            try {
-                const response = await HttpService.get<{ url: string }>(`/get-presigned-url/to-view?key=${company?.resources?.logo}`, undefined, false);
-                setLogoUrl(response.url);
-            } catch (error) {
-                console.error("Error fetching logo URL:", error);
-            }
-        };
-        if(company?.resources?.logo) {
-            fetchLogo();
-        }
-    }, [company]);
-
-    useEffect(() => {
         const fetchProperties = async () => {
             if (!company?.id) return;
     
@@ -62,30 +46,6 @@ function Company() {
         fetchProperties();
     }, [company]);
 
-    useEffect(() => {
-        const fetchGalleryImages = async () => {
-            if (!company?.resources) return;
-    
-            try {
-                const imageUrls = await Promise.all(
-                    company.resources.gallery_images.map(async (key: string) => {
-                        const response = await HttpService.get<{ url: string }>(
-                            `/get-presigned-url/to-view?key=${key}`, undefined, false
-                        );
-                        return response.url;
-                    })
-                );
-    
-                setGalleryImages(imageUrls);
-            } catch (error) {
-                console.error("Error fetching image URLs:", error);
-            }
-        };
-    
-        fetchGalleryImages();
-    }, [company]);
-    
-
     return (
         <div className="pt-16 align-middle flex flex-col items-center">
             <div className="p-9 w-full max-w-6xl mx-auto border rounded-lg flex flex-col items-center">
@@ -102,9 +62,9 @@ function Company() {
                     {company?.name}
                 </h1>
                 <div className="w-full md:w-1/2 max-w-32 p-4 mt-4 mb-10 md:mt-0 flex justify-center">
-                        {logoUrl && (
+                        {company?.resources?.logo && (
                             <img
-                                src={logoUrl}
+                                src={company.resources?.logo}
                                 alt="Company logo"
                                 className="w-full h-auto object-contain"
                             />
@@ -127,9 +87,9 @@ function Company() {
                         )}
                     </div>
                     <div className="w-full md:w-1/2 max-w-md p-4 mt-4 md:mt-0 flex justify-center">
-                        {galleryImages[0] && (
+                        {company?.resources?.gallery_images[0] && (
                             <img
-                                src={galleryImages[0]}
+                                src={company.resources?.gallery_images[0]}
                                 alt="Company logo"
                                 className="w-full h-auto object-contain rounded-lg shadow-md border"
                             />
