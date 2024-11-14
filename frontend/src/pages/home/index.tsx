@@ -16,7 +16,7 @@ function Home() {
 
   useEffect(() => {
     const fetchImageUrl = async () => {
-      const response = await HttpService.get<{ url: string }>('/get-presigned-url/to-view?key=home-image');
+      const response = await HttpService.get<{ url: string }>('/get-presigned-url/to-view?key=home-image', undefined, false);
       setImageUrl(response.url);
     };
     fetchImageUrl();
@@ -24,7 +24,7 @@ function Home() {
 
   useEffect(() => {
     const fetchHomeTextUrl = async () => {
-      const response = await HttpService.get<{ url: string }>('/get-presigned-url/to-view?key=home-text');
+      const response = await HttpService.get<{ url: string }>('/get-presigned-url/to-view?key=home-text', undefined, false);
       setHomeTextUrl(response.url);
     };
     fetchHomeTextUrl();

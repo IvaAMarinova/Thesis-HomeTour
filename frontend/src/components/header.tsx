@@ -18,14 +18,7 @@ function Header() {
   const isHomePage = location.pathname === '/';
   const [logoUrl, setLogoUrl] = useState<string>('');
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(HttpService.isAuthenticated());
   const { userId, setUserId } = useUser();
-
-  useEffect(() => {
-    setIsLoggedIn(HttpService.isAuthenticated());
-    console.log('[Header] User ID check effect:', userId);
-  }, [userId]);
-
 
   useEffect(() => {
     const fetchLogoUrl = async () => {
@@ -55,9 +48,11 @@ function Header() {
     HttpService.logout();
     setUserId(null);
     console.log('[Header] User logged out');
-    setIsLoggedIn(false);
     navigate('/');
   };
+
+  useEffect(() => {
+  }, [userId]);
 
   return (
     <header className={`p-4 fixed top-0 left-0 right-0 z-10 ${isHomePage && !isScrolled ? 'bg-transparent' : 'bg-black'} text-[#F2ECDD] transition-colors duration-400 ease-in-out`}>
@@ -84,7 +79,7 @@ function Header() {
             <DropdownMenuContent>
               <DropdownMenuLabel className="text-black font-bold text-lg cursor-pointer transform transition-transform duration-300 hover:scale-105">My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {isLoggedIn ? (
+              {userId ? (
                 <div>
                   <DropdownMenuItem>
                     <Link to="/profile">
@@ -101,8 +96,7 @@ function Header() {
                     Регистрация
                   </Link>
                 </DropdownMenuItem>
-              )
-              }
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </nav>

@@ -9,7 +9,7 @@ function Visualization({ visualizationFolder }: { visualizationFolder: string })
     const fetchS3Url = async () => {
       try {
         const response = await HttpService.get<Record<string, string>>(
-          `/get-presigned-url/to-view?key=${visualizationFolder}`
+          `/get-presigned-url/to-view?key=${visualizationFolder}`, undefined, false
         );
         if (response.url) {
           setS3Url(response.url);

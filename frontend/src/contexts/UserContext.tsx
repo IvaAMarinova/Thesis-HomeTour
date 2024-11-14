@@ -1,9 +1,10 @@
-import { createContext, useState, useContext, ReactNode, useEffect } from 'react';
+import { createContext, useState, useContext, ReactNode, useCallback } from 'react';
 import { HttpService } from '../services/http-service';
 
 interface UserContextType {
   userId: number | null;
   setUserId: (id: number | null) => void;
+  fetchUserId: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -11,23 +12,19 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserId] = useState<number | null>(null);
 
-  useEffect(() => {
-    const fetchUserId = async () => {
-      try {
-        const response = await HttpService.get<{ id: number }>('/users/me/');
-        setUserId(response.id);
-        console.log("UserProvider: User ID fetched:", response.id);
-      } catch (error) {
-        console.error('Failed to fetch user ID:', error);
-        setUserId(null);
-      }
-    };
-
-    fetchUserId();
+  const fetchUserId = useCallback(async () => {
+    try {
+      console.log("[UserContext] Fethching user auth/me...")
+      const response = await HttpService.get<{ id: number }>('/auth/me/');
+      console.log("[UserContext] Response: ", response);
+      setUserId(response.id);
+    } catch (error) {
+      setUserId(null);
+    }
   }, []);
 
   return (
-    <UserContext.Provider value={{ userId, setUserId }}>
+    <UserContext.Provider value={{ userId, setUserId, fetchUserId }}>
       {children}
     </UserContext.Provider>
   );

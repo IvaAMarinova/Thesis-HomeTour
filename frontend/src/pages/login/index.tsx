@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -7,7 +5,8 @@ import { z } from "zod";
 import { Eye, EyeOff } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HttpService } from "@/services/http-service";
-// import { setUserId } from "../../contexts/UserContext";
+import { useUser } from "../../contexts/UserContext";
+import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +45,8 @@ interface LoginProps {
 }
 
 export function Login({ onLoginSuccess }: LoginProps) {
+  const navigate = useNavigate();
+  const { fetchUserId } = useUser();
   const [showPassword, setShowPassword] = useState(false);
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
@@ -69,18 +70,18 @@ export function Login({ onLoginSuccess }: LoginProps) {
     try {
       const response = await HttpService.post<{ access_token: string; refresh_token: string }>('/auth/login', values);
       if (response) {
-        console.log(response);
+        console.log("[Login] Access token: ", response.access_token);
+        console.log("[Login] Refresh token: ", response.refresh_token);
         HttpService.setAccessToken(response.access_token);
         HttpService.setRefreshToken(response.refresh_token);
-        console.log('[Login] Acces token', response.access_token);
-        console.log('[Login] refresh token', response.refresh_token);
-        console.log('User logged in successfully');
         onLoginSuccess();
+        await fetchUserId();
+        navigate('/');
       } else {
-        throw new Error('Access token not found in the response');
+        throw new Error("Access token not found in the response");
       }
     } catch (error) {
-      console.error('Error logging in:', error);
+      console.error("Error logging in:", error);
     }
   }
 
@@ -90,13 +91,17 @@ export function Login({ onLoginSuccess }: LoginProps) {
         ...values,
         type: "b2c",
       };
-      const response = await HttpService.post<{ access_token: string; refresh_token: string }>('/auth/register', registerData);
-      console.log('User registered:', response);
+      const response = await HttpService.post<{ access_token: string; refresh_token: string; user_id: string }>('/auth/register', registerData, undefined, false);
+      console.log("[Login] Response: ", response);
+      console.log("[Login] Access token: ", response.access_token);
+      console.log("[Login] Refresh token: ", response.refresh_token);
+      console.log("[Login] User ID: ", response.user_id);
       HttpService.setAccessToken(response.access_token);
       HttpService.setRefreshToken(response.refresh_token);
-      console.log('[Login] Acces token', response.access_token);
-      console.log('[Login] Refresh token', response.refresh_token);
-      console.log('User logged in successfully');
+      await new Promise(resolve => setTimeout(resolve, 100));
+      onLoginSuccess();
+      await fetchUserId();
+      navigate('/');
     } catch (error) {
       console.error('Error registering user:', error);
     }

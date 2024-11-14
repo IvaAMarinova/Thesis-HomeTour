@@ -33,7 +33,7 @@ function CompanyBox({
         try {
             const imageKey = company.resources?.logo;
             if (imageKey) {
-            const response = await HttpService.get<{ url: string }>(`/get-presigned-url/to-view?key=${imageKey}`);
+            const response = await HttpService.get<{ url: string }>(`/get-presigned-url/to-view?key=${imageKey}`,undefined, false);
             setImageUrl(response.url);
             }
         } catch (error) {

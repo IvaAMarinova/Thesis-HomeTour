@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Login from './pages/login';
 import Home from './pages/home';
@@ -30,9 +30,7 @@ function App() {
           <Header />
           <div className="flex-grow">
             <Routes>
-              <Route path="/login" element={
-                isAuthenticated ? <Navigate to="/" replace /> : <Login onLoginSuccess={() => setIsAuthenticated(true)} />
-              } />
+              <Route path="/login" element={<Login onLoginSuccess={() => setIsAuthenticated(true)} />} />
               <Route path="/" element={<Home />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/properties" element={<Properties />} />

@@ -17,7 +17,7 @@ function Company() {
     useEffect(() => {
         const fetchCompany = async () => {
             try {
-                const response = await HttpService.get(`/companies/${id}`);
+                const response = await HttpService.get(`/companies/${id}`, undefined, false);
                 console.log(response);
                 setCompany(response);
             } catch (error) {
@@ -33,7 +33,7 @@ function Company() {
     useEffect(() => {
         const fetchLogo = async () => {
             try {
-                const response = await HttpService.get<{ url: string }>(`/get-presigned-url/to-view?key=${company?.resources?.logo}`);
+                const response = await HttpService.get<{ url: string }>(`/get-presigned-url/to-view?key=${company?.resources?.logo}`, undefined, false);
                 setLogoUrl(response.url);
             } catch (error) {
                 console.error("Error fetching logo URL:", error);
@@ -50,7 +50,7 @@ function Company() {
     
             try {
                 const response = await HttpService.get<Record<string, string>[]>(
-                    `/companies/${company.id}/properties`
+                    `/companies/${company.id}/properties`, undefined, false
                 );
                 setProperties(response);
                 console.log("response: ", response);
@@ -70,7 +70,7 @@ function Company() {
                 const imageUrls = await Promise.all(
                     company.resources.gallery_images.map(async (key: string) => {
                         const response = await HttpService.get<{ url: string }>(
-                            `/get-presigned-url/to-view?key=${key}`
+                            `/get-presigned-url/to-view?key=${key}`, undefined, false
                         );
                         return response.url;
                     })

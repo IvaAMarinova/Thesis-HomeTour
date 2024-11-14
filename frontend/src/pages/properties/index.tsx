@@ -36,8 +36,8 @@ function Properties() {
     const fetchData = async () => {
       try {
         const [propertiesResponse, companiesResponse] = await Promise.all([
-          HttpService.get<Property[]>('/properties'),
-          HttpService.get<{ id: string; name: string }[]>('/companies'),
+          HttpService.get<Property[]>('/properties', undefined, false),
+          HttpService.get<{ id: string; name: string }[]>('/companies', undefined, false),
         ]);
 
         const companyIdToNameMap = Object.fromEntries(companiesResponse.map(({ id, name }) => [id, name]));
@@ -75,7 +75,7 @@ function Properties() {
         <div className="p-4 mb-4">
           <Filter companies={companies} properties={properties} setAppliedFilters={setAppliedFilters} />
         </div>
-        <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
+        <div className="columns-1 sm:columns-2 md:columns-4 lg:columns-4 gap-4 space-y-4">
           {filteredProperties.map((property) => (
             <div
               key={property.id}

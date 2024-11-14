@@ -17,7 +17,7 @@ function Property() {
     useEffect(() => {
         const fetchProperty = async () => {
             try {
-                const response = await HttpService.get(`/properties/${id}`);
+                const response = await HttpService.get(`/properties/${id}`, undefined, false);
                 setPropertyData(response);
             } catch (error) {
                 console.error("Error fetching property:", error);
@@ -42,7 +42,7 @@ function Property() {
                 const imageUrls = await Promise.all(
                     imageKeys.map(async (key) => {
                         const response = await HttpService.get<{ url: string }>(
-                            `/get-presigned-url/to-view?key=${key}`
+                            `/get-presigned-url/to-view?key=${key}`, undefined, false
                         );
                         return response.url;
                     })

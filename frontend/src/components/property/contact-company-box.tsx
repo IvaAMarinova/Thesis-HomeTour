@@ -20,7 +20,7 @@ function ContactCompanyBox({ company, onClick }: { company: string; onClick: () 
     useEffect(() => {
         const fetchCompany = async () => {
             try {
-                const response = await HttpService.get(`/companies/${company}`);
+                const response = await HttpService.get(`/companies/${company}`, undefined, false);
                 setCompanyData(response);
             } catch (error) {
                 console.error("Error fetching company:", error);

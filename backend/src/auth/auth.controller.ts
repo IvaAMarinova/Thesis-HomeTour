@@ -10,14 +10,12 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req) {
-    console.log(`[AuthController] login`);
     return this.authService.login(req.user);
   }
 
   @Post('register')
   async register(@Body() registerData: { email: string; password: string; fullName: string; type: string; companyId?: string }) {
-    const user = await this.authService.register(registerData.email, registerData.password, registerData.fullName, registerData.companyId, registerData.type);
-    return this.authService.login(user);
+    return this.authService.register(registerData.email, registerData.password, registerData.fullName, registerData.companyId, registerData.type);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -27,9 +25,9 @@ export class AuthController {
     return this.authService.getMe(userId);
   }
 
+
   @Post('refresh-token')
   async refreshToken(@Body() body: { refresh_token: string }) {
-    console.log(`[AuthController] Refresh token request received`);
     return this.authService.refreshToken(body.refresh_token);
   }
 }

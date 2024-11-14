@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export interface RequestParams {
   headers?: { [key: string]: string };
@@ -10,27 +10,27 @@ export class HttpService {
   private static accessToken: string | null = null;
   private static refreshToken: string | null = null;
 
-  static async get<T>(url: string, params?: RequestParams): Promise<T> {
-    return await HttpService.request<T>(url, 'GET', params);
+  static async get<T>(url: string, params?: RequestParams, authRequired = true): Promise<T> {
+    return await HttpService.request<T>(url, 'GET', params, authRequired);
   }
 
-  static async post<T>(url: string, body: object, params?: RequestParams): Promise<T> {
-    return await HttpService.request<T>(url, 'POST', { ...params, body });
+  static async post<T>(url: string, body: object, params?: RequestParams, authRequired = true): Promise<T> {
+    return await HttpService.request<T>(url, 'POST', { ...params, body }, authRequired);
   }
 
-  static async put<T>(url: string, body: object, params?: RequestParams): Promise<T> {
-    return await HttpService.request<T>(url, 'PUT', { ...params, body });
+  static async put<T>(url: string, body: object, params?: RequestParams, authRequired = true): Promise<T> {
+    return await HttpService.request<T>(url, 'PUT', { ...params, body }, authRequired);
   }
 
-  static async patch<T>(url: string, body: object, params?: RequestParams): Promise<T> {
-    return await HttpService.request<T>(url, 'PATCH', { ...params, body });
+  static async patch<T>(url: string, body: object, params?: RequestParams, authRequired = true): Promise<T> {
+    return await HttpService.request<T>(url, 'PATCH', { ...params, body }, authRequired);
   }
 
   static async delete<T>(url: string, params?: RequestParams): Promise<T> {
     return await HttpService.request<T>(url, 'DELETE', params);
   }
 
-  private static async request<T>(url: string, method: string, params?: RequestParams): Promise<T> {
+  private static async request<T>(url: string, method: string, params?: RequestParams, authRequired = true): Promise<T> {
     try {
       const requestUrl = new URL(url, API_BASE_URL);
       if (params?.query) {
@@ -39,13 +39,16 @@ export class HttpService {
         );
       }
 
+      console.log("[HTTP Service] Access token: ", this.accessToken);
+      console.log("[HTTP Service] authRequired: ", authRequired);
       const headers = {
-        ...(params?.body instanceof FormData
-          ? {}
-          : { 'Content-Type': 'application/json' }),
+        ...(params?.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...params?.headers,
-        ...(this.accessToken ? { Authorization: `Bearer ${this.accessToken}` } : {}),
+        ...(this.accessToken && authRequired ? { Authorization: `Bearer ${this.accessToken}` } : {}),
       };
+
+      console.log("[HTTP Service] requestUrl: ", requestUrl.toString());
+      console.log("[HTTP Service] headers: ", headers);
 
       const response = await fetch(requestUrl.toString(), {
         method: method,
@@ -59,10 +62,10 @@ export class HttpService {
       });
 
       if (!response.ok) {
-        if (response.status === 401) {
+        if (response.status === 401 && authRequired) {
           console.log('[HttpService] Token expired. Attempting to refresh...');
           await this.refreshAccessToken();
-          return await this.request<T>(url, method, params);
+          return await this.request<T>(url, method, params, authRequired);
         } else {
           throw new Error(`Request failed with status ${response.status}`);
         }
@@ -82,13 +85,19 @@ export class HttpService {
   }
 
   public static setAccessToken(accessToken: string): void {
+    console.log("[HTTP Service] Setting access token..");
     this.accessToken = accessToken;
     localStorage.setItem('accessToken', accessToken);
+    console.log("HTTP Service] AccessToken from here: ", this.accessToken);
+    console.log("HTTP Service] AccessToken from local storage: ", localStorage.getItem('accessToken'));
   }
 
   public static setRefreshToken(refreshToken: string): void {
+    console.log("[HTTP Service] Setting refresh token..");
     this.refreshToken = refreshToken;
     localStorage.setItem('refreshToken', refreshToken);
+    console.log("HTTP Service] RefreshToken from here: ", this.refreshToken);
+    console.log("HTTP Service] RefreshToken from local storage: ", localStorage.getItem('refreshToken'));
   }
 
   public static logout(): void {

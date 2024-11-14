@@ -28,7 +28,7 @@ function Filter({ companies, properties, setAppliedFilters }: FilterProps) {
     useEffect(() => {
         const fetchAddresses = async () => {
             try {
-                const response = await HttpService.get<Record<string, string>[]>("/properties/addresses");
+                const response = await HttpService.get<Record<string, string>[]>("/properties/addresses",undefined, false);
                 setCities([...new Set(response.map(address => address.city))].sort());
                 const uniqueNeighborhoods = [...new Set(response.map(address => address.neighborhood))].sort();
                 setAvailableNeighborhoods(uniqueNeighborhoods);
@@ -42,7 +42,7 @@ function Filter({ companies, properties, setAppliedFilters }: FilterProps) {
     useEffect(() => {
         const fetchFloors = async () => {
             try {
-                const response = await HttpService.get<number[]>("/properties/floors");
+                const response = await HttpService.get<number[]>("/properties/floors", undefined, false);
                 setFloors([...new Set(response)].sort((a, b) => a - b).map(floor => floor.toString()));
             } catch (error) {
                 console.error("Error fetching floors:", error);

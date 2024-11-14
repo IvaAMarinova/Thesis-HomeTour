@@ -42,7 +42,7 @@ function PropertyBox({
         try {
             const headerImageKey = property.resources?.header_image;
             if (headerImageKey) {
-            const response = await HttpService.get<{ url: string }>(`/get-presigned-url/to-view?key=${headerImageKey}`);
+            const response = await HttpService.get<{ url: string }>(`/get-presigned-url/to-view?key=${headerImageKey}`, undefined, false);
             setImageUrl(response.url);
             }
         } catch (error) {
