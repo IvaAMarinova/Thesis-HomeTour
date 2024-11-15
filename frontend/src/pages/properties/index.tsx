@@ -13,7 +13,7 @@ type Property = {
   company: string;
   address: Record<string, string>;
   floor: number;
-  resources?: { header_image?: string | null };
+  resources?: { headerImage?: string | null };
   whenClicked: () => void;
 };
 

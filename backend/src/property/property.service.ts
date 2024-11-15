@@ -28,9 +28,9 @@ export class PropertyService {
     floor?: number,
     buildingId?: string,
     resources?: {
-      header_image?: string | null;
-      gallery_images?: string[];
-      visualization_folder?: string | null;
+      headerImage?: string | null;
+      galleryImages?: string[];
+      visualizationFolder?: string | null;
     },
   ): Promise<PropertyEntity> {
     const company = await this.companyRepository.findOne({ id: companyId });
@@ -42,7 +42,7 @@ export class PropertyService {
     const property = new PropertyEntity();
     property.floor = floor;
     property.address = address;
-    property.phone_number = phoneNumber;
+    property.phoneNumber = phoneNumber;
     property.email = email;
     property.resources = resources || {};
     property.company = company;

@@ -19,9 +19,9 @@ export class PropertyController {
     email: string, 
     companyId: string,
     resources?: {
-      header_image?: string | null;
-      gallery_images?: string[];
-      visualization_folder?: string | null;
+      headerImage?: string | null;
+      galleryImages?: string[];
+      visualizationFolder?: string | null;
     }, 
     floor?: number, 
     buildingId?: string
@@ -74,14 +74,14 @@ export class PropertyController {
   }
 
   async mapPresignedUrlsToProperty(property: PropertyEntity) {
-    if (property.resources?.header_image) {
-      property.resources.header_image = await this.fileUploadService.getPreSignedURLToViewObject(
-        property.resources.header_image
+    if (property.resources?.headerImage) {
+      property.resources.headerImage = await this.fileUploadService.getPreSignedURLToViewObject(
+        property.resources.headerImage
       );
     }
-    if (property.resources?.gallery_images) {
-      property.resources.gallery_images = await Promise.all(
-        property.resources.gallery_images.map(async (imageKey) => 
+    if (property.resources?.galleryImages) {
+      property.resources.galleryImages = await Promise.all(
+        property.resources.galleryImages.map(async (imageKey) => 
           this.fileUploadService.getPreSignedURLToViewObject(imageKey)
         )
       );

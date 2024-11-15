@@ -27,8 +27,8 @@ function PropertyBox({
         description: string;
         companyName: string;
         resources?: {  
-            header_image?: string | null;
-            visualization_folder?: string | null;
+            headerImage?: string | null;
+            visualizationFolder?: string | null;
         };
     };
     whenClicked: () => void;
@@ -39,7 +39,7 @@ function PropertyBox({
             <HoverCard>
                 <HoverCardTrigger>
                     <div className="flex justify-end items-end mb-3">
-                        {property.resources?.visualization_folder ? (
+                        {property.resources?.visualizationFolder ? (
                             <Ar />
                         ) : (
                             <span className="invisible">
@@ -54,9 +54,9 @@ function PropertyBox({
                 </HoverCardContent>
             </HoverCard>
             
-            {property.resources?.header_image ? (
+            {property.resources?.headerImage ? (
                 <img 
-                src={property.resources?.header_image} 
+                src={property.resources?.headerImage} 
                 alt={property.name} 
                 className="w-full h-48 rounded-lg mb-4 object-cover"
                 />

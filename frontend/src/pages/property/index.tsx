@@ -37,10 +37,10 @@ function Property() {
                     <GoBackButton />
                 </div>
     
-                {property?.resources?.header_image && (
+                {property?.resources?.headerImage && (
                     <div className="h-64 mt-10 overflow-hidden rounded-xl shadow-md">
                         <img
-                            src={property.resources.header_image}
+                            src={property.resources.headerImage}
                             alt="Property header image"
                             className="w-full h-full object-cover transform transition-transform duration-300 hover:scale-105"
                         />
@@ -91,14 +91,14 @@ function Property() {
                 </div>
     
                 <div className="w-full max-w-6xl mx-auto px-4 mt-4">
-                    {property?.resources?.gallery_images?.length > 1 && (
-                        <ImagesCarousel galleryImages={property.resources.gallery_images.slice(1)} /> 
+                    {property?.resources?.galleryImages?.length > 1 && (
+                        <ImagesCarousel galleryImages={property.resources.galleryImages.slice(1)} /> 
                     )}
                 </div>
     
                 <div className="w-full max-w-6xl mx-auto px-4 mt-4">
-                    {property?.resources?.visualization_folder && (
-                        <Visualization visualizationFolder={property.resources.visualization_folder} />
+                    {property?.resources?.visualizationFolder && (
+                        <Visualization visualizationFolder={property.resources.visualizationFolder} />
                     )}
                 </div>
                 <GoUpButton />

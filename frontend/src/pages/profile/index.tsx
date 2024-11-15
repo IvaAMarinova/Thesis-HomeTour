@@ -55,7 +55,7 @@ function Profile() {
                 <div className="flex items-center mb-8 space-x-4">
                     <UserCircle className="h-16 w-16" />
                     <div>
-                        <p className="text-lg font-medium">{user.full_name}</p>
+                        <p className="text-lg font-medium">{user.fullName}</p>
                         <p className="text-sm text-gray-500">{user.email}</p>
                     </div>
                 </div>
@@ -64,9 +64,9 @@ function Profile() {
                     <div>
                         <Label className="mb-2 block">Full Name</Label>
                         <Input
-                            id="full_name"
-                            name="full_name"
-                            value={user.full_name}
+                            id="fullName"
+                            name="fullName"
+                            value={user.fullName}
                             onChange={handleChange}
                             className="mt-2 w-full"
                         />

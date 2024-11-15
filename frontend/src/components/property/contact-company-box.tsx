@@ -55,7 +55,7 @@ function ContactCompanyBox({ company, onClick }: { company: string; onClick: () 
                             Email: {companyData.email}
                         </p>
                         <p className="text-sm font-medium text-gray-600 italic">
-                            Phone: {companyData.phone_number}
+                            Phone: {companyData.phoneNumber}
                         </p>
                     </div>
                 </>

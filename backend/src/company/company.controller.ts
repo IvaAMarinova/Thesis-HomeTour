@@ -12,7 +12,7 @@ export class CompanyController {
   ) {}
 
   @Post()
-  async createCompany(@Body() body: {name: string, description: string, email: string, phoneNumber: string, website: string, resources?: {logo?: string | null, gallery_images?: string[]}}): Promise<Company> {
+  async createCompany(@Body() body: {name: string, description: string, email: string, phoneNumber: string, website: string, resources?: {logo?: string | null, galleryImages?: string[]}}): Promise<Company> {
     return this.companyService.create(body.name, body.description, body.email, body.phoneNumber, body.website, body.resources);
   }
 
@@ -57,9 +57,9 @@ export class CompanyController {
         company.resources.logo
       );
     }
-    if (company.resources?.gallery_images) {
-      company.resources.gallery_images = await Promise.all(
-        company.resources.gallery_images.map(async (imageKey) => 
+    if (company.resources?.galleryImages) {
+      company.resources.galleryImages = await Promise.all(
+        company.resources.galleryImages.map(async (imageKey) => 
           this.fileUploadService.getPreSignedURLToViewObject(imageKey)
         )
       );
@@ -67,14 +67,14 @@ export class CompanyController {
   }
 
   async mapPresignedUrlsToProperty(property: PropertyEntity) {
-    if (property.resources?.header_image) {
-      property.resources.header_image = await this.fileUploadService.getPreSignedURLToViewObject(
-        property.resources.header_image
+    if (property.resources?.headerImage) {
+      property.resources.headerImage = await this.fileUploadService.getPreSignedURLToViewObject(
+        property.resources.headerImage
       );
     }
-    if (property.resources?.gallery_images) {
-      property.resources.gallery_images = await Promise.all(
-        property.resources.gallery_images.map(async (imageKey) => 
+    if (property.resources?.galleryImages) {
+      property.resources.galleryImages = await Promise.all(
+        property.resources.galleryImages.map(async (imageKey) => 
           this.fileUploadService.getPreSignedURLToViewObject(imageKey)
         )
       );

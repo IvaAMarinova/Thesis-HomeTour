@@ -22,16 +22,16 @@ export class PropertyEntity {
   address!: Record<string, string>;
 
   @Property()
-  phone_number!: string;
+  phoneNumber!: string;
 
   @Property()
   email!: string;
 
   @Property({ type: JsonType, nullable: true })
   resources?: {
-    header_image?: string | null;
-    gallery_images?: string[];
-    visualization_folder?: string | null;
+    headerImage?: string | null;
+    galleryImages?: string[];
+    visualizationFolder?: string | null;
   };
 
   @ManyToOne(() => Company)

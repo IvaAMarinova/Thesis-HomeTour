@@ -17,7 +17,7 @@ export class Company {
   email!: string;
 
   @Property()
-  phone_number!: string;
+  phoneNumber!: string;
 
   @Property()
   website!: string;
@@ -25,7 +25,7 @@ export class Company {
   @Property({ type: JsonType, nullable: true })
   resources?: {
     logo?: string | null;
-    gallery_images?: string[];
+    galleryImages?: string[];
   };
 
   @BeforeCreate()

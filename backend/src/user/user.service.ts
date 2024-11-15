@@ -22,7 +22,7 @@ export class UserService {
     }
 
     const user = new User();
-    user.full_name = fullName;
+    user.fullName = fullName;
     user.email = email;
     user.password = await hash(password, 10);
     user.type = type;

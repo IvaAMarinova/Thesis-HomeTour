@@ -82,9 +82,9 @@ function Company() {
                         )}
                     </div>
                     <div className="w-full md:w-1/2 max-w-md p-4 mt-4 md:mt-0 flex justify-center">
-                        {company?.resources?.gallery_images[0] && (
+                        {company?.resources?.galleryImages[0] && (
                             <img
-                                src={company.resources?.gallery_images[0]}
+                                src={company.resources?.galleryImages[0]}
                                 alt="Company logo"
                                 className="w-full h-auto object-contain rounded-lg shadow-md border"
                             />
@@ -95,7 +95,7 @@ function Company() {
                     <div className="flex flex-col items-center">
                         <h2 className="text-lg font-semibold text-gray-800">Телефонен номер</h2>
                         <TelephoneCall className="text-6xl mt-2" />
-                        <p className="text-lg mt-2 text-gray-700">{company?.phone_number}</p>
+                        <p className="text-lg mt-2 text-gray-700">{company?.phoneNumber}</p>
                     </div>
 
                     <div className="flex flex-col items-center">
