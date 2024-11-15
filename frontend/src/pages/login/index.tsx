@@ -91,11 +91,10 @@ export function Login({ onLoginSuccess }: LoginProps) {
         ...values,
         type: "b2c",
       };
-      const response = await HttpService.post<{ access_token: string; refresh_token: string; userId: string }>('/auth/register', registerData, undefined, false);
+      const response = await HttpService.post<{ access_token: string; refresh_token: string;}>('/auth/register', registerData, undefined, false);
       console.log("[Login] Response: ", response);
       console.log("[Login] Access token: ", response.access_token);
       console.log("[Login] Refresh token: ", response.refresh_token);
-      console.log("[Login] User ID: ", response.userId);
       HttpService.setAccessToken(response.access_token);
       HttpService.setRefreshToken(response.refresh_token);
       await new Promise(resolve => setTimeout(resolve, 100));
