@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { HttpService } from '../../services/http-service';
 import ImagesCarousel from '../../components/property/images-carousel';
-import { ArrowLeft } from "@mynaui/icons-react";
+import GoBackButton from '@/components/go-back-button';
 import ContactCompanyBox  from "../../components/property/contact-company-box";
 import Visualization from '@/components/property/visualization';
 import GoUpButton from '../../components/go-up-button';
@@ -32,18 +32,11 @@ function Property() {
 
     return (
         <div className="pt-16 align-middle flex flex-col items-center">
-            <div className="p-9 w-full max-w-6xl mx-auto border rounded-lg">
+            <div className="p-9 w-full max-w-6xl mx-auto border rounded-lg mt-14">
                 <div className="self-start ml-4 mt-6">
-                    <span
-                        onClick={() => navigate(-1)}
-                        className="text-gray-800 underline cursor-pointer flex items-center"
-                    >
-                        <ArrowLeft className="mr-2" />
-                        Назад
-                    </span>
+                    <GoBackButton />
                 </div>
     
-                {/* Check if property and property.resources.header_image exist */}
                 {property?.resources?.header_image && (
                     <div className="h-64 mt-10 overflow-hidden rounded-xl shadow-md">
                         <img

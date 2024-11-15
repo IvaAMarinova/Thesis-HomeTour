@@ -77,7 +77,7 @@ function Header() {
               <UserCircle className="h-8 w-8" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuLabel className="text-black font-bold text-lg cursor-pointer transform transition-transform duration-300 hover:scale-105">My Account</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-black font-bold text-lg cursor-pointer transform transition-transform duration-300 hover:scale-105">Моят профил</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {userId ? (
                 <div>
@@ -93,7 +93,7 @@ function Header() {
               ) : (
                 <DropdownMenuItem>
                   <Link to="/login">
-                    Регистрация
+                    Вход
                   </Link>
                 </DropdownMenuItem>
               )}

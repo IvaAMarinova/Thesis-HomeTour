@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { HttpService } from '../../services/http-service';
-import { TelephoneCall, ArrowLeft, Envelope, Globe } from "@mynaui/icons-react";
+import { TelephoneCall, Envelope, Globe } from "@mynaui/icons-react";
 import PropertyBox from '../../components/property-box';
 import GoUpButton from '../../components/go-up-button';
 import Footer from '../../components/footer';
+import GoBackButton from '../../components/go-back-button';
 
 function Company() {
     const navigate = useNavigate();
@@ -48,17 +49,11 @@ function Company() {
 
     return (
         <div className="pt-16 align-middle flex flex-col items-center">
-            <div className="p-9 w-full max-w-6xl mx-auto border rounded-lg flex flex-col items-center">
-                <div className="self-start ml-4 mt-6">
-                    <span
-                        onClick={() => navigate(-1)}
-                        className="text-gray-800 underline cursor-pointer flex items-center"
-                    >
-                        <ArrowLeft className="mr-2" />
-                        Назад
-                    </span>
+            <div className="p-9 w-full max-w-6xl mx-auto border rounded-lg flex flex-col items-center mt-14">
+                <div className="self-start ml-4">
+                    <GoBackButton />
                 </div>
-                <h1 className="text-4xl font-bold mt-10 mb-4 text-center">
+                <h1 className="text-4xl font-bold mt-3 mb-4 text-center">
                     {company?.name}
                 </h1>
                 <div className="w-full md:w-1/2 max-w-32 p-4 mt-4 mb-10 md:mt-0 flex justify-center">
