@@ -473,26 +473,6 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": [
-            "user_id"
-          ],
-          "composite": false,
-          "keyName": "user_property_user_id_unique",
-          "constraint": true,
-          "primary": false,
-          "unique": true
-        },
-        {
-          "columnNames": [
-            "property_id"
-          ],
-          "composite": false,
-          "keyName": "user_property_property_id_unique",
-          "constraint": true,
-          "primary": false,
-          "unique": true
-        },
-        {
           "keyName": "user_property_pkey",
           "columnNames": [
             "id"
