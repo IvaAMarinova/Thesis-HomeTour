@@ -8,13 +8,12 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(255)",
+          "type": "uuid",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "uuid"
         },
         "name": {
           "name": "name",
@@ -97,13 +96,12 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(255)",
+          "type": "uuid",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "uuid"
         },
         "name": {
           "name": "name",
@@ -135,13 +133,12 @@
         },
         "company_id": {
           "name": "company_id",
-          "type": "varchar(255)",
+          "type": "uuid",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "uuid"
         }
       },
       "name": "building",
@@ -180,13 +177,12 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(255)",
+          "type": "uuid",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "uuid"
         },
         "name": {
           "name": "name",
@@ -256,23 +252,21 @@
         },
         "company_id": {
           "name": "company_id",
-          "type": "varchar(255)",
+          "type": "uuid",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "uuid"
         },
         "building_id": {
           "name": "building_id",
-          "type": "varchar(255)",
+          "type": "uuid",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "uuid"
         }
       },
       "name": "property_entity",
@@ -323,13 +317,12 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(255)",
+          "type": "uuid",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "uuid"
         },
         "full_name": {
           "name": "full_name",
@@ -376,13 +369,12 @@
         },
         "company_id": {
           "name": "company_id",
-          "type": "varchar(255)",
+          "type": "uuid",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "uuid"
         }
       },
       "name": "user",
@@ -431,33 +423,30 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "varchar(255)",
+          "type": "uuid",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "uuid"
         },
         "user_id": {
           "name": "user_id",
-          "type": "varchar(255)",
+          "type": "uuid",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "uuid"
         },
         "property_id": {
           "name": "property_id",
-          "type": "varchar(255)",
+          "type": "uuid",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "uuid"
         },
         "liked": {
           "name": "liked",

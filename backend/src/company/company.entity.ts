@@ -1,11 +1,13 @@
 import { Entity, PrimaryKey, Property, BeforeCreate, JsonType } from '@mikro-orm/core';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 } from 'uuid';
 
 @Entity()
 export class Company {
-
-  @PrimaryKey()
-  id: string;
+  @PrimaryKey({
+    columnType: 'uuid',
+    type: 'uuid',
+  })
+  id = v4();
 
   @Property()
   name!: string;
@@ -27,9 +29,4 @@ export class Company {
     logo?: string | null;
     galleryImages?: string[];
   };
-
-  @BeforeCreate()
-  setId() {
-    this.id = uuidv4();
-  }
 }

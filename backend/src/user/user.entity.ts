@@ -1,6 +1,6 @@
 import { Entity, PrimaryKey, Property, BeforeCreate, ManyToOne, Enum } from '@mikro-orm/core';
 import { Company } from '../company/company.entity';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 } from 'uuid';
 
 export enum UserType {
   B2B = 'b2b',
@@ -9,9 +9,11 @@ export enum UserType {
 
 @Entity()
 export class User {
-
-  @PrimaryKey()
-  id: string;
+  @PrimaryKey({
+    columnType: 'uuid',
+    type: 'uuid',
+  })
+  id = v4();
 
   @Property()
   fullName!: string;
@@ -27,9 +29,4 @@ export class User {
 
   @ManyToOne(() => Company, { nullable: true })
   company?: Company;
-
-  @BeforeCreate()
-  setId() {
-    this.id = uuidv4();
-  }
 }

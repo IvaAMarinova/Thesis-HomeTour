@@ -1,13 +1,15 @@
 import { Entity, PrimaryKey, Property, BeforeCreate, ManyToOne } from '@mikro-orm/core';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 } from 'uuid';
 import { User } from '../user/user.entity';
 import { PropertyEntity } from '../property/property.entity';
 
 @Entity()
 export class UserProperty {
-
-  @PrimaryKey()
-  id: string;
+  @PrimaryKey({
+    columnType: 'uuid',
+    type: 'uuid',
+  })
+  id = v4();
 
   @ManyToOne(() => User)
   user!: User;
@@ -17,9 +19,4 @@ export class UserProperty {
 
   @Property({ nullable: true })
   liked: boolean;
-
-  @BeforeCreate()
-  setId() {
-    this.id = uuidv4();
-  }
 }
