@@ -26,13 +26,36 @@ export class UserPropertyController {
     await this.userPropertyService.delete(id);
   }
 
-  @Get(':userId')
-  async getUserProperties(@Param('userId') userId: string): Promise<UserProperty[]> {
-    return this.userPropertyService.getUserProperties(userId);
+  @Get('/user-id-liked/:userId')
+  async getLikedUserProperties(@Param('userId') userId: string): Promise<UserProperty[]> {
+    return this.userPropertyService.getLikedUserProperties(userId);
   }
 
-  @Get(':property_id')
-  async getPropertyUsers(@Param('property_id') propertyId: string): Promise<UserProperty[]> {
+  @Get('/property-id/:propertyId')
+  async getPropertyUsers(@Param('propertyId') propertyId: string): Promise<UserProperty[]> {
     return this.userPropertyService.getPropertyUsers(propertyId);
   }
+
+  @Put('/user-id/:userId')
+  async updateUserPropertyByUserId(@Param('userId') userId: string, @Body() body: { propertyId: string; liked: boolean }): Promise<UserProperty> {
+    console.log("[UserPropertyController] User id:", userId);
+    console.log("[UserPropertyController] Property id:", body.propertyId);
+    console.log("[UserPropertyController] Liked:", body.liked);
+
+    let userProperty;
+    try {
+      userProperty = await this.userPropertyService.getByIds(userId, body.propertyId);
+    } catch (error) {
+      console.log("[UserPropertyController] Error getting user property.");
+    } 
+
+    if (!userProperty) {
+      console.log("[UserPropertyController] User property not found. Creating new one");
+      return await this.userPropertyService.create(userId, body.propertyId, body.liked);
+    } else {
+      console.log("[UserPropertyController] User property found. Updating it");
+      return await this.userPropertyService.update(userProperty.id, body.liked);
+    }
+  }
+
 }

@@ -22,7 +22,7 @@ export class PropertyService {
     address: Record<string, string>,
     phoneNumber: string,
     email: string,
-    companyId: string,
+    company: string,
     name: string,
     description: string,
     floor?: number,
@@ -33,19 +33,19 @@ export class PropertyService {
       visualizationFolder?: string | null;
     },
   ): Promise<PropertyEntity> {
-    const company = await this.companyRepository.findOne({ id: companyId });
+    const companyObject = await this.companyRepository.findOne({ id: company });
+    console.log('[PropertyService] company: ', company);
     if (!company) {
-      throw new NotFoundException(`Company with id ${companyId} not found`);
+      throw new NotFoundException(`Company with id ${company} not found`);
     }
     
-
     const property = new PropertyEntity();
     property.floor = floor;
     property.address = address;
     property.phoneNumber = phoneNumber;
     property.email = email;
     property.resources = resources || {};
-    property.company = company;
+    property.company = companyObject;
     property.name = name;
     property.description = description;
     if(buildingId) {

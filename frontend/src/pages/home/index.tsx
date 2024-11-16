@@ -40,7 +40,7 @@ function Home() {
         />
 
         <div className="absolute inset-0 flex justify-center items-center">
-          <div className="w-1/3 h-1/3 rounded-full bg-black opacity-50 blur-2xl absolute z-0" />
+          <div className="w-1/4 h-1/4 rounded-full bg-black opacity-50 blur-2xl absolute z-0" />
           <img
             src={homeTextUrl}
             alt="sectiontext"

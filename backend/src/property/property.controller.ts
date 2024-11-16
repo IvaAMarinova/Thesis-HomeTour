@@ -17,7 +17,7 @@ export class PropertyController {
     address: Record<string, string>, 
     phoneNumber: string, 
     email: string, 
-    companyId: string,
+    company: string,
     resources?: {
       headerImage?: string | null;
       galleryImages?: string[];
@@ -26,11 +26,12 @@ export class PropertyController {
     floor?: number, 
     buildingId?: string
   }): Promise<PropertyEntity> {
+    console.log(body);
     return this.propertyService.create(
       body.address,
       body.phoneNumber,
       body.email,
-      body.companyId,
+      body.company,
       body.name,
       body.description,
       body.floor,

@@ -72,6 +72,8 @@ export class UserPropertyService {
       throw new Error(`Failed to update UserProperty: ${error.message}`);
     }
 
+    console.log("[SERVICE] Updated user property to state:", userProperty.liked);
+
     return userProperty;
   }
 
@@ -101,7 +103,6 @@ export class UserPropertyService {
     );
   }
   
-
   async getAllUserProperties(): Promise<UserProperty[]> {
     return this.userPropertyRepository.findAll({ populate: ['user', 'property'] });
   }
@@ -115,6 +116,52 @@ export class UserPropertyService {
       { property: { id: propertyId } },
       { populate: ['user'] }
     );
+  }
+  
+  async getByIds(userId: string, propertyId: string): Promise<UserProperty> {
+    console.log("[UserPropertyService] Getting user property by user ID :", userId);
+    console.log("[UserPropertyService] Getting user property by property ID :", propertyId);
+    if (!userId || !propertyId) {
+      console.log("[UserPropertyService] User ID or Property ID is null");
+      throw new BadRequestException('User ID and Property ID must be provided');
+    }
+
+    const userProperty = await this.userPropertyRepository.findOne({
+      user: { id: userId },
+      property: { id: propertyId },
+    });
+    if (!userProperty) {
+      console.log("[UserPropertyService] User property not found");
+    }
+    return userProperty;
+  }
+
+  async getLikedUserProperties(userId: string): Promise<UserProperty[]> {
+    if (!userId) {
+      throw new BadRequestException('User ID must be provided');
+    }
+  
+    // Log the query being made
+    console.log(`[SERVICE] Fetching liked user properties for User ID: ${userId}`);
+  
+    // Fetch the liked properties
+    const likedProperties = await this.userPropertyRepository.find(
+      { user: { id: userId }, liked: true },
+      { populate: ['property'] }
+    );
+  
+    // Log the liked properties and their liked state
+    console.log(`[SERVICE] Fetched ${likedProperties.length} liked properties for User ID: ${userId}`);
+    
+    likedProperties.forEach((userProperty, index) => {
+      console.log(`[SERVICE] Liked Property ${index + 1}:`, {
+        propertyId: userProperty.property.id,
+        liked: userProperty.liked, // Log the 'liked' state
+        propertyName: userProperty.property.name, // You can add more details of the property here as needed
+      });
+    });
+  
+    return likedProperties;
   }
   
   

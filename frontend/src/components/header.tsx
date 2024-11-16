@@ -22,8 +22,12 @@ function Header() {
 
   useEffect(() => {
     const fetchLogoUrl = async () => {
-      const response = await HttpService.get<{ url: string }>('/get-presigned-url/to-view?key=logo-light');
-      setLogoUrl(response.url);
+      try {
+        const response = await HttpService.get<{ url: string }>('/get-presigned-url/to-view?key=logo-light');
+        setLogoUrl(response.url);
+      } catch (error) {
+        console.error('Error fetching logo URL:', error);
+      }
     };
     fetchLogoUrl();
   }, []);
@@ -51,8 +55,9 @@ function Header() {
     navigate('/');
   };
 
-  useEffect(() => {
-  }, [userId]);
+  const handleHeartClick = () => {
+    navigate('/properties?isLikedOnly=true');
+  };
 
   return (
     <header className={`p-4 fixed top-0 left-0 right-0 z-10 ${isHomePage && !isScrolled ? 'bg-transparent' : 'bg-black'} text-[#F2ECDD] transition-colors duration-400 ease-in-out`}>
@@ -63,21 +68,26 @@ function Header() {
         </Link>
 
         <nav className="flex items-center space-x-8 mt-1 mb-1 mr-4">
-          <Link to="/properties" className="text-[#F2ECDD] text-lg font-bold py-2 cursor-pointer transform transition-transform duration-300 hover:scale-105">
+          <Link to="/properties" className="text-[#F2ECDD] text-xl font-bold py-2 cursor-pointer transform transition-transform duration-300 hover:scale-105">
             Жилища
           </Link>
-          <Link to="/companies" className="text-[#F2ECDD] text-lg font-bold py-2 cursor-pointer transform transition-transform duration-300 hover:scale-105">
+          <Link to="/companies" className="text-[#F2ECDD] text-xl font-bold py-2 cursor-pointer transform transition-transform duration-300 hover:scale-105">
             Партньори
           </Link>
 
-          <Heart className="text-[#F2ECDD] h-6 w-6 cursor-pointer transform transition-transform duration-300 hover:scale-105" />
+          <Heart 
+            className="text-[#F2ECDD] h-6 w-6 cursor-pointer transform transition-transform duration-300 hover:scale-105" 
+            onClick={handleHeartClick} 
+          />
           
           <DropdownMenu>
             <DropdownMenuTrigger>
               <UserCircle className="h-8 w-8" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuLabel className="text-black font-bold text-lg cursor-pointer transform transition-transform duration-300 hover:scale-105">Моят профил</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-black font-bold text-lg cursor-pointer transform transition-transform duration-300 hover:scale-105">
+                Моят профил
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               {userId ? (
                 <div>
