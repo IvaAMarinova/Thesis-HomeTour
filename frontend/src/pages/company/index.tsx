@@ -6,46 +6,68 @@ import PropertyBox from '../../components/property-box';
 import GoUpButton from '../../components/go-up-button';
 import Footer from '../../components/footer';
 import GoBackButton from '../../components/go-back-button';
+import { useUser } from '@/contexts/UserContext';
+import { toast } from 'react-toastify';
 
 function Company() {
     const navigate = useNavigate();
     const { id } = useParams();
     const [company, setCompany] = useState<any>(null);
     const [properties, setProperties] = useState<any[]>([]);
+    const { userId } = useUser();
+    const [likedProperties, setLikedProperties] = useState<{ property: { id: string } }[]>([]);
 
     useEffect(() => {
         const fetchCompany = async () => {
             try {
                 const response = await HttpService.get(`/companies/${id}`, undefined, false);
-                console.log(response);
                 setCompany(response);
             } catch (error) {
                 console.error("Error fetching company:", error);
             }
         };
-        if(id) {
+
+        if (id) {
             fetchCompany();
         }
-        console.log(company);
-    }, []);
+    }, [id]);
 
     useEffect(() => {
         const fetchProperties = async () => {
             if (!company?.id) return;
-    
+
             try {
-                const response = await HttpService.get<Record<string, string>[]>(
-                    `/companies/${company.id}/properties`, undefined, false
+                const response = await HttpService.get<any[]>(
+                    `/companies/${company.id}/properties`,
+                    undefined,
+                    false
                 );
                 setProperties(response);
-                console.log("response: ", response);
             } catch (error) {
                 console.error("Error fetching properties:", error);
             }
         };
-    
-        fetchProperties();
+
+        if (company) {
+            fetchProperties();
+        }
     }, [company]);
+
+
+    const fetchLikedProperties = async () => {
+        if (!userId) return;
+
+        try {
+            const response = await HttpService.get<{ property: { id: string } }[]>(
+                `/user-properties/user-id-liked/${userId}`,
+                undefined,
+                false
+            );
+            setLikedProperties(response);
+        } catch (error) {
+            toast.error('Failed to load liked properties. Please try again later.');
+        }
+    };
 
     return (
         <div className="pt-16 align-middle flex flex-col items-center">
@@ -57,13 +79,13 @@ function Company() {
                     {company?.name}
                 </h1>
                 <div className="w-full md:w-1/2 max-w-32 p-4 mt-4 mb-10 md:mt-0 flex justify-center">
-                        {company?.resources?.logo && (
-                            <img
-                                src={company.resources?.logo}
-                                alt="Company logo"
-                                className="w-full h-auto object-contain"
-                            />
-                        )}
+                    {company?.resources?.logo && (
+                        <img
+                            src={company.resources?.logo}
+                            alt="Company logo"
+                            className="w-full h-auto object-contain"
+                        />
+                    )}
                 </div>
                 <div className="flex flex-col md:flex-row justify-between items-center w-full mt-4 border-t-2 border-gray-500 pt-4">
                     <div className="text-base mt-12 text-gray-700 whitespace-pre-line md:w-1/2 md:pr-8">
@@ -85,7 +107,7 @@ function Company() {
                         {company?.resources?.galleryImages[0] && (
                             <img
                                 src={company.resources?.galleryImages[0]}
-                                alt="Company logo"
+                                alt="Company gallery image"
                                 className="w-full h-auto object-contain rounded-lg shadow-md border"
                             />
                         )}
@@ -95,41 +117,49 @@ function Company() {
                     <div className="flex flex-col items-center">
                         <h2 className="text-lg font-semibold text-gray-800">Телефонен номер</h2>
                         <TelephoneCall className="text-6xl mt-2" />
-                        <p className="text-lg mt-2 text-gray-700">{company?.phoneNumber}</p>
+                        <p className="text-lg mt-2 text-gray-700">{company?.phoneNumber || 'N/A'}</p>
                     </div>
 
                     <div className="flex flex-col items-center">
                         <h2 className="text-lg font-semibold text-gray-800">Имейл</h2>
                         <Envelope className="text-6xl mt-2" />
-                        <p className="text-lg mt-2 text-gray-700">{company?.email}</p>
+                        <p className="text-lg mt-2 text-gray-700">{company?.email || 'N/A'}</p>
                     </div>
 
                     <div className="flex flex-col items-center">
                         <h2 className="text-lg font-semibold text-gray-800">Официален website</h2>
                         <Globe className="text-6xl mt-2" />
                         <a 
-                            href={company?.website} 
+                            href={company?.website || '#'} 
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="text-lg mt-2 text-blue-600 hover:underline"
                         >
-                            {company?.name}
+                            {company?.website || 'N/A'}
                         </a>
                     </div>
                 </div>
                 <div className="flex flex-col border-t-2 border-gray-500 pt-4 mt-12">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 -mx-2">
-                        {properties.map((property, index) => (
-                            <div 
-                                key={index} 
-                                className="px-2 mb-4 mt-2 transform transition-transform duration-300 hover:scale-105"
-                            >
-                                <PropertyBox 
-                                    property={property} 
-                                    whenClicked={() => navigate(`/properties/${property.id}`)}              
-                                />
-                            </div>
-                        ))}
+                        {properties.map((property) => {
+                            const isLiked = likedProperties.some(
+                                (liked) => liked.property?.id === property.id
+                            );
+
+                            return (
+                                <div 
+                                    key={property.id} 
+                                    className="px-2 mb-4 mt-2 transform transition-transform duration-300 hover:scale-105"
+                                >
+                                    <PropertyBox 
+                                        property={property} 
+                                        initialLiked={isLiked}
+                                        whenClicked={() => navigate(`/properties/${property.id}`)} 
+                                        onLikeUpdate={() => fetchLikedProperties()}             
+                                    />
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
                 <GoUpButton />

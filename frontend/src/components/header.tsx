@@ -26,7 +26,7 @@ function Header() {
         const response = await HttpService.get<{ url: string }>('/get-presigned-url/to-view?key=logo-light');
         setLogoUrl(response.url);
       } catch (error) {
-        console.error('Error fetching logo URL:', error);
+        // console.error('Error fetching logo URL:', error);
       }
     };
     fetchLogoUrl();
@@ -48,10 +48,8 @@ function Header() {
   }, [isHomePage]);
 
   const handleLogout = () => {
-    console.log('[Header] Logout clicked');
     HttpService.logout();
     setUserId(null);
-    console.log('[Header] User logged out');
     navigate('/');
   };
 
@@ -75,10 +73,12 @@ function Header() {
             Партньори
           </Link>
 
-          <Heart 
-            className="text-[#F2ECDD] h-6 w-6 cursor-pointer transform transition-transform duration-300 hover:scale-105" 
-            onClick={handleHeartClick} 
-          />
+          {userId && (
+            <Heart 
+              className="text-[#F2ECDD] h-6 w-6 cursor-pointer transform transition-transform duration-300 hover:scale-105" 
+              onClick={handleHeartClick} 
+            />
+          )}
           
           <DropdownMenu>
             <DropdownMenuTrigger>

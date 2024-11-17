@@ -49,6 +49,12 @@ function PropertyBox({
         setLiked(initialLiked);
     }, [initialLiked]);
 
+    const [isLoggedIn, setIsLoggedIn] = useState(!!userId);
+
+    useEffect(() => {
+        setIsLoggedIn(!!userId);
+    }, [userId]);
+
     const handleLikeProperty = async (event: React.MouseEvent) => {
         event.stopPropagation();
         const newLikedState = !liked;
@@ -67,21 +73,25 @@ function PropertyBox({
 
     return (
         <div className="border rounded-lg shadow-md p-4 cursor-pointer" onClick={whenClicked}>
-            <div className="flex flex-row items-center justify-between mb-3">
-                <div className="flex justify-end items-end mb-3">
-                    {liked ? (
-                        <div className="p-4" onClick={handleLikeProperty}>
-                            <HeartSolid className="h-6 w-6" />
-                        </div>
-                    ) : (
-                        <div className="p-4" onClick={handleLikeProperty}>
-                            <Heart className="h-6 w-6" />
+            <div className="flex flex-row items-center justify-between mb-2">
+                <div className="flex justify-end items-end">
+                    {isLoggedIn && (
+                        <div>
+                            {liked ? (
+                                <div className="p-1" onClick={handleLikeProperty}>
+                                    <HeartSolid className="h-6 w-6" />
+                                </div>
+                            ) : (
+                                <div className="p-1" onClick={handleLikeProperty}>
+                                    <Heart className="h-6 w-6" />
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
                 <HoverCard>
                     <HoverCardTrigger>
-                        <div className="flex justify-end items-end mb-3">
+                        <div className="flex justify-end items-end mb-1">
                             {property.resources?.visualizationFolder ? (
                                 <Ar />
                             ) : (
