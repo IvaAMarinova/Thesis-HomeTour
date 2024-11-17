@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { HttpService } from '../../services/http-service';
 import { Leaves, HomeSmile, BrightnessHigh, TelephoneCall, Envelope } from "@mynaui/icons-react";
-import Footer from '../../components/footer';
 
 function Home() {
   const [imageUrl, setImageUrl] = useState<string>('');
@@ -159,7 +158,6 @@ function Home() {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }

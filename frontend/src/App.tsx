@@ -11,6 +11,9 @@ import Company from './pages/company';
 import Companies from './pages/companies';
 import Profile from './pages/profile';
 import { UserProvider } from './contexts/UserContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Footer from './components/footer';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -29,6 +32,7 @@ function App() {
         <div className="min-h-screen flex flex-col">
           <Header />
           <div className="flex-grow">
+            <ToastContainer />
             <Routes>
               <Route path="/login" element={<Login onLoginSuccess={() => setIsAuthenticated(true)} />} />
               <Route path="/" element={<Home />} />
@@ -39,6 +43,7 @@ function App() {
               <Route path="/companies" element={<Companies />} />
             </Routes>
           </div>
+          <Footer />
         </div>
       </Router>
     </UserProvider>

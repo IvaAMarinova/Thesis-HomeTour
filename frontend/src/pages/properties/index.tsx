@@ -34,7 +34,6 @@ function Properties() {
     const [properties, setProperties] = useState<Property[]>([]);
     const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
     const [likedProperties, setLikedProperties] = useState<{ property: { id: string } }[]>([]);
-    const [isLoadingLikedProperties, setIsLoadingLikedProperties] = useState(true);
     const [appliedFilters, setAppliedFilters] = useState<Filters>({
         city: [],
         company: [],
@@ -53,17 +52,16 @@ function Properties() {
     }, [location.search]);
 
     const fetchLikedProperties = async () => {
+        if (!userId) return;
         try {
             const response = await HttpService.get<{ property: { id: string } }[]>(
                 `/user-properties/user-id-liked/${userId}`,
                 undefined,
-                false
+                true
             );
             setLikedProperties(response);
         } catch (error) {
-            console.error("Error fetching liked properties:", error);
-        } finally {
-            setIsLoadingLikedProperties(false);
+            // console.error("Error fetching liked properties:", error);
         }
     };
 
@@ -84,7 +82,8 @@ function Properties() {
                 setCompanies(companiesResponse.map((company) => company.name));
                 setCompanyDictionary(companyIdToNameMap);
             } catch (error) {
-                console.error("Error fetching data:", error);
+                setProperties([]);
+                // console.error("Error fetching data:", error);
             }
         };
 
@@ -107,10 +106,6 @@ function Properties() {
 
         filterProperties();
     }, [appliedFilters, properties, companyDictionary, likedProperties]);
-
-    if (isLoadingLikedProperties) {
-        return <div className="text-center text-lg">Loading properties...</div>;
-    }
 
     return (
         <div className="pt-16">

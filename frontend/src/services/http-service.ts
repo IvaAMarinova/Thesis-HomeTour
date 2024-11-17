@@ -10,46 +10,49 @@ export class HttpService {
   private static accessToken: string | null = null;
   private static refreshToken: string | null = null;
 
-  static async get<T>(url: string, params?: RequestParams, authRequired = true): Promise<T> {
-    return await HttpService.request<T>(url, 'GET', params, authRequired);
+  static async get<T>(url: string, params?: RequestParams, authRequired = true, isLoginAttempt = false): Promise<T> {
+    return await HttpService.request<T>(url, 'GET', params, authRequired, isLoginAttempt);
   }
 
-  static async post<T>(url: string, body: object, params?: RequestParams, authRequired = true): Promise<T> {
-    return await HttpService.request<T>(url, 'POST', { ...params, body }, authRequired);
+  static async post<T>(url: string, body: object, params?: RequestParams, authRequired = true, isLoginAttempt = false): Promise<T> {
+      return await HttpService.request<T>(url, 'POST', { ...params, body }, authRequired, isLoginAttempt);
   }
 
-  static async put<T>(url: string, body: object, params?: RequestParams, authRequired = true): Promise<T> {
-    return await HttpService.request<T>(url, 'PUT', { ...params, body }, authRequired);
+  static async put<T>(url: string, body: object, params?: RequestParams, authRequired = true, isLoginAttempt = false): Promise<T> {
+      return await HttpService.request<T>(url, 'PUT', { ...params, body }, authRequired, isLoginAttempt);
   }
 
-  static async patch<T>(url: string, body: object, params?: RequestParams, authRequired = true): Promise<T> {
-    return await HttpService.request<T>(url, 'PATCH', { ...params, body }, authRequired);
+  static async patch<T>(url: string, body: object, params?: RequestParams, authRequired = true, isLoginAttempt = false): Promise<T> {
+      return await HttpService.request<T>(url, 'PATCH', { ...params, body }, authRequired, isLoginAttempt);
   }
 
-  static async delete<T>(url: string, params?: RequestParams): Promise<T> {
-    return await HttpService.request<T>(url, 'DELETE', params);
+  static async delete<T>(url: string, params?: RequestParams, authRequired = true, isLoginAttempt = false): Promise<T> {
+      return await HttpService.request<T>(url, 'DELETE', params, authRequired, isLoginAttempt);
   }
 
-  private static async request<T>(url: string, method: string, params?: RequestParams, authRequired = true): Promise<T> {
+
+  static async request<T>(
+    url: string,
+    method: string,
+    params?: RequestParams,
+    authRequired = true,
+    isLoginAttempt = false
+  ): Promise<T> {
     try {
       const requestUrl = new URL(url, API_BASE_URL);
+  
       if (params?.query) {
         Object.keys(params.query).forEach((key) =>
           requestUrl.searchParams.append(key, params.query![key]),
         );
       }
-
-      console.log("[HTTP Service] Access token: ", this.accessToken);
-      console.log("[HTTP Service] authRequired: ", authRequired);
+  
       const headers = {
         ...(params?.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...params?.headers,
         ...(this.accessToken && authRequired ? { Authorization: `Bearer ${this.accessToken}` } : {}),
       };
-
-      console.log("[HTTP Service] requestUrl: ", requestUrl.toString());
-      console.log("[HTTP Service] headers: ", headers);
-
+  
       const response = await fetch(requestUrl.toString(), {
         method: method,
         headers: headers,
@@ -60,17 +63,24 @@ export class HttpService {
             ? JSON.stringify(params.body)
             : undefined,
       });
-
+  
       if (!response.ok) {
-        if (response.status === 401 && authRequired) {
+        if (response.status === 401 && authRequired && !isLoginAttempt) {
           console.log('[HttpService] Token expired. Attempting to refresh...');
           await this.refreshAccessToken();
           return await this.request<T>(url, method, params, authRequired);
+        } else if (response.status === 401 && isLoginAttempt) {
+          throw new Error('Invalid login credentials');
         } else {
-          throw new Error(`Request failed with status ${response.status}`);
+          const errorData = await response.json().catch(() => null);
+          const errorMessage = errorData?.message || `Request failed with status ${response.status}`;
+          const error = new Error(errorMessage);
+          (error as any).response = errorData;
+          throw error;
         }
       }
-
+      
+  
       const contentType = response.headers.get('Content-Type');
       if (contentType && contentType.includes('application/json')) {
         return await response.json();
@@ -83,6 +93,7 @@ export class HttpService {
       throw error;
     }
   }
+  
 
   public static setAccessToken(accessToken: string): void {
     console.log("[HTTP Service] Setting access token..");

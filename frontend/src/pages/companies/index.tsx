@@ -12,7 +12,6 @@ function Companies() {
         name: string; 
         description: string; 
         resources?: Record<string, string>;
-        whenClicked: () => void;
     }[]>([]);
 
     useEffect(() => {
@@ -21,7 +20,9 @@ function Companies() {
                 const response = await HttpService.get('/companies', undefined, false);
                 setCompanies(response as any[]);
             } catch (error) {
-                console.error("Error fetching companies:", error);
+                // console.error("Error fetching companies:", error);
+                setCompanies([]);
+                // toast.error('Failed to load companies. Please try again later.');
             }
         };
 
@@ -36,21 +37,30 @@ function Companies() {
                     Рзгледайте компаниите строители и наши партньори. <br />
                     Свържете се с тях, за да предприемете следващите стъпки по закупуването на вашия нов дом!
                 </h2>
-                <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 mt-16">
-                    {companies.map((company, index) => (
-                        <div key={index} className="break-inside-avoid mb-4 flex justify-center">
-                            <CompanyBox
-                                company={company}
-                                whenClicked={() => navigate(`/companies/${company.id}`)}
-                            />
-                        </div>
-                    ))}
-                </div>
+                {companies.length === 0 ? (
+                    <div className="flex items-center justify-center h-20">
+                        <p className="text-center text-gray-700">
+                            За момента нямаме компании, които да ви покажем. Пробвайте пак по-късно!
+                        </p>
+                    </div>
+                ) : (
+                    <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 mt-16">
+                        {companies.map((company, index) => (
+                            <div key={index} className="break-inside-avoid mb-4 flex justify-center">
+                                <CompanyBox
+                                    company={company}
+                                    whenClicked={() => navigate(`/companies/${company.id}`)}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                )}
 
                 <GoUpButton />
             </div>
             <Footer />
         </div>
+
     );
 }
 

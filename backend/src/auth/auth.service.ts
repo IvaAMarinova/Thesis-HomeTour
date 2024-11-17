@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { IUser } from '../user/user.inteface';
@@ -32,11 +32,11 @@ export class AuthService {
   async register(email: string, password: string, fullName: string, companyId: string, type: string): Promise<any> {
     const existingUser = await this.userService.findByEmail(email);
     if (existingUser) {
-      throw new UnauthorizedException('User already exists');
+      throw new ConflictException('User with this email already exists');
     }
-    
+  
     const userType = this.validateAndConvertUserType(type);
-    
+  
     try {
       const user = await this.userService.create(fullName, email, password, userType, companyId);
       const payload = { email: user.email, sub: user.id };
@@ -45,10 +45,10 @@ export class AuthService {
         refresh_token: this.jwtService.sign(payload, { expiresIn: '7d' }),
       };
     } catch (error) {
-      throw new Error(`Failed to register user: ${error.message}`);
+      throw new BadRequestException(`Failed to register user: ${error.message}`);
     }
   }
-
+  
   private validateAndConvertUserType(type: string): UserType {
     const upperCaseType = type.toUpperCase();
     if (upperCaseType in UserType) {

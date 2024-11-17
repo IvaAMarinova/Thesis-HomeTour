@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { toast } from "react-toastify";
 
 const loginSchema = z.object({
   email: z.string().email({
@@ -68,43 +69,65 @@ export function Login({ onLoginSuccess }: LoginProps) {
 
   async function onLogin(values: z.infer<typeof loginSchema>) {
     try {
-      const response = await HttpService.post<{ access_token: string; refresh_token: string }>('/auth/login', values);
-      if (response) {
-        console.log("[Login] Access token: ", response.access_token);
-        console.log("[Login] Refresh token: ", response.refresh_token);
-        HttpService.setAccessToken(response.access_token);
-        HttpService.setRefreshToken(response.refresh_token);
-        onLoginSuccess();
-        await fetchUserId();
-        navigate('/');
-      } else {
-        throw new Error("Access token not found in the response");
-      }
+      const response = await HttpService.post<{ access_token: string; refresh_token: string }>('/auth/login',
+        values, undefined, false, true
+      );
+      console.log("[Login] Access token: ", response.access_token);
+      console.log("[Login] Refresh token: ", response.refresh_token);
+      HttpService.setAccessToken(response.access_token);
+      HttpService.setRefreshToken(response.refresh_token);
+      onLoginSuccess();
+      await fetchUserId();
+      navigate('/');
     } catch (error) {
-      console.error("Error logging in:", error);
+      if (error instanceof Error) {
+        if (error.message === 'Invalid login credentials') {
+          toast.error('Невалиден имейл или парола. Опитайте отново!');
+        } else {
+          toast.error('Получи се грешка докато влизахте. Опитайте отново!');
+        }
+      } else {
+        toast.error('Неочаквана грешка настъпи. Опитайте отново!');
+      }
     }
   }
-
+  
   async function onRegister(values: z.infer<typeof registerSchema>) {
     try {
       const registerData = {
         ...values,
         type: "b2c",
       };
-      const response = await HttpService.post<{ access_token: string; refresh_token: string;}>('/auth/register', registerData, undefined, false);
+      const response = await HttpService.post<{ access_token: string; refresh_token: string }>(
+        '/auth/register',
+        registerData,
+        undefined,
+        false,
+        true
+      );
       console.log("[Login] Response: ", response);
       console.log("[Login] Access token: ", response.access_token);
       console.log("[Login] Refresh token: ", response.refresh_token);
       HttpService.setAccessToken(response.access_token);
       HttpService.setRefreshToken(response.refresh_token);
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
       onLoginSuccess();
       await fetchUserId();
       navigate('/');
     } catch (error) {
-      console.error('Error registering user:', error);
+      if (error instanceof Error) {
+        if (error.message === "User with this email already exists") {
+          toast.error('Вече съществува регистриран акаунт с този имейл адрес.');
+        } else {
+          toast.error('Получи се грешка докато влизахте. Опитайте отново!');
+        }
+      } else {
+        toast.error('Неочаквана грешка настъпи. Опитайте отново!');
+      }
+      
     }
-  }
+  }  
+  
 
   return (
     <div className="flex items-center justify-center h-screen">

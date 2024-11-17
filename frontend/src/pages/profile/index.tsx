@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { UserCircle, ArrowLeft } from "@mynaui/icons-react";
 import { HttpService } from '../../services/http-service';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 function Profile() {
     const navigate = useNavigate();
@@ -15,10 +16,10 @@ function Profile() {
             try {                
                 const response = await HttpService.get<Record<string, string>>(`/auth/me`);
                 setUser(response);
-                console.log('[Profile]: ', response);
             }
             catch (error) {
-                console.error("Error fetching user:", error);
+                // console.error("Error fetching user:", error);
+                toast.error('Възникна проблем при зареждането на профила. Моля, опитайте отново по-късно.');
             }
         }
         fetchUser();
@@ -99,4 +100,3 @@ function Profile() {
 }
 
 export default Profile;
-
