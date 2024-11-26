@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common'
 import { PropertyService } from './property.service';
 import { PropertyEntity } from './property.entity';
 import { FileUploadService } from '../upload/upload.service';
+import { TransformedPropertyDto } from './dto/property-transformed-response.dto';
 
 @Controller('properties')
 export class PropertyController {
@@ -61,31 +62,64 @@ export class PropertyController {
   }
 
   @Get()
-  async getAllProperties(): Promise<PropertyEntity[]> {
+  async getAllProperties(): Promise<TransformedPropertyDto[]> {
     const properties = await this.propertyService.getAllProperties();
-    await Promise.all(properties.map(async (property) => this.mapPresignedUrlsToProperty(property)));
-    return properties;
+    return Promise.all(properties.map((property) => this.mapPresignedUrlsToProperty(property)));
+  }
+
+  @Get('ids')
+  async getAllPropertyIds(): Promise<{ id: string }[]> {
+      const ids = await this.propertyService.getAllPropertyIds();
+      console.log('[Controller] Retrieved IDs:', ids); // Debug log
+      return ids;
   }
 
   @Get(':id')
-  async getPropertyById(@Param('id') id: string): Promise<PropertyEntity | null> {
+  async getPropertyById(@Param('id') id: string): Promise<TransformedPropertyDto | null> {
     const property = await this.propertyService.getPropertyById(id);
-    await this.mapPresignedUrlsToProperty(property);
-    return property;
+    if (!property) return null;
+    return this.mapPresignedUrlsToProperty(property);
   }
 
-  async mapPresignedUrlsToProperty(property: PropertyEntity) {
-    if (property.resources?.headerImage) {
-      property.resources.headerImage = await this.fileUploadService.getPreSignedURLToViewObject(
-        property.resources.headerImage
-      );
-    }
-    if (property.resources?.galleryImages) {
-      property.resources.galleryImages = await Promise.all(
-        property.resources.galleryImages.map(async (imageKey) => 
-          this.fileUploadService.getPreSignedURLToViewObject(imageKey)
-        )
-      );
-    }
+
+  @Delete('all')
+  async deleteAllProperties(): Promise<{ message: string }> {
+      await this.propertyService.deleteAllProperties();
+      return { message: 'All properties have been deleted.' };
   }
+
+  async mapPresignedUrlsToProperty(property: PropertyEntity): Promise<TransformedPropertyDto> {
+    console.log('[PropertyController] Property Data:', property);
+    return {
+      id: property.id,
+      name: property.name,
+      description: property.description,
+      floor: property.floor,
+      address: property.address,
+      phoneNumber: property.phoneNumber,
+      email: property.email,
+      company: property.company.id,
+      building: property.building?.id || null,
+      resources: {
+        ...property.resources,
+        headerImage: property.resources?.headerImage
+          ? {
+              key: property.resources.headerImage,
+              url: await this.fileUploadService.getPreSignedURLToViewObject(property.resources.headerImage),
+            }
+          : null,
+        galleryImages: property.resources?.galleryImages
+          ? await Promise.all(
+              property.resources.galleryImages.map(async (imageKey) => ({
+                key: imageKey,
+                url: await this.fileUploadService.getPreSignedURLToViewObject(imageKey),
+              }))
+            )
+          : [],
+      },
+    };
+  }
+  
+  
+
 }

@@ -14,7 +14,9 @@ type Property = {
     company: string;
     address: Record<string, string>;
     floor: number;
-    resources?: { headerImage?: string | null };
+    resources?: { 
+        headerImage?: {key: string, url: string}
+    };
 };
 
 type Filters = {

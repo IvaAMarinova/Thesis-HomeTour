@@ -108,4 +108,28 @@ export class PropertyService {
     const properties = await this.propertyRepository.findAll();
     return properties.map(property => property.floor).filter(floor => floor !== undefined);;
   }
+
+  async getAllPropertyIds(): Promise<{ id: string }[]> {
+    const properties = await this.propertyRepository.findAll({
+        fields: ['id'],
+    });
+
+    console.log('[Service] Raw Properties:', properties);
+
+    return properties.map((property) => ({ id: property.id }));
+  }
+
+  async deleteAllProperties(): Promise<void> {
+    const properties = await this.propertyRepository.findAll();
+    if (properties.length === 0) {
+        console.log('[Service] No properties to delete.');
+        return;
+    }
+
+    console.log(`[Service] Deleting ${properties.length} properties...`);
+
+    await this.em.removeAndFlush(properties);
+    console.log('[Service] All properties have been deleted.');
+  }
+
 }
