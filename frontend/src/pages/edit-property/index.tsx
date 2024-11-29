@@ -6,6 +6,74 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { X, Trash } from "@mynaui/icons-react";
 import { toast } from "react-toastify";
+import { v4 } from "uuid";
+import { z } from "zod";
+
+const propertySchema = z.object({
+    floor: z.number().refine(
+        (val) => val > 0 && Number.isInteger(val),
+        { message: "Етажът трябва да бъде положително цяло число." }
+    ),
+    address: z.object({
+        city: z.string().min(1, { message: "Градът не може да бъде празен." }),
+        street: z.string().min(1, { message: "Улицата не може да бъде празна." }),
+        neighborhood: z.string().min(1, { message: "Кварталът не може да бъде празен." }),
+        zip: z.string().optional(),
+    }),  
+    phoneNumber: z
+        .string()
+        .regex(/^\+?\d[\d\s]{8,14}$/, {
+            message: "Телефонният номер трябва да бъде валиден номер.",
+        }),
+    email: z.string().email({
+        message: "Моля, въведете валиден имейл адрес.",
+    }),
+    name: z.string().min(1, {
+        message: "Името не може да бъде празно.",
+    }),
+    description: z
+        .string()
+        .min(64, {
+            message: "Описанието е прекалено кратко.",
+        })
+        .max(2048, {
+            message: "Описанието е прекалено дълго.",
+        }),
+
+    resources: z.object({
+        headerImage: z
+            .object({
+                key: z.string().min(1, {
+                    message: "Ключът на заглавното изображение не може да бъде празен.",
+                }),
+                url: z.string().url({
+                    message: "URL адресът на заглавното изображение трябва да бъде валиден.",
+                }),
+            })
+            .optional(),
+        galleryImages: z
+            .array(
+                z.object({
+                    key: z.string().min(1, {
+                        message: "Ключът на изображението в галерията не може да бъде празен.",
+                    }),
+                    url: z.string().url({
+                        message: "URL адресът на изображението в галерията трябва да бъде валиден.",
+                    }),
+                })
+            )
+            .optional(),
+        vizualizationFolder: z.string().optional(),
+    }),
+});
+
+z.setErrorMap((issue, _ctx) => {
+    if (issue.message) {
+        return { message: issue.message };
+    } else {
+        return { message: "Невалидни данни." };
+    }
+    });
 
 interface Property {
     floor: string;
@@ -25,7 +93,6 @@ function EditProperty() {
     const { id } = useParams<{ id: string }>();
     const [showImageModal, setShowImageModal] = useState(false);
     const [imageToShow, setImageToShow] = useState<string>("");
-    const [uploadUrl, setUploadUrl] = useState<string>();
     const [property, setProperty] = useState<Property>({
         floor: "",
         address: {},
@@ -33,7 +100,9 @@ function EditProperty() {
         email: "",
         name: "",
         description: "",
-        resources: {},
+        resources: {
+            headerImage: {key: "", url: ""}
+        },
     });
 
     const fetchProperty = async ()=> {
@@ -66,7 +135,7 @@ function EditProperty() {
                 const mappedProperty = mapResponseToProperty(response);
                 setProperty(mappedProperty);
             } catch (error) {
-                console.error("[EditProperty] Error fetching property:", error);
+                toast.error("Има грешка! Пробвай отново по-късно.")
             }
         };
 
@@ -92,41 +161,87 @@ function EditProperty() {
 
     const handleUpdateProperty = async () => {
         try {
-            const { resources, ...propertyWithoutResources } = property;
-                await HttpService.put<Record<string, string>>(
-                `/properties/${id}`,
-                propertyWithoutResources
-            );
-    
+            const requiredFields = [
+                { key: "floor", value: property.floor },
+                { key: "address.city", value: property.address?.city },
+                { key: "address.street", value: property.address?.street },
+                { key: "address.neighborhood", value: property.address?.neighborhood },
+                { key: "phoneNumber", value: property.phoneNumber },
+                { key: "email", value: property.email },
+                { key: "name", value: property.name },
+                { key: "description", value: property.description },
+                { key: "resources.headerImage", value: property.resources?.headerImage },
+            ];
+            
+            const missingFields = requiredFields.filter((field) => !field.value);
+            
+            if (missingFields.length > 0) {
+                throw new Error("Validation failed due to missing required fields.");
+            }
+            
+            if (missingFields.length > 0) {
+                toast.error(`Всички полета трябва да бъдат попълнени и да има поне по една снимка качена.`);
+                throw new Error("Validation failed due to missing required fields.");
+            }
+            
+
+            if (property.resources?.galleryImages && property.resources.galleryImages.length > 10) {
+                toast.error("Галерията не може да съдържа повече от 10 изображения.");
+                throw new Error("Validation failed due to exceeding gallery image limit.");
+            }
+
+            propertySchema.parse(property);
+            
+            const updatedGalleryImages = [
+                ...(property.resources.galleryImages?.map((img) => img.key) || [])                      
+            ];
+
+            const updatedResources = {
+                headerImage: property.resources.headerImage?.key,
+                galleryImages: updatedGalleryImages,
+                vizualizationFolder: property.resources.vizualizationFolder
+            };
+
+            const updatedProperty = {
+                ...property,
+                resources: updatedResources
+            }
+
+            await HttpService.put<Record<string, string>>(`/properties/${id}`, updatedProperty);
             toast.success("Имотът беше успешно обновен!");
         } catch (error) {
-            toast.error("Възникна грешка. Опитайте отново!");
+            if (error instanceof z.ZodError) {
+                error.errors.forEach((err) => toast.error(err.message));
+            } else {
+                toast.error("Възникна грешка. Опитайте отново!");
+            }
         }
+        
     };
     
-    const handleUploadImage = async (imageKey: string, type: "header" | "gallery") => {
+    const handleUploadImage = async (type: "header" | "gallery") => {
         try {
-            const fileInput = document.getElementById("headerImageInput") as HTMLInputElement;
-            
-            const response = await HttpService.get<Record<string, string>>(
-                `/get-presigned-url/to-upload?key=${imageKey}&contentType=image/jpeg`
-            );
-
-            setUploadUrl(response.url);
-            console.log("Presigned upload url: ", response);
+            const imageKey = v4();
+            const fileInputId = type === "header" ? "headerImageInput" : "galleryImageInput";
+            const fileInput = document.getElementById(fileInputId) as HTMLInputElement;
     
-            if (response.url) {
-                const fileInputId = type === "header" ? "headerImageInput" : "galleryImageInput";
-                const fileInput = document.getElementById(fileInputId) as HTMLInputElement;
+            if (fileInput?.files?.[0]) {
+                const file = fileInput.files[0];
     
-                if (fileInput?.files?.[0]) {
-                    const file = fileInput.files[0];
-                    console.log("[Edit property] File to upload: ", file);
+                if (!file.type.startsWith("image/")) {
+                    toast.error("Моля, качете валидно изображение!");
+                    return;
+                }
     
+                const response = await HttpService.get<Record<string, string>>(
+                    `/get-presigned-url/to-upload?key=${imageKey}&contentType=${file.type}`
+                );
+        
+                if (response.url) {
                     const uploadResponse = await fetch(response.url, {
                         method: "PUT",
                         headers: {
-                            "contentType": file.type,
+                            "Content-Type": file.type,
                         },
                         body: file,
                     });
@@ -134,46 +249,53 @@ function EditProperty() {
                     if (uploadResponse.ok) {
                         toast.success("Снимката беше успешно качена!");
     
-                        let updatedResources;
-                        if(type === "header")
-                        {
+                        if (type === "header") {
+                            const responseToView = await HttpService.get<{ url:string }>(`/get-presigned-url/to-view/${imageKey}`);
+                            const imageViewUrl = responseToView.url;
+    
+                            const updatedResources = {
+                                galleryImages: property.resources.galleryImages,
+                                headerImage: {key: imageKey, url: imageViewUrl},
+                                vizualizationFolder: property.resources.vizualizationFolder
+                            };
+
+                            setProperty((prevState) => ({
+                                ...prevState,
+                                resources: updatedResources,
+                            }));
+                        } else {
+                            const responseToView = await HttpService.get<{ url:string }>(`/get-presigned-url/to-view?key=${imageKey}`);
+                            const imageViewUrl = responseToView.url;
+
                             const updatedGalleryImages = [
-                                ...(property.resources.galleryImages?.map((img) => img.key) || [])                      
+                                ...(property.resources.galleryImages || []),
+                                { key: imageKey, url: imageViewUrl }
                             ];
                             
-                            updatedResources = {
-                                headerImage: imageKey,
+                            const updatedResources = {
+                                headerImage: property.resources.headerImage,
                                 galleryImages: updatedGalleryImages,
-                                vizualizationFolder: property.resources.vizualizationFolder
+                                vizualizationFolder: property.resources.vizualizationFolder,
                             };
 
-                        } else {
-                            const updatedGalleryImages = [
-                                ...(property.resources.galleryImages?.map((img) => img.key) || []),
-                                imageKey                     
-                            ];
-                            updatedResources = {
-                                headerImage: property.resources.headerImage?.key,
-                                galleryImages: updatedGalleryImages,
-                                vizualizationFolder: property.resources.vizualizationFolder
-                            };
+                            setProperty((prevState) => ({
+                                ...prevState,
+                                resources: updatedResources,
+                            }));
                         }
-
-                        await HttpService.put(`/properties/${id}`, { resources: updatedResources });
-                        fetchProperty();
-                        fileInput.value = "";
+                            fileInput.value = "";
                     } else {
                         throw new Error("Failed to upload the image.");
                     }
-                } else {
-                    toast.error("Моля, изберете файл за качване!");
                 }
+            } else {
+                toast.error("Моля, изберете файл за качване!");
             }
         } catch (error) {
-            console.error("[EditProperty] Error uploading header image:", error);
             toast.error("Възникна грешка при качването на изображението. Опитайте отново!");
         }
     };
+    
     
     const handleDeleteImage = async (imageKey: string) => {
         try {
@@ -188,10 +310,6 @@ function EditProperty() {
                 updatedResources.galleryImages = updatedGalleryImages;
             }
 
-            await HttpService.put(`/properties/${id}`, {
-                resources: updatedResources,
-            });
-
             toast.success("Изображението беше успешно изтрито!");
 
             setProperty((prevState) => ({
@@ -200,8 +318,19 @@ function EditProperty() {
             }));
         } catch (error) {
             toast.error("Възникна грешка при изтриване на изображението.");
-            console.error("[EditProperty] Error deleting image:", error);
         }
+    };
+
+    const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const {name, value} = e.target;
+        const updatedAddress: Record<string, string> = { ...property.address };
+    
+        updatedAddress[name] = value;
+    
+        setProperty((prevState) => ({
+            ...prevState,
+            address: updatedAddress
+        }))
     };
 
     return (
@@ -263,11 +392,43 @@ function EditProperty() {
                             onChange={handleDescriptionChange}
                             className="mt-2 w-full border shadow-sm h-24 p-2 rounded focus:outline-black"
                         />
+
+                        <h2 className="text-xl font-semibold mt-6">Адрес на имота</h2>
+                        <div className="flex flex-row mt-4 space-x-12">
+                            <div>
+                                <Label className="mb-2 block">Град / Село</Label>
+                                <input
+                                    id="city"
+                                    name="city"
+                                    value={property.address["city"]}
+                                    onChange={handleAddressChange}
+                                    className="mt-2 w-full border shadow-sm p-2 rounded focus:outline-black"
+                                />
+                            </div>
+                            <div>
+                                <Label className="mb-2 block">Квартал</Label>
+                                <input
+                                    id="neighborhood"
+                                    name="neighborhood"
+                                    value={property.address["neighborhood"]}
+                                    onChange={handleAddressChange}
+                                    className="mt-2 w-full border shadow-sm p-2 rounded focus:outline-black"
+                                />
+                            </div>
+                            <div>
+                                <Label className="mb-2 block">Улица</Label>
+                                <input
+                                    id="street"
+                                    name="street"
+                                    value={property.address["street"]}
+                                    onChange={handleAddressChange}
+                                    className="mt-2 w-full border shadow-sm p-2 rounded focus:outline-black"
+                                />
+                            </div>                
+                        </div>
                     </div>
                     
                     <h1 className="text-2xl font-semibold text-center">Изображения на имота</h1>
-
-                    
 
                     <h2 className="text-xl font-semibold mt-10">Заглавна снимка</h2>
                     {property.resources?.headerImage ? ((() => {
@@ -276,7 +437,7 @@ function EditProperty() {
                         return (
                             <div
                                 key={headerImage.key}
-                                className="relative overflow-hidden transform transition-transform duration-300 hover:scale-105 cursor-pointer"
+                                className="relative overflow-hidden cursor-pointer"
                                 onClick={() => {
                                     setImageToShow(headerImage.url);
                                     setShowImageModal(true);
@@ -305,7 +466,7 @@ function EditProperty() {
                                 <Input
                                     id="headerImageInput"
                                     type="file"
-                                    onChange={() => handleUploadImage("hardcoded-header-image-key2", "header")}
+                                    onChange={() => handleUploadImage("header")}
                                 />
                             </div>
                         )
@@ -317,7 +478,7 @@ function EditProperty() {
                         <Input
                             id="galleryImageInput"
                             type="file"
-                            onChange={() => handleUploadImage("some_name_image", "gallery")}
+                            onChange={() => handleUploadImage( "gallery")}
                         />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
