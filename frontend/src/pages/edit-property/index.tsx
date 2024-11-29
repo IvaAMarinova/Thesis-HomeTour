@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { HttpService } from "../../services/http-service";
+import { useUser } from "@/contexts/UserContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,9 +11,11 @@ import { v4 } from "uuid";
 import { z } from "zod";
 
 const propertySchema = z.object({
-    floor: z.number().refine(
-        (val) => val > 0 && Number.isInteger(val),
-        { message: "Етажът трябва да бъде положително цяло число." }
+    floor: z
+        .preprocess((val) => parseInt(val as string, 10), z.number())
+        .refine(
+            (val) => val > 0 && Number.isInteger(val),
+            { message: "Етажът трябва да бъде положително цяло число." }
     ),
     address: z.object({
         city: z.string().min(1, { message: "Градът не може да бъде празен." }),
@@ -93,9 +96,11 @@ function EditProperty() {
     const { id } = useParams<{ id: string }>();
     const [showImageModal, setShowImageModal] = useState(false);
     const [imageToShow, setImageToShow] = useState<string>("");
+    const isNewProperty = id === "0";
+    const { userCompany } = useUser();
     const [property, setProperty] = useState<Property>({
         floor: "",
-        address: {},
+        address: {city: "", street: "", neighborhood: ""},
         phoneNumber: "",
         email: "",
         name: "",
@@ -104,6 +109,13 @@ function EditProperty() {
             headerImage: {key: "", url: ""}
         },
     });
+
+    useEffect(() => {
+        console.log("Is new property: ", isNewProperty);
+        if (!isNewProperty) {
+            fetchProperty();
+        }
+    }, [id, isNewProperty]);
 
     const fetchProperty = async ()=> {
         const mapResponseToProperty = (response: Record<string, any>): Property => {
@@ -128,9 +140,9 @@ function EditProperty() {
         const getProperty = async () => {
             try {
                 const response = await HttpService.get<Record<string, string>>(
-                `/properties/${id}`,
-                undefined,
-                false
+                    `/properties/${id}`,
+                    undefined,
+                    false
                 );
                 const mappedProperty = mapResponseToProperty(response);
                 setProperty(mappedProperty);
@@ -141,13 +153,6 @@ function EditProperty() {
 
         getProperty();
     }
-        
-
-    useEffect(() => {
-        if (id) {
-            fetchProperty();
-        }
-    }, [id]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -161,6 +166,7 @@ function EditProperty() {
 
     const handleUpdateProperty = async () => {
         try {
+            console.log("Property: ", property);
             const requiredFields = [
                 { key: "floor", value: property.floor },
                 { key: "address.city", value: property.address?.city },
@@ -183,7 +189,6 @@ function EditProperty() {
                 toast.error(`Всички полета трябва да бъдат попълнени и да има поне по една снимка качена.`);
                 throw new Error("Validation failed due to missing required fields.");
             }
-            
 
             if (property.resources?.galleryImages && property.resources.galleryImages.length > 10) {
                 toast.error("Галерията не може да съдържа повече от 10 изображения.");
@@ -204,14 +209,21 @@ function EditProperty() {
 
             const updatedProperty = {
                 ...property,
-                resources: updatedResources
-            }
+                resources: updatedResources,
+                ...(isNewProperty && { company: userCompany })
+            };
+            const url = isNewProperty ? "/properties" : `/properties/${id}`;
+            const method = isNewProperty ? "post" : "put";
 
-            await HttpService.put<Record<string, string>>(`/properties/${id}`, updatedProperty);
-            toast.success("Имотът беше успешно обновен!");
+            await HttpService[method](url, updatedProperty);
+
+            toast.success(
+                isNewProperty ? "Имотът беше успешно създаден!" : "Имотът беше успешно обновен!"
+            );
         } catch (error) {
             if (error instanceof z.ZodError) {
                 error.errors.forEach((err) => toast.error(err.message));
+                error.errors.forEach((err) => console.log(err));
             } else {
                 toast.error("Възникна грешка. Опитайте отново!");
             }
@@ -250,7 +262,7 @@ function EditProperty() {
                         toast.success("Снимката беше успешно качена!");
     
                         if (type === "header") {
-                            const responseToView = await HttpService.get<{ url:string }>(`/get-presigned-url/to-view/${imageKey}`);
+                            const responseToView = await HttpService.get<{ url:string }>(`/get-presigned-url/to-view?key=${imageKey}`);
                             const imageViewUrl = responseToView.url;
     
                             const updatedResources = {
@@ -369,19 +381,16 @@ function EditProperty() {
                                 className="mt-2 w-full focus:outline-black"
                             />
                         </div>
-                        {property.floor && 
-                            <div>
-                                <Label className="mb-2 block">Етаж</Label>
-                                <Input
-                                    id="floor"
-                                    name="floor"
-                                    value={property.floor}
-                                    onChange={handleChange}
-                                    className="mt-2 w-full focus:outline-black"
-                                />
-                            </div>
-                        }
-                        
+                        <div>
+                            <Label className="mb-2 block">Етаж</Label>
+                            <Input
+                                id="floor"
+                                name="floor"
+                                value={property.floor}
+                                onChange={handleChange}
+                                className="mt-2 w-full focus:outline-black"
+                            />
+                        </div>
                     </div>
                     <div>
                         <Label className="mb-2 block">Описание</Label>
@@ -431,46 +440,47 @@ function EditProperty() {
                     <h1 className="text-2xl font-semibold text-center">Изображения на имота</h1>
 
                     <h2 className="text-xl font-semibold mt-10">Заглавна снимка</h2>
-                    {property.resources?.headerImage ? ((() => {
-                        const headerImage = property.resources.headerImage;
+                    {property.resources?.headerImage && property.resources.headerImage.url ? (
+                        (() => {
+                            const headerImage = property.resources.headerImage;
 
-                        return (
-                            <div
-                                key={headerImage.key}
-                                className="relative overflow-hidden cursor-pointer"
-                                onClick={() => {
-                                    setImageToShow(headerImage.url);
-                                    setShowImageModal(true);
-                                }}
-                            >
+                            return (
                                 <div
-                                    onClick={(event) => {
-                                        event.stopPropagation();
-                                        handleDeleteImage(headerImage.key);
+                                    key={headerImage.key}
+                                    className="relative overflow-hidden cursor-pointer"
+                                    onClick={() => {
+                                        setImageToShow(headerImage.url);
+                                        setShowImageModal(true);
                                     }}
                                 >
-                                    <Trash className="absolute mt-3 ml-3 bg-white rounded-lg p-1 text-red-600" />
-                                </div>
+                                    <div
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            handleDeleteImage(headerImage.key);
+                                        }}
+                                    >
+                                        <Trash className="absolute mt-3 ml-3 bg-white rounded-lg p-1 text-red-600" />
+                                    </div>
 
-                                <img
-                                    src={headerImage.url}
-                                    alt="Property header image"
-                                    className="w-auto h-56 object-cover rounded-lg"
-                                />
+                                    <img
+                                        src={headerImage.url}
+                                        alt="Property header image"
+                                        className="w-auto h-56 object-cover rounded-lg"
+                                    />
                                 </div>
                             );
                         })()
-                        ) : (
-                            <div className="grid w-full max-w-sm items-center gap-1.5">
-                                <Label htmlFor="headerImageInput">Качи заглавна снимка</Label>
-                                <Input
-                                    id="headerImageInput"
-                                    type="file"
-                                    onChange={() => handleUploadImage("header")}
-                                />
-                            </div>
-                        )
-                    }
+                    ) : (
+                        <div className="grid w-full max-w-sm items-center gap-1.5">
+                            <Label htmlFor="headerImageInput">Качи заглавна снимка</Label>
+                            <Input
+                                id="headerImageInput"
+                                type="file"
+                                onChange={() => handleUploadImage("header")}
+                            />
+                        </div>
+                    )}
+
 
                     <h2 className="text-xl font-semibold mt-10">Галерия</h2>
                     <div className="grid w-full max-w-sm items-center gap-1.5">
