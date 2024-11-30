@@ -13,7 +13,7 @@ export class CompanyService {
     private readonly em: EntityManager,
   ) {}
 
-  async create(name: string, description: string, email: string, phoneNumber: string, website: string, resources?: {logo?: string | null, galleryImages?: string[]}): Promise<Company> {
+  async create(name: string, description: string, email: string, phoneNumber: string, website: string, resources?: {logoImage?: string | null, galleryImage?: string}): Promise<Company> {
     const company = new Company();
     company.name = name;
     company.description = description;

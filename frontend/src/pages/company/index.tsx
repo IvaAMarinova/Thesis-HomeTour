@@ -103,9 +103,9 @@ function Company() {
                         )}
                     </div>
                     <div className="w-full md:w-1/2 max-w-md p-4 mt-4 md:mt-0 flex justify-center">
-                        {company?.resources?.galleryImages[0] && (
+                        {company?.resources?.galleryImage && (
                             <img
-                                src={company.resources?.galleryImages[0].url}
+                                src={company.resources?.galleryImage.url}
                                 alt="Company gallery image"
                                 className="w-full h-auto object-contain rounded-lg shadow-md border"
                             />
@@ -144,7 +144,6 @@ function Company() {
                             const isLiked = likedProperties.some(
                                 (liked) => liked.property?.id === property.id
                             );
-
                             return (
                                 <div 
                                     key={property.id} 

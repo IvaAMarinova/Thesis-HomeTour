@@ -27,6 +27,6 @@ export class Company {
   @Property({ type: JsonType, nullable: true })
   resources?: {
     logoImage?: string | null;
-    galleryImages?: string[];
+    galleryImage?: string;
   };
 }

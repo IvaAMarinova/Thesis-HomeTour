@@ -7,6 +7,6 @@ export class TransformedCompanyDto {
     website: string;
     resources?: {
         logoImage?: { key: string; url: string } | null;
-        galleryImages?: { key: string; url: string }[];
+        galleryImage?: { key: string; url: string };
     };
 }

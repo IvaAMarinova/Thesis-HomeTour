@@ -14,7 +14,7 @@ export class CompanyController {
   ) {}
 
   @Post()
-  async createCompany(@Body() body: {name: string, description: string, email: string, phoneNumber: string, website: string, resources?: {logoImage?: string | null, galleryImages?: string[]}}): Promise<Company> {
+  async createCompany(@Body() body: {name: string, description: string, email: string, phoneNumber: string, website: string, resources?: {logoImage?: string | null, galleryImage?: string}}): Promise<Company> {
     return this.companyService.create(body.name, body.description, body.email, body.phoneNumber, body.website, body.resources);
   }
 
@@ -70,14 +70,12 @@ export class CompanyController {
               url: await this.fileUploadService.getPreSignedURLToViewObject(company.resources.logoImage),
             }
           : null,
-        galleryImages: company.resources?.galleryImages
-          ? await Promise.all(
-              company.resources.galleryImages.map(async (imageKey) => ({
-                key: imageKey,
-                url: await this.fileUploadService.getPreSignedURLToViewObject(imageKey),
-              }))
-            )
-          : [],
+        galleryImage: company.resources?.galleryImage
+          ? {
+            key: company.resources.galleryImage,
+            url: await this.fileUploadService.getPreSignedURLToViewObject(company.resources.galleryImage),
+          }
+          : null,
       },
     };
   }

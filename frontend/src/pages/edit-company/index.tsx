@@ -17,7 +17,7 @@ interface Company {
     website: string;
     resources: {
         logoImage?: {key: string, url: string};
-        galleryImages?: Record<string, string>[];
+        galleryImage?: {key: string, url: string};
     };
 }
 
@@ -55,20 +55,17 @@ const companySchema = z.object({
                 }),
             })
             .optional(),
-        galleryImages: z
-            .array(
-                z.object({
-                    key: z.string().min(1, {
-                        message: "Ключът на изображението в галерията не може да бъде празен.",
-                    }),
-                    url: z.string().url({
-                        message: "URL адресът на изображението в галерията трябва да бъде валиден.",
-                    }),
-                })
-            )
-            .optional(),
-        vizualizationFolder: z.string().optional(),
-    }),
+        galleryImage: z
+            .object({
+                key: z.string().min(1, {
+                    message: "Ключът на заглавното изображение не може да бъде празен.",
+                }),
+                url: z.string().url({
+                    message: "URL адресът на заглавното изображение трябва да бъде валиден.",
+                }),
+            })
+            .optional()
+        }),
 });
 
 z.setErrorMap((issue, _ctx) => {
@@ -95,25 +92,6 @@ function EditCompany() {
     });
 
     const fetchCompany = async ()=> {
-        // const mapResponseToProperty = (response: Record<string, any>): Property => {
-        //     return {
-        //         floor: response.floor,
-        //         address: response.address,
-        //         phoneNumber: response.phoneNumber,
-        //         email: response.email,
-        //         name: response.name,
-        //         description: response.description,
-        //         resources: {
-        //             headerImage: response.resources.headerImage,
-        //             galleryImages: response.resources.galleryImages?.map((img: Record<string, string>) => ({
-        //                 key: img.key,
-        //                 url: img.url,
-        //             })),
-        //             vizualizationFolder: response.resources.vizualizationFolder,
-        //         },
-        //     };
-        // };
-        
         const getCompany = async () => {
             try {
                 const response = await HttpService.get<Company>(
@@ -121,7 +99,6 @@ function EditCompany() {
                     undefined,
                     false
                 );
-                // const mappedProperty = mapResponseToProperty(response);
                 console.log("Response: ", response);
                 setCompany(response);
             } catch (error) {
@@ -133,7 +110,6 @@ function EditCompany() {
     }
 
     useEffect(() => {
-        console.log("hi");
         fetchCompany();
     }, []);
 
@@ -157,6 +133,7 @@ function EditCompany() {
                 { key: "website", value: company.website },
                 { key: "description", value: company.description },
                 { key: "resources.logoImage", value: company.resources?.logoImage },
+                { key: "resources.galleryImage", value: company.resources?.galleryImage },
             ];
             
             const missingFields = requiredFields.filter((field) => !field.value);
@@ -166,26 +143,18 @@ function EditCompany() {
                 throw new Error("Validation failed due to missing required fields.");
             }
 
-            if (company.resources?.galleryImages && company.resources.galleryImages.length > 10) {
-                toast.error("Галерията не може да съдържа повече от 10 изображения.");
-                throw new Error("Validation failed due to exceeding gallery image limit.");
-            }
-
             companySchema.parse(company);
-            
-            const updatedGalleryImages = [
-                ...(company.resources.galleryImages?.map((img) => img.key) || [])                      
-            ];
 
             const updatedResources = {
                 logoImage: company.resources.logoImage?.key,
-                galleryImages: updatedGalleryImages            
+                galleryImage: company.resources.galleryImage?.key
             };
 
             const updatedCompany = {
                 ...company,
-                resources: updatedResources,
+                resources: updatedResources            
             };
+            
             const url = `/companies/${id}`;
             const method = "put";
 
@@ -238,7 +207,7 @@ function EditCompany() {
                             const imageViewUrl = responseToView.url;
     
                             const updatedResources = {
-                                galleryImages: company.resources.galleryImages,
+                                galleryImage: company.resources.galleryImage,
                                 logoImage: {key: imageKey, url: imageViewUrl},
                             };
 
@@ -249,15 +218,10 @@ function EditCompany() {
                         } else {
                             const responseToView = await HttpService.get<{ url:string }>(`/get-presigned-url/to-view?key=${imageKey}`);
                             const imageViewUrl = responseToView.url;
-
-                            const updatedGalleryImages = [
-                                ...(company.resources.galleryImages || []),
-                                { key: imageKey, url: imageViewUrl }
-                            ];
                             
                             const updatedResources = {
                                 logoImage: company.resources.logoImage,
-                                galleryImages: updatedGalleryImages
+                                galleryImage: { key: imageKey, url: imageViewUrl }
                             };
 
                             setCompany((prevState) => ({
@@ -285,11 +249,8 @@ function EditCompany() {
 
             if (company.resources.logoImage?.key === imageKey) {
                 updatedResources.logoImage = undefined;
-            } else if (company.resources.galleryImages) {
-                const updatedGalleryImages = company.resources.galleryImages.filter(
-                    (img) => img.key !== imageKey
-                );
-                updatedResources.galleryImages = updatedGalleryImages;
+            } else if (company.resources.galleryImage) {
+                updatedResources.galleryImage = undefined;
             }
 
             toast.success("Изображението беше успешно изтрито!");
@@ -403,42 +364,45 @@ function EditCompany() {
                         </div>
                     )}
 
-
-                    <h2 className="text-xl font-semibold mt-10">Галерия</h2>
-                    <div className="grid w-full max-w-sm items-center gap-1.5">
-                        <Label htmlFor="picture">Качи нова снимка</Label>
-                        <Input
-                            id="galleryImageInput"
-                            type="file"
-                            onChange={() => handleUploadImage( "gallery")}
-                        />
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        
-                        {company.resources.galleryImages?.map((image: Record<string, string>, index: number) => (
-                            <div
-                                key={image.key}
-                                className="relative overflow-hidden rounded-lg shadow-md transform transition-transform duration-300 hover:scale-105 cursor-pointer"
-                                onClick={() => {
-                                    setImageToShow(image.url);
-                                    setShowImageModal(true);
-                                }}
-                            >
-                                <div onClick={(event) => {
-                                        event.stopPropagation();
-                                        handleDeleteImage(image.key)}
-                                    }>
-                                    <Trash className="absolute mt-3 ml-3 bg-white rounded-lg p-1 text-red-600" />
+                    <h2 className="text-xl font-semibold mt-10">Снимка на компанията</h2>
+                    {company.resources?.galleryImage && company.resources.galleryImage.url ? (
+                        (() => {
+                            const galleryImage = company.resources.galleryImage;
+                            return (
+                                <div
+                                    key={galleryImage.key}
+                                    className="relative overflow-hidden cursor-pointer"
+                                    onClick={() => {
+                                        setImageToShow(galleryImage.url);
+                                        setShowImageModal(true);
+                                    }}
+                                >
+                                    <div
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            handleDeleteImage(galleryImage.key);
+                                        }}
+                                    >
+                                        <Trash className="absolute mt-3 ml-3 bg-white rounded-lg p-1 text-red-600" />
+                                    </div>
+                                    <img
+                                        src={galleryImage.url}
+                                        alt="Company gallery image"
+                                        className="w-auto h-56 object-cover overflow-hidden rounded-lg shadow-md"
+                                    />
                                 </div>
-
-                                <img
-                                    src={image.url}
-                                    alt={`Company image ${index + 1}`}
-                                    className="w-full h-56 object-cover"
-                                />
-                            </div>
-                        ))}
-                    </div>
+                            );
+                        })()
+                    ) : (
+                        <div className="grid w-full max-w-sm items-center gap-1.5">
+                            <Label htmlFor="galleryImageInput">Качи снимка</Label>
+                            <Input
+                                id="galleryImageInput"
+                                type="file"
+                                onChange={() => handleUploadImage("gallery")}
+                            />
+                        </div>
+                    )}
 
                     <Button className="mt-10" onClick={handleUpdateCompany}>
                         Запази
