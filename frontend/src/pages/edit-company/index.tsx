@@ -8,6 +8,7 @@ import { X, Trash } from "@mynaui/icons-react";
 import { toast } from "react-toastify";
 import { v4 } from "uuid";
 import { z } from "zod";
+import GoBackButton from "@/components/go-back-button";
 
 interface Company {
     name: string;
@@ -267,8 +268,9 @@ function EditCompany() {
     return (
         <div className="pt-16 align-middle flex flex-col items-center">
             <div className="relative p-9 w-full max-w-6xl mx-auto border rounded-lg mt-14">
-                <h2 className="text-2xl font-bold text-center">Редактирай тази компания</h2>
-                <div className="space-y-6 mt-10">
+                <GoBackButton />
+                <h2 className="text-3xl font-bold text-center">Редактирай тази компания</h2>
+                <div className="space-y-6 mt-12">
                     <div className="flex flex-row justify-start space-x-12">
                         <div>
                             <Label className="mb-2 block">Име на компанията</Label>
@@ -331,11 +333,7 @@ function EditCompany() {
                             return (
                                 <div
                                     key={logoImage.key}
-                                    className="relative overflow-hidden cursor-pointer"
-                                    onClick={() => {
-                                        setImageToShow(logoImage.url);
-                                        setShowImageModal(true);
-                                    }}
+                                    className="relative overflow-hidden"
                                 >
                                     <div
                                         onClick={(event) => {
@@ -348,7 +346,11 @@ function EditCompany() {
                                     <img
                                         src={logoImage.url}
                                         alt="Company logo image"
-                                        className="w-auto h-56 object-cover overflow-hidden rounded-lg shadow-md"
+                                        className="w-auto h-56 object-cover border p-6 overflow-hidden rounded-lg shadow-md cursor-pointer"
+                                        onClick={() => {
+                                            setImageToShow(logoImage.url);
+                                            setShowImageModal(true);
+                                        }}
                                     />
                                 </div>
                             );
@@ -416,9 +418,10 @@ function EditCompany() {
                 onClick={() => setShowImageModal(false)}
             >
                 <div
-                    className="bg-white p-10 rounded-lg shadow-lg max-w-4xl w-full relative"
+                    className="bg-white p-10 rounded-lg shadow-lg max-w-4xl max-h-screen w-full relative overflow-auto"
                     onClick={(e) => e.stopPropagation()}
                 >
+
                     <button
                         className="absolute top-3 right-3 text-black text-lg font-bold"
                         onClick={() => setShowImageModal(false)}
@@ -428,8 +431,9 @@ function EditCompany() {
                     <img
                         src={imageToShow}
                         alt="Selected company image"
-                        className="w-full h-auto object-contain rounded-md"
+                        className="w-full max-h-96 object-contain rounded-md"
                     />
+
                 </div>
             </div>
         )}

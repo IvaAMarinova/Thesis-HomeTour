@@ -9,6 +9,7 @@ import { X, Trash } from "@mynaui/icons-react";
 import { toast } from "react-toastify";
 import { v4 } from "uuid";
 import { z } from "zod";
+import GoBackButton from "@/components/go-back-button";
 
 const propertySchema = z.object({
     floor: z
@@ -344,8 +345,13 @@ function EditProperty() {
     return (
         <div className="pt-16 align-middle flex flex-col items-center">
             <div className="relative p-9 w-full max-w-6xl mx-auto border rounded-lg mt-14">
-                <h2 className="text-2xl font-bold text-center">Редактирай този имот</h2>
-                <div className="space-y-6 mt-10">
+                <GoBackButton />
+                { isNewProperty ? (
+                    <h2 className="text-3xl font-bold text-center">Създай нов имот</h2>
+                ) : (
+                    <h2 className="text-3xl font-bold text-center">Редактирай този имот</h2>
+                )}
+                <div className="space-y-6 mt-12">
                     <div className="flex flex-row justify-start space-x-12">
                         <div>
                             <Label className="mb-2 block">Име на имота</Label>
