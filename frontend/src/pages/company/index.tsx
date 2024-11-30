@@ -4,7 +4,6 @@ import { HttpService } from '../../services/http-service';
 import { TelephoneCall, Envelope, Globe } from "@mynaui/icons-react";
 import PropertyBox from '../../components/property-box';
 import GoUpButton from '../../components/go-up-button';
-import Footer from '../../components/footer';
 import GoBackButton from '../../components/go-back-button';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-toastify';
@@ -79,10 +78,10 @@ function Company() {
                     {company?.name}
                 </h1>
                 <div className="w-full md:w-1/2 max-w-32 p-4 mt-4 mb-10 md:mt-0 flex justify-center">
-                    {company?.resources?.logo && (
+                    {company?.resources?.logoImage && (
                         <img
-                            src={company.resources?.logo}
-                            alt="Company logo"
+                            src={company.resources?.logoImage.url}
+                            alt="Company logoImage"
                             className="w-full h-auto object-contain"
                         />
                     )}
@@ -106,7 +105,7 @@ function Company() {
                     <div className="w-full md:w-1/2 max-w-md p-4 mt-4 md:mt-0 flex justify-center">
                         {company?.resources?.galleryImages[0] && (
                             <img
-                                src={company.resources?.galleryImages[0]}
+                                src={company.resources?.galleryImages[0].url}
                                 alt="Company gallery image"
                                 className="w-full h-auto object-contain rounded-lg shadow-md border"
                             />
@@ -164,7 +163,6 @@ function Company() {
                 </div>
                 <GoUpButton />
             </div>
-            <Footer />
         </div>
     );    
 }

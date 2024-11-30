@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { HttpService } from "../../services/http-service";
-import { useUser } from "@/contexts/UserContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,19 +9,19 @@ import { toast } from "react-toastify";
 import { v4 } from "uuid";
 import { z } from "zod";
 
-const propertySchema = z.object({
-    floor: z
-        .preprocess((val) => parseInt(val as string, 10), z.number())
-        .refine(
-            (val) => val > 0 && Number.isInteger(val),
-            { message: "Етажът трябва да бъде положително цяло число." }
-    ),
-    address: z.object({
-        city: z.string().min(1, { message: "Градът не може да бъде празен." }),
-        street: z.string().min(1, { message: "Улицата не може да бъде празна." }),
-        neighborhood: z.string().min(1, { message: "Кварталът не може да бъде празен." }),
-        zip: z.string().optional(),
-    }),  
+interface Company {
+    name: string;
+    description: string;
+    email: string;
+    phoneNumber: string;
+    website: string;
+    resources: {
+        logoImage?: {key: string, url: string};
+        galleryImages?: Record<string, string>[];
+    };
+}
+
+const companySchema = z.object({ 
     phoneNumber: z
         .string()
         .regex(/^\+?\d[\d\s]{8,14}$/, {
@@ -34,6 +33,9 @@ const propertySchema = z.object({
     name: z.string().min(1, {
         message: "Името не може да бъде празно.",
     }),
+    website: z.string().min(1, {
+        message: "Уебсайтът не може да бъде празен.",
+    }),
     description: z
         .string()
         .min(64, {
@@ -41,10 +43,9 @@ const propertySchema = z.object({
         })
         .max(2048, {
             message: "Описанието е прекалено дълго.",
-        }),
-
+    }),
     resources: z.object({
-        headerImage: z
+        logoImage: z
             .object({
                 key: z.string().min(1, {
                     message: "Ключът на заглавното изображение не може да бъде празен.",
@@ -78,105 +79,84 @@ z.setErrorMap((issue, _ctx) => {
     }
     });
 
-interface Property {
-    floor: string;
-    address: Record<string, string>;
-    phoneNumber: string;
-    email: string;
-    name: string;
-    description: string;
-    resources: {
-        headerImage?: {key: string, url: string};
-        galleryImages?: Record<string, string>[];
-        vizualizationFolder?: string;
-    };
-}
-
-function EditProperty() {
+function EditCompany() {
     const { id } = useParams<{ id: string }>();
     const [showImageModal, setShowImageModal] = useState(false);
     const [imageToShow, setImageToShow] = useState<string>("");
-    const isNewProperty = id === "0";
-    const { userCompany } = useUser();
-    const [property, setProperty] = useState<Property>({
-        floor: "",
-        address: {city: "", street: "", neighborhood: ""},
-        phoneNumber: "",
-        email: "",
+    const [company, setCompany] = useState<Company>({
         name: "",
         description: "",
+        email: "",
+        phoneNumber: "",
+        website: "",
         resources: {
-            headerImage: {key: "", url: ""}
-        },
+            logoImage: {key: "", url:  ""},
+        }
     });
 
-    useEffect(() => {
-        console.log("Is new property: ", isNewProperty);
-        if (!isNewProperty) {
-            fetchProperty();
-        }
-    }, [id, isNewProperty]);
-
-    const fetchProperty = async ()=> {
-        const mapResponseToProperty = (response: Record<string, any>): Property => {
-            return {
-                floor: response.floor,
-                address: response.address,
-                phoneNumber: response.phoneNumber,
-                email: response.email,
-                name: response.name,
-                description: response.description,
-                resources: {
-                    headerImage: response.resources.headerImage,
-                    galleryImages: response.resources.galleryImages?.map((img: Record<string, string>) => ({
-                        key: img.key,
-                        url: img.url,
-                    })),
-                    vizualizationFolder: response.resources.vizualizationFolder,
-                },
-            };
-        };
+    const fetchCompany = async ()=> {
+        // const mapResponseToProperty = (response: Record<string, any>): Property => {
+        //     return {
+        //         floor: response.floor,
+        //         address: response.address,
+        //         phoneNumber: response.phoneNumber,
+        //         email: response.email,
+        //         name: response.name,
+        //         description: response.description,
+        //         resources: {
+        //             headerImage: response.resources.headerImage,
+        //             galleryImages: response.resources.galleryImages?.map((img: Record<string, string>) => ({
+        //                 key: img.key,
+        //                 url: img.url,
+        //             })),
+        //             vizualizationFolder: response.resources.vizualizationFolder,
+        //         },
+        //     };
+        // };
         
-        const getProperty = async () => {
+        const getCompany = async () => {
             try {
-                const response = await HttpService.get<Record<string, string>>(
-                    `/properties/${id}`,
+                const response = await HttpService.get<Company>(
+                    `/companies/${id}`,
                     undefined,
                     false
                 );
-                const mappedProperty = mapResponseToProperty(response);
-                setProperty(mappedProperty);
+                // const mappedProperty = mapResponseToProperty(response);
+                console.log("Response: ", response);
+                setCompany(response);
             } catch (error) {
                 toast.error("Има грешка! Пробвай отново по-късно.")
             }
         };
 
-        getProperty();
+        getCompany();
     }
+
+    useEffect(() => {
+        console.log("hi");
+        fetchCompany();
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setProperty((prevState) => ({ ...prevState, [name]: value }));
+        setCompany((prevState) => ({ ...prevState, [name]: value }));
     };
 
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setProperty((prevState) => ({ ...prevState, [name]: value }));
+        setCompany((prevState) => ({ ...prevState, [name]: value }));
     };
 
-    const handleUpdateProperty = async () => {
+    const handleUpdateCompany = async () => {
         try {
-            console.log("Property: ", property);
+            console.log("Company: ", company);
             const requiredFields = [
-                { key: "floor", value: property.floor },
-                { key: "address.city", value: property.address?.city },
-                { key: "address.street", value: property.address?.street },
-                { key: "address.neighborhood", value: property.address?.neighborhood },
-                { key: "phoneNumber", value: property.phoneNumber },
-                { key: "email", value: property.email },
-                { key: "name", value: property.name },
-                { key: "description", value: property.description },
-                { key: "resources.headerImage", value: property.resources?.headerImage },
+                { key: "name", value: company.name },
+                { key: "phoneNumber", value: company.phoneNumber },
+                { key: "email", value: company.email },
+                { key: "website", value: company.website },
+                { key: "description", value: company.description },
+                { key: "resources.logoImage", value: company.resources?.logoImage },
             ];
             
             const missingFields = requiredFields.filter((field) => !field.value);
@@ -186,36 +166,32 @@ function EditProperty() {
                 throw new Error("Validation failed due to missing required fields.");
             }
 
-            if (property.resources?.galleryImages && property.resources.galleryImages.length > 10) {
+            if (company.resources?.galleryImages && company.resources.galleryImages.length > 10) {
                 toast.error("Галерията не може да съдържа повече от 10 изображения.");
                 throw new Error("Validation failed due to exceeding gallery image limit.");
             }
 
-            propertySchema.parse(property);
+            companySchema.parse(company);
             
             const updatedGalleryImages = [
-                ...(property.resources.galleryImages?.map((img) => img.key) || [])                      
+                ...(company.resources.galleryImages?.map((img) => img.key) || [])                      
             ];
 
             const updatedResources = {
-                headerImage: property.resources.headerImage?.key,
-                galleryImages: updatedGalleryImages,
-                vizualizationFolder: property.resources.vizualizationFolder
+                logoImage: company.resources.logoImage?.key,
+                galleryImages: updatedGalleryImages            
             };
 
-            const updatedProperty = {
-                ...property,
+            const updatedCompany = {
+                ...company,
                 resources: updatedResources,
-                ...(isNewProperty && { company: userCompany })
             };
-            const url = isNewProperty ? "/properties" : `/properties/${id}`;
-            const method = isNewProperty ? "post" : "put";
+            const url = `/companies/${id}`;
+            const method = "put";
 
-            await HttpService[method](url, updatedProperty);
+            await HttpService[method](url, updatedCompany);
 
-            toast.success(
-                isNewProperty ? "Имотът беше успешно създаден!" : "Имотът беше успешно обновен!"
-            );
+            toast.success("Компанията беше успешно обновенa!");
         } catch (error) {
             if (error instanceof z.ZodError) {
                 error.errors.forEach((err) => toast.error(err.message));
@@ -227,10 +203,10 @@ function EditProperty() {
         
     };
     
-    const handleUploadImage = async (type: "header" | "gallery") => {
+    const handleUploadImage = async (type: "logo" | "gallery") => {
         try {
             const imageKey = v4();
-            const fileInputId = type === "header" ? "headerImageInput" : "galleryImageInput";
+            const fileInputId = type === "logo" ? "logoImageInput" : "galleryImageInput";
             const fileInput = document.getElementById(fileInputId) as HTMLInputElement;
     
             if (fileInput?.files?.[0]) {
@@ -257,17 +233,16 @@ function EditProperty() {
                     if (uploadResponse.ok) {
                         toast.success("Снимката беше успешно качена!");
     
-                        if (type === "header") {
+                        if (type === "logo") {
                             const responseToView = await HttpService.get<{ url:string }>(`/get-presigned-url/to-view?key=${imageKey}`);
                             const imageViewUrl = responseToView.url;
     
                             const updatedResources = {
-                                galleryImages: property.resources.galleryImages,
-                                headerImage: {key: imageKey, url: imageViewUrl},
-                                vizualizationFolder: property.resources.vizualizationFolder
+                                galleryImages: company.resources.galleryImages,
+                                logoImage: {key: imageKey, url: imageViewUrl},
                             };
 
-                            setProperty((prevState) => ({
+                            setCompany((prevState) => ({
                                 ...prevState,
                                 resources: updatedResources,
                             }));
@@ -276,17 +251,16 @@ function EditProperty() {
                             const imageViewUrl = responseToView.url;
 
                             const updatedGalleryImages = [
-                                ...(property.resources.galleryImages || []),
+                                ...(company.resources.galleryImages || []),
                                 { key: imageKey, url: imageViewUrl }
                             ];
                             
                             const updatedResources = {
-                                headerImage: property.resources.headerImage,
-                                galleryImages: updatedGalleryImages,
-                                vizualizationFolder: property.resources.vizualizationFolder,
+                                logoImage: company.resources.logoImage,
+                                galleryImages: updatedGalleryImages
                             };
 
-                            setProperty((prevState) => ({
+                            setCompany((prevState) => ({
                                 ...prevState,
                                 resources: updatedResources,
                             }));
@@ -307,12 +281,12 @@ function EditProperty() {
     
     const handleDeleteImage = async (imageKey: string) => {
         try {
-            let updatedResources = { ...property.resources };
+            let updatedResources = { ...company.resources };
 
-            if (property.resources.headerImage?.key === imageKey) {
-                updatedResources.headerImage = undefined;
-            } else if (property.resources.galleryImages) {
-                const updatedGalleryImages = property.resources.galleryImages.filter(
+            if (company.resources.logoImage?.key === imageKey) {
+                updatedResources.logoImage = undefined;
+            } else if (company.resources.galleryImages) {
+                const updatedGalleryImages = company.resources.galleryImages.filter(
                     (img) => img.key !== imageKey
                 );
                 updatedResources.galleryImages = updatedGalleryImages;
@@ -320,7 +294,7 @@ function EditProperty() {
 
             toast.success("Изображението беше успешно изтрито!");
 
-            setProperty((prevState) => ({
+            setCompany((prevState) => ({
                 ...prevState,
                 resources: updatedResources,
             }));
@@ -329,30 +303,18 @@ function EditProperty() {
         }
     };
 
-    const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {name, value} = e.target;
-        const updatedAddress: Record<string, string> = { ...property.address };
-    
-        updatedAddress[name] = value;
-    
-        setProperty((prevState) => ({
-            ...prevState,
-            address: updatedAddress
-        }))
-    };
-
     return (
         <div className="pt-16 align-middle flex flex-col items-center">
             <div className="relative p-9 w-full max-w-6xl mx-auto border rounded-lg mt-14">
-                <h2 className="text-2xl font-bold text-center">Редактирай този имот</h2>
+                <h2 className="text-2xl font-bold text-center">Редактирай тази компания</h2>
                 <div className="space-y-6 mt-10">
                     <div className="flex flex-row justify-start space-x-12">
                         <div>
-                            <Label className="mb-2 block">Име на имота</Label>
+                            <Label className="mb-2 block">Име на компанията</Label>
                             <Input
-                                id="propertyName"
+                                id="companyName"
                                 name="name"
-                                value={property.name}
+                                value={company.name}
                                 onChange={handleChange}
                                 className="mt-2 w-full focus:outline-black"
                             />
@@ -362,7 +324,7 @@ function EditProperty() {
                             <Input
                                 id="email"
                                 name="email"
-                                value={property.email}
+                                value={company.email}
                                 onChange={handleChange}
                                 className="mt-2 w-full focus:outline-black"
                             />
@@ -372,17 +334,17 @@ function EditProperty() {
                             <Input
                                 id="phoneNumber"
                                 name="phoneNumber"
-                                value={property.phoneNumber}
+                                value={company.phoneNumber}
                                 onChange={handleChange}
                                 className="mt-2 w-full focus:outline-black"
                             />
                         </div>
                         <div>
-                            <Label className="mb-2 block">Етаж</Label>
+                            <Label className="mb-2 block">Уебсайт</Label>
                             <Input
-                                id="floor"
-                                name="floor"
-                                value={property.floor}
+                                id="website"
+                                name="website"
+                                value={company.website}
                                 onChange={handleChange}
                                 className="mt-2 w-full focus:outline-black"
                             />
@@ -393,86 +355,50 @@ function EditProperty() {
                         <textarea
                             id="description"
                             name="description"
-                            value={property.description}
+                            value={company.description}
                             onChange={handleDescriptionChange}
                             className="mt-2 w-full border shadow-sm h-24 p-2 rounded focus:outline-black"
                         />
-
-                        <h2 className="text-xl font-semibold mt-6">Адрес на имота</h2>
-                        <div className="flex flex-row mt-4 space-x-12">
-                            <div>
-                                <Label className="mb-2 block">Град / Село</Label>
-                                <input
-                                    id="city"
-                                    name="city"
-                                    value={property.address["city"]}
-                                    onChange={handleAddressChange}
-                                    className="mt-2 w-full border shadow-sm p-2 rounded focus:outline-black"
-                                />
-                            </div>
-                            <div>
-                                <Label className="mb-2 block">Квартал</Label>
-                                <input
-                                    id="neighborhood"
-                                    name="neighborhood"
-                                    value={property.address["neighborhood"]}
-                                    onChange={handleAddressChange}
-                                    className="mt-2 w-full border shadow-sm p-2 rounded focus:outline-black"
-                                />
-                            </div>
-                            <div>
-                                <Label className="mb-2 block">Улица</Label>
-                                <input
-                                    id="street"
-                                    name="street"
-                                    value={property.address["street"]}
-                                    onChange={handleAddressChange}
-                                    className="mt-2 w-full border shadow-sm p-2 rounded focus:outline-black"
-                                />
-                            </div>                
-                        </div>
                     </div>
                     
-                    <h1 className="text-2xl font-semibold text-center">Изображения на имота</h1>
+                    <h1 className="text-2xl font-semibold text-center">Изображения на компанията</h1>
 
-                    <h2 className="text-xl font-semibold mt-10">Заглавна снимка</h2>
-                    {property.resources?.headerImage && property.resources.headerImage.url ? (
+                    <h2 className="text-xl font-semibold mt-10">Лого</h2>
+                    {company.resources?.logoImage && company.resources.logoImage.url ? (
                         (() => {
-                            const headerImage = property.resources.headerImage;
-
+                            const logoImage = company.resources.logoImage;
                             return (
                                 <div
-                                    key={headerImage.key}
+                                    key={logoImage.key}
                                     className="relative overflow-hidden cursor-pointer"
                                     onClick={() => {
-                                        setImageToShow(headerImage.url);
+                                        setImageToShow(logoImage.url);
                                         setShowImageModal(true);
                                     }}
                                 >
                                     <div
                                         onClick={(event) => {
                                             event.stopPropagation();
-                                            handleDeleteImage(headerImage.key);
+                                            handleDeleteImage(logoImage.key);
                                         }}
                                     >
                                         <Trash className="absolute mt-3 ml-3 bg-white rounded-lg p-1 text-red-600" />
                                     </div>
-
                                     <img
-                                        src={headerImage.url}
-                                        alt="Property header image"
-                                        className="w-auto h-56 object-cover rounded-lg"
+                                        src={logoImage.url}
+                                        alt="Company logo image"
+                                        className="w-auto h-56 object-cover overflow-hidden rounded-lg shadow-md"
                                     />
                                 </div>
                             );
                         })()
                     ) : (
                         <div className="grid w-full max-w-sm items-center gap-1.5">
-                            <Label htmlFor="headerImageInput">Качи заглавна снимка</Label>
+                            <Label htmlFor="logoImageInput">Качи лого</Label>
                             <Input
-                                id="headerImageInput"
+                                id="logoImageInput"
                                 type="file"
-                                onChange={() => handleUploadImage("header")}
+                                onChange={() => handleUploadImage("logo")}
                             />
                         </div>
                     )}
@@ -489,7 +415,7 @@ function EditProperty() {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         
-                        {property.resources.galleryImages?.map((image: Record<string, string>, index: number) => (
+                        {company.resources.galleryImages?.map((image: Record<string, string>, index: number) => (
                             <div
                                 key={image.key}
                                 className="relative overflow-hidden rounded-lg shadow-md transform transition-transform duration-300 hover:scale-105 cursor-pointer"
@@ -507,14 +433,14 @@ function EditProperty() {
 
                                 <img
                                     src={image.url}
-                                    alt={`Property image ${index + 1}`}
+                                    alt={`Company image ${index + 1}`}
                                     className="w-full h-56 object-cover"
                                 />
                             </div>
                         ))}
                     </div>
 
-                    <Button className="mt-10" onClick={handleUpdateProperty}>
+                    <Button className="mt-10" onClick={handleUpdateCompany}>
                         Запази
                     </Button>
                 </div>
@@ -537,8 +463,8 @@ function EditProperty() {
                     </button>
                     <img
                         src={imageToShow}
-                        alt="Selected property image"
-                        className="w-full h-auto object-contain rounded-lg"
+                        alt="Selected company image"
+                        className="w-full h-auto object-contain rounded-md"
                     />
                 </div>
             </div>
@@ -547,4 +473,4 @@ function EditProperty() {
     );
 }
 
-export default EditProperty;
+export default EditCompany;

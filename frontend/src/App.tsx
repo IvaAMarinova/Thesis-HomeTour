@@ -16,6 +16,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Footer from './components/footer';
 import EditProperties from './pages/edit-properties';
 import EditProperty from './pages/edit-property';
+import EditCompany from './pages/edit-company'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -45,6 +46,7 @@ function App() {
               <Route path="/companies" element={<Companies />} />
               <Route path="/edit-properties/:id" element={<EditProperties />} />
               <Route path="/edit-property/:id" element={<EditProperty />} />
+              <Route path="/edit-company/:id" element={<EditCompany />} />
             </Routes>
           </div>
           <Footer />
