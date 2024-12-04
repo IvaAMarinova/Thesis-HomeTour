@@ -69,13 +69,13 @@ export function Login({ onLoginSuccess }: LoginProps) {
 
   async function onLogin(values: z.infer<typeof loginSchema>) {
     try {
-      const response = await HttpService.post<{ access_token: string; refresh_token: string }>('/auth/login',
+      const response = await HttpService.post<{ accessToken: string; refreshToken: string }>('/auth/login',
         values, undefined, false, true
       );
-      console.log("[Login] Access token: ", response.access_token);
-      console.log("[Login] Refresh token: ", response.refresh_token);
-      HttpService.setAccessToken(response.access_token);
-      HttpService.setRefreshToken(response.refresh_token);
+      console.log("[Login] Access token: ", response.accessToken);
+      console.log("[Login] Refresh token: ", response.refreshToken);
+      HttpService.setAccessToken(response.accessToken);
+      HttpService.setRefreshToken(response.refreshToken);
       onLoginSuccess();
       await fetchUserId();
       navigate('/');
@@ -98,7 +98,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
         ...values,
         type: "b2c",
       };
-      const response = await HttpService.post<{ access_token: string; refresh_token: string }>(
+      const response = await HttpService.post<{ accessToken: string; refreshToken: string }>(
         '/auth/register',
         registerData,
         undefined,
@@ -106,10 +106,10 @@ export function Login({ onLoginSuccess }: LoginProps) {
         true
       );
       console.log("[Login] Response: ", response);
-      console.log("[Login] Access token: ", response.access_token);
-      console.log("[Login] Refresh token: ", response.refresh_token);
-      HttpService.setAccessToken(response.access_token);
-      HttpService.setRefreshToken(response.refresh_token);
+      console.log("[Login] Access token: ", response.accessToken);
+      console.log("[Login] Refresh token: ", response.refreshToken);
+      HttpService.setAccessToken(response.accessToken);
+      HttpService.setRefreshToken(response.refreshToken);
       await new Promise((resolve) => setTimeout(resolve, 100));
       onLoginSuccess();
       await fetchUserId();

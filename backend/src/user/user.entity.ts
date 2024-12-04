@@ -15,6 +15,12 @@ export class User {
   })
   id = v4();
 
+  @Property({ nullable: true })
+  accessToken?: string;
+
+  @Property({ nullable: true })
+  refreshToken?: string;
+
   @Property()
   fullName!: string;
 

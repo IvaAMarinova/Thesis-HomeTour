@@ -136,7 +136,7 @@ export class HttpService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ refresh_token: this.refreshToken }),
+        body: JSON.stringify({ refreshToken: this.refreshToken, accessToken: this.accessToken }),
       });
 
       if (!response.ok) {
@@ -144,7 +144,7 @@ export class HttpService {
       }
 
       const data = await response.json();
-      this.setAccessToken(data.access_token);
+      this.setAccessToken(data.accessToken);
       console.log('Access token refreshed');
     } catch (error) {
       console.error('Failed to refresh access token:', error);

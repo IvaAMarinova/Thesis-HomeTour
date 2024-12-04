@@ -7,5 +7,7 @@ export interface IUser {
     password: string;
     fullName: string;
     type: UserType;
+    accessToken?: string;
+    refreshToken?: string;
     company?: Company;
 }
