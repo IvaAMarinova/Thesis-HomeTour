@@ -14,6 +14,7 @@ import { UserProvider } from './contexts/UserContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Footer from './components/footer';
+import { CookiesProvider } from 'react-cookie'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -28,24 +29,26 @@ function App() {
 
   return (
     <UserProvider>
-      <Router>
-        <div className="min-h-screen flex flex-col">
-          <Header />
-          <div className="flex-grow">
-            <ToastContainer />
-            <Routes>
-              <Route path="/login" element={<Login onLoginSuccess={() => setIsAuthenticated(true)} />} />
-              <Route path="/" element={<Home />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/properties" element={<Properties />} />
-              <Route path="/properties/:id" element={<Property />} />
-              <Route path="/companies/:id" element={<Company />} />
-              <Route path="/companies" element={<Companies />} />
-            </Routes>
+      <CookiesProvider>
+        <Router>
+          <div className="min-h-screen flex flex-col">
+            <Header />
+            <div className="flex-grow">
+              <ToastContainer />
+              <Routes>
+                <Route path="/login" element={<Login onLoginSuccess={() => setIsAuthenticated(true)} />} />
+                <Route path="/" element={<Home />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/properties" element={<Properties />} />
+                <Route path="/properties/:id" element={<Property />} />
+                <Route path="/companies/:id" element={<Company />} />
+                <Route path="/companies" element={<Companies />} />
+              </Routes>
+            </div>
+            <Footer />
           </div>
-          <Footer />
-        </div>
-      </Router>
+        </Router>
+      </CookiesProvider>
     </UserProvider>
   );
 }

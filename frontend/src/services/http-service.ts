@@ -1,3 +1,6 @@
+import { Cookies } from 'react-cookie';
+const cookies = new Cookies();
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export interface RequestParams {
@@ -10,23 +13,43 @@ export class HttpService {
   private static accessToken: string | null = null;
   private static refreshToken: string | null = null;
 
-  static async get<T>(url: string, params?: RequestParams, authRequired = true, isLoginAttempt = false): Promise<T> {
+  static setTokenCookies(accessToken: string, refreshToken: string) {
+    cookies.set('accessToken', accessToken, {
+      path: '/',
+      secure: false,
+      sameSite: 'strict',
+      maxAge: 3600
+    });
+    cookies.set('refreshToken', refreshToken, {
+      path: '/',
+      secure: false,
+      sameSite: 'strict',
+      maxAge: 3600
+    });
+  }
+
+  private static loadTokensFromCookies() {
+    this.accessToken = cookies.get('accessToken') || null;
+    this.refreshToken = cookies.get('refreshToken') || null;
+  }
+
+  static async get<T>(url: string, params?: RequestParams, authRequired = false, isLoginAttempt = false): Promise<T> {
     return await HttpService.request<T>(url, 'GET', params, authRequired, isLoginAttempt);
   }
 
-  static async post<T>(url: string, body: object, params?: RequestParams, authRequired = true, isLoginAttempt = false): Promise<T> {
+  static async post<T>(url: string, body: object, params?: RequestParams, authRequired = false, isLoginAttempt = false): Promise<T> {
       return await HttpService.request<T>(url, 'POST', { ...params, body }, authRequired, isLoginAttempt);
   }
 
-  static async put<T>(url: string, body: object, params?: RequestParams, authRequired = true, isLoginAttempt = false): Promise<T> {
+  static async put<T>(url: string, body: object, params?: RequestParams, authRequired = false, isLoginAttempt = false): Promise<T> {
       return await HttpService.request<T>(url, 'PUT', { ...params, body }, authRequired, isLoginAttempt);
   }
 
-  static async patch<T>(url: string, body: object, params?: RequestParams, authRequired = true, isLoginAttempt = false): Promise<T> {
+  static async patch<T>(url: string, body: object, params?: RequestParams, authRequired = false, isLoginAttempt = false): Promise<T> {
       return await HttpService.request<T>(url, 'PATCH', { ...params, body }, authRequired, isLoginAttempt);
   }
 
-  static async delete<T>(url: string, params?: RequestParams, authRequired = true, isLoginAttempt = false): Promise<T> {
+  static async delete<T>(url: string, params?: RequestParams, authRequired = false, isLoginAttempt = false): Promise<T> {
       return await HttpService.request<T>(url, 'DELETE', params, authRequired, isLoginAttempt);
   }
 
@@ -39,7 +62,14 @@ export class HttpService {
     isLoginAttempt = false
   ): Promise<T> {
     try {
+
+      this.loadTokensFromCookies();
+      
       const requestUrl = new URL(url, API_BASE_URL);
+      console.log('[HttpService] Access token from cookies:', this.accessToken);
+      console.log('[HttpService] Refresh token from cookies:', this.refreshToken);
+      console.log('[HttpService] Request URL:', requestUrl.toString());
+
   
       if (params?.query) {
         Object.keys(params.query).forEach((key) =>
@@ -52,10 +82,13 @@ export class HttpService {
         ...params?.headers,
         ...(this.accessToken && authRequired ? { Authorization: `Bearer ${this.accessToken}` } : {}),
       };
+
+      console.log("[Http Service] Credentials: ", authRequired? 'include': 'omit');
   
       const response = await fetch(requestUrl.toString(), {
-        method: method,
-        headers: headers,
+        method,
+        headers,
+        credentials: authRequired? 'include': 'omit',
         body:
           params?.body instanceof FormData
             ? (params.body as BodyInit)
@@ -93,29 +126,18 @@ export class HttpService {
       throw error;
     }
   }
+
+  public static async logout(): Promise<void> {
+    try {
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
   
-
-  public static setAccessToken(accessToken: string): void {
-    console.log("[HTTP Service] Setting access token..");
-    this.accessToken = accessToken;
-    localStorage.setItem('accessToken', accessToken);
-    console.log("HTTP Service] AccessToken from here: ", this.accessToken);
-    console.log("HTTP Service] AccessToken from local storage: ", localStorage.getItem('accessToken'));
-  }
-
-  public static setRefreshToken(refreshToken: string): void {
-    console.log("[HTTP Service] Setting refresh token..");
-    this.refreshToken = refreshToken;
-    localStorage.setItem('refreshToken', refreshToken);
-    console.log("HTTP Service] RefreshToken from here: ", this.refreshToken);
-    console.log("HTTP Service] RefreshToken from local storage: ", localStorage.getItem('refreshToken'));
-  }
-
-  public static logout(): void {
-    this.accessToken = null;
-    this.refreshToken = null;
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+      console.log('[HttpService] Logout successful. Cookies cleared.');
+    } catch (error) {
+      console.error('[HttpService] Error during logout:', error);
+    }
   }
 
   public static isAuthenticated(): boolean {
@@ -123,6 +145,7 @@ export class HttpService {
   }
 
   private static async refreshAccessToken(): Promise<void> {
+    this.loadTokensFromCookies();
     if (!this.refreshToken) {
       throw new Error('No refresh token available');
     }
@@ -144,7 +167,7 @@ export class HttpService {
       }
 
       const data = await response.json();
-      this.setAccessToken(data.accessToken);
+      this.setTokenCookies(data.accessToken, data.refreshToken);
       console.log('Access token refreshed');
     } catch (error) {
       console.error('Failed to refresh access token:', error);

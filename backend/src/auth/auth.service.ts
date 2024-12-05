@@ -35,7 +35,7 @@ export class AuthService {
     };
   }
 
-  async register(email: string, password: string, fullName: string, companyId: string, type: string): Promise<any> {
+  async register(email: string, password: string, fullName: string, companyId: string, type: string) {
     const existingUser = await this.userService.findByEmail(email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
@@ -45,7 +45,7 @@ export class AuthService {
   
     try {
       const user = await this.userService.create(fullName, email, password, userType, companyId);
-      this.login(user);
+      return this.login(user);
     } catch (error) {
       throw new BadRequestException(`Failed to register user: ${error.message}`);
     }
@@ -72,7 +72,6 @@ export class AuthService {
       const decoded = this.jwtService.verify(accessToken);
   
       const user = await this.userService.getUserById(decoded.sub);
-      console.log("[Auth Service] User with id from access token: ", user);
       if (!user) {
         throw new UnauthorizedException('User not found');
       }

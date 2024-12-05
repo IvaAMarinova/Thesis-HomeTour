@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey, Property, BeforeCreate, ManyToOne, Enum } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne, Enum } from '@mikro-orm/core';
 import { Company } from '../company/company.entity';
 import { v4 } from 'uuid';
 

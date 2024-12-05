@@ -14,8 +14,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserId = useCallback(async () => {
     try {
-      console.log("[UserContext] Fethching user auth/me...")
-      const response = await HttpService.get<{ id: number }>('/auth/me/');
+      console.log("[UserContext] Fetching user auth/me...")
+      const response = await HttpService.get<{ id: number }>('/auth/me/', undefined, true, false);
       console.log("[UserContext] Response: ", response);
       setUserId(response.id);
     } catch (error) {

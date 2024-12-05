@@ -19,7 +19,7 @@ function Property() {
     useEffect(() => {
         const fetchProperty = async () => {
             try {
-                const response = await HttpService.get(`/propertiess/${id}`, undefined, false);
+                const response = await HttpService.get(`/properties/${id}`);
                 // console.log("Fetched property:", response);
                 setProperty(response);
             } catch (error) {
@@ -69,7 +69,7 @@ function Property() {
             await HttpService.put(`/user-properties/user-id/${userId}`, {
                 liked: newLikedState,
                 propertyId: id,
-            });
+            }, undefined, true);
 
             setIsLiked(newLikedState);
             console.log(`Property ${newLikedState ? "liked" : "unliked"} successfully.`);

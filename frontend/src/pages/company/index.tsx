@@ -20,7 +20,7 @@ function Company() {
     useEffect(() => {
         const fetchCompany = async () => {
             try {
-                const response = await HttpService.get(`/companies/${id}`, undefined, false);
+                const response = await HttpService.get(`/companies/${id}`);
                 setCompany(response);
             } catch (error) {
                 console.error("Error fetching company:", error);
@@ -37,11 +37,7 @@ function Company() {
             if (!company?.id) return;
 
             try {
-                const response = await HttpService.get<any[]>(
-                    `/companies/${company.id}/properties`,
-                    undefined,
-                    false
-                );
+                const response = await HttpService.get<any[]>(`/companies/${company.id}/properties`);
                 setProperties(response);
             } catch (error) {
                 console.error("Error fetching properties:", error);
@@ -61,7 +57,7 @@ function Company() {
             const response = await HttpService.get<{ property: { id: string } }[]>(
                 `/user-properties/user-id-liked/${userId}`,
                 undefined,
-                false
+                true
             );
             setLikedProperties(response);
         } catch (error) {
