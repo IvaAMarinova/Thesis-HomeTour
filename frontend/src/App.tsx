@@ -10,43 +10,56 @@ import Header from './components/header';
 import Company from './pages/company';
 import Companies from './pages/companies';
 import Profile from './pages/profile';
-import { UserProvider } from './contexts/UserContext';
+import { UserProvider, useUser } from './contexts/UserContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Footer from './components/footer';
-import { CookiesProvider } from 'react-cookie'
+import { CookiesProvider } from 'react-cookie';
 
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+function AppContent() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const { fetchUserId } = useUser();
 
   useEffect(() => {
-    setIsAuthenticated(HttpService.isAuthenticated());
-  }, []);
+    const checkAuthentication = async () => {
+      try {
+        const authenticated = await HttpService.isAuthenticated(fetchUserId);
+        setIsAuthenticated(authenticated);
+      } catch (error) {
+        console.error("[AppContent] Error during authentication check:", error);
+        setIsAuthenticated(false);
+      }
+    };
 
-  if (isAuthenticated === null) {
-    return <div>Loading...</div>;
-  }
+    checkAuthentication();
+  }, [fetchUserId]);
 
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header isAuthenticated={isAuthenticated} />
+      <div className="flex-grow">
+        <ToastContainer />
+        <Routes>
+          <Route path="/login" element={<Login onLoginSuccess={() => setIsAuthenticated(true)} />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/properties" element={<Properties />} />
+          <Route path="/properties/:id" element={<Property />} />
+          <Route path="/companies/:id" element={<Company />} />
+          <Route path="/companies" element={<Companies />} />
+        </Routes>
+      </div>
+      <Footer />
+    </div>
+  );
+}
+
+function App() {
   return (
     <UserProvider>
       <CookiesProvider>
         <Router>
-          <div className="min-h-screen flex flex-col">
-            <Header />
-            <div className="flex-grow">
-              <ToastContainer />
-              <Routes>
-                <Route path="/login" element={<Login onLoginSuccess={() => setIsAuthenticated(true)} />} />
-                <Route path="/" element={<Home />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/properties" element={<Properties />} />
-                <Route path="/properties/:id" element={<Property />} />
-                <Route path="/companies/:id" element={<Company />} />
-                <Route path="/companies" element={<Companies />} />
-              </Routes>
-            </div>
-            <Footer />
-          </div>
+          <AppContent />
         </Router>
       </CookiesProvider>
     </UserProvider>

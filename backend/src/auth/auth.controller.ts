@@ -14,19 +14,21 @@ export class AuthController {
   async login(@Request() req, @Res({ passthrough: true }) res: Response) {
     const { accessToken, refreshToken } = await this.authService.login(req.user);
 
+    console.log('Server Time:', new Date().toISOString());
+
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: 3600000,
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
     });
-
+    
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: 3600000,
-    });
+      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+    }); 
 
     return { message: 'Logged in successfully' };
   }
@@ -42,42 +44,105 @@ export class AuthController {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: 3600000,
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      path: '/',
     });
-
+    
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: 3600000,
+      maxAge: 30 * 24 * 3600 * 1000,
+      path: '/',
     });
-
-    return { message: 'Logged in successfully' };
+    
+    return { message: 'Register in successfully' };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMe(@Request() req) {
-    console.log('[Auth Controller]');
+    console.error('/////////////////////////////////////////////////////');
+    console.log('Server Time:', new Date().toISOString());
+
+    console.log('[Auth Controller] Hit /auth/me endpoint');
+
     console.log('[Auth Controller] Cookies:', req.cookies);
+
     if (!req.cookies || !req.cookies.accessToken) {
-      console.log("[Auth controller] No access token");
+      console.error("[Auth Controller] No access token in cookies");
       throw new UnauthorizedException('No access token found');
     }
 
+    // Log the request user from the JwtAuthGuard
+    console.log('[Auth Controller] req.user:', req.user);
+
+    // Validate if `req.user` exists
+    if (!req.user || !req.user.userId) {
+      console.error('[Auth Controller] Missing user information in request');
+      throw new UnauthorizedException('User information is missing in the token');
+    }
+
     const { userId } = req.user;
-    return this.authService.getMe(userId);
+    console.log("[Auth Controller] Extracted userId from token:", userId);
+
+    try {
+      const user = await this.authService.getMe(userId);
+      console.log("[Auth Controller] Successfully retrieved user:", user);
+      
+      return user;
+    } catch (error) {
+      console.error("[Auth Controller] Error retrieving user:", error.message);
+      throw error;
+    }
   }
 
+
   @Post('refresh-token')
-  async refreshToken(@Body() body: { refreshToken: string; accessToken: string}) {
-    return this.authService.refreshToken(body.refreshToken, body.accessToken);
+  async refreshToken(
+    @Body() body: { refreshToken: string; accessToken: string },
+    @Res({ passthrough: true }) res: Response
+  ) {
+    console.error('/////////////////////////////////////////////////////');
+    console.log('Server Time:', new Date().toISOString());
+
+    try {
+      const { accessToken, refreshToken } = await this.authService.refreshToken(
+        body.accessToken,
+        body.refreshToken
+      );
+
+      console.log("[Refresh Token] Successfully generated new tokens");
+      
+
+      // Set new tokens in cookies
+      res.cookie('accessToken', accessToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
+        path: '/',
+      });
+
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        path: '/',
+      });
+
+      return { message: 'Tokens refreshed successfully' };
+    } catch (error) {
+      console.error("[Refresh Token] Error:", error.message);
+      res.status(401).json({ message: 'Invalid or expired tokens' });
+    }
   }
 
   @Post('logout')
   async logout(@Res({ passthrough: true }) res: Response) {
     res.cookie('accessToken', '', {
-      httpOnly: true,
+      httpOnly: false,
       secure: false,
       sameSite: 'lax',
       maxAge: 0,
@@ -85,7 +150,7 @@ export class AuthController {
     });
 
     res.cookie('refreshToken', '', {
-      httpOnly: true,
+      httpOnly: false,
       secure: false,
       sameSite: 'lax',
       maxAge: 0,
@@ -94,5 +159,7 @@ export class AuthController {
 
     return { message: 'Logged out successfully' };
   }
+
+  
 
 }
