@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserCircle, Heart } from "@mynaui/icons-react";
+import { UserCircle, Heart, Building, Briefcase  } from "@mynaui/icons-react";
 import { HttpService } from '../services/http-service';
 import { useUser } from '../contexts/UserContext';
 
@@ -19,6 +19,8 @@ function Header() {
   const [logoUrl, setLogoUrl] = useState<string>('');
   const [isScrolled, setIsScrolled] = useState(false);
   const { userId, setUserId } = useUser();
+  const { userCompany } = useUser();
+  const { userType } = useUser();
 
   useEffect(() => {
     const fetchLogoUrl = async () => {
@@ -85,12 +87,28 @@ function Header() {
               <UserCircle className="h-8 w-8" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuLabel className="text-black font-bold text-lg cursor-pointer transform transition-transform duration-300 hover:scale-105">
+              <DropdownMenuLabel className="text-black font-bold text-lg">
                 Моят профил
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               {userId ? (
                 <div>
+                  {userType === "b2b" &&
+                    <div>
+                      <DropdownMenuItem>
+                        <Link to={`/edit-properties/${userId}`} className="flex flex-row items-center">
+                          <p className="font-bold"> Моите имоти</p>
+                          <Building className="h-4"/>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Link to={`/edit-company/${userCompany}`} className="flex flex-row items-center">
+                          <p className="font-bold"> Моята компания</p>
+                          <Briefcase className="h-4"/>
+                        </Link>
+                      </DropdownMenuItem>
+                    </div>
+                  }
                   <DropdownMenuItem>
                     <Link to="/profile">
                       Профил

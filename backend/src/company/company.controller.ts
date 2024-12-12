@@ -3,6 +3,8 @@ import { CompanyService } from './company.service';
 import { Company } from './company.entity';
 import { PropertyEntity } from '../property/property.entity';
 import { FileUploadService } from '../upload/upload.service';
+import { TransformedCompanyDto } from './dto/company-transformed-response.dto'
+import { TransformedPropertyDto } from '../property/dto/property-transformed-response.dto'
 
 @Controller('companies')
 export class CompanyController {
@@ -12,7 +14,7 @@ export class CompanyController {
   ) {}
 
   @Post()
-  async createCompany(@Body() body: {name: string, description: string, email: string, phoneNumber: string, website: string, resources?: {logo?: string | null, galleryImages?: string[]}}): Promise<Company> {
+  async createCompany(@Body() body: {name: string, description: string, email: string, phoneNumber: string, website: string, resources?: {logoImage?: string | null, galleryImage?: string}}): Promise<Company> {
     return this.companyService.create(body.name, body.description, body.email, body.phoneNumber, body.website, body.resources);
   }
 
@@ -27,57 +29,86 @@ export class CompanyController {
   }
 
   @Get()
-  async getAllCompanies(): Promise<Company[]> {
+  async getAllCompanies(): Promise<TransformedCompanyDto[]> {
     const companies = await this.companyService.getAllCompanies();
-    await Promise.all(companies.map(async (company) => this.mapPresignedUrlsToCompany(company)));
-    return companies;
+    const updatedCompanies = await Promise.all(companies.map(async (company) => this.mapPresignedUrlsToCompany(company)));
+    return updatedCompanies;
   }
 
   @Get(':id')
-  async getCompany(@Param('id') id: string): Promise<Company> {
+  async getCompany(@Param('id') id: string): Promise<TransformedCompanyDto> {
     const company = await this.companyService.getCompanyById(id);
-    await this.mapPresignedUrlsToCompany(company);
-    return company;
+    const updatedCompany = await this.mapPresignedUrlsToCompany(company);
+    console.log("[Company controller] Company after mapped: ", updatedCompany);
+    return updatedCompany;
   }
 
   @Get(':id/properties')
-  async getallPropertiesByCompany(@Param('id') id: string): Promise<PropertyEntity[]> {
+  async getallPropertiesByCompany(@Param('id') id: string): Promise<TransformedPropertyDto[]> {
     const properties = await this.companyService.getallPropertiesByCompany(id);
 
-    await Promise.all(properties.map(async (property) => {
-      await this.mapPresignedUrlsToProperty(property);
+    const updatedProperties = await Promise.all(properties.map(async (property) => {
+      return this.mapPresignedUrlsToProperty(property);
     }));
 
-    return properties;
+    return updatedProperties;
   }
 
-  async mapPresignedUrlsToCompany(company: Company) {
-    if (company.resources?.logo) {
-      company.resources.logo = await this.fileUploadService.getPreSignedURLToViewObject(
-        company.resources.logo
-      );
-    }
-    if (company.resources?.galleryImages) {
-      company.resources.galleryImages = await Promise.all(
-        company.resources.galleryImages.map(async (imageKey) => 
-          this.fileUploadService.getPreSignedURLToViewObject(imageKey)
-        )
-      );
-    }
+  async mapPresignedUrlsToCompany(company: Company): Promise<TransformedCompanyDto> {
+    return {
+      id: company.id,
+      name: company.name,
+      description: company.description,
+      phoneNumber: company.phoneNumber,
+      email: company.email,
+      website: company.website,
+      resources: {
+        ...company.resources,
+        logoImage: company.resources?.logoImage
+          ? {
+              key: company.resources.logoImage,
+              url: await this.fileUploadService.getPreSignedURLToViewObject(company.resources.logoImage),
+            }
+          : null,
+        galleryImage: company.resources?.galleryImage
+          ? {
+            key: company.resources.galleryImage,
+            url: await this.fileUploadService.getPreSignedURLToViewObject(company.resources.galleryImage),
+          }
+          : null,
+      },
+    };
   }
 
-  async mapPresignedUrlsToProperty(property: PropertyEntity) {
-    if (property.resources?.headerImage) {
-      property.resources.headerImage = await this.fileUploadService.getPreSignedURLToViewObject(
-        property.resources.headerImage
-      );
-    }
-    if (property.resources?.galleryImages) {
-      property.resources.galleryImages = await Promise.all(
-        property.resources.galleryImages.map(async (imageKey) => 
-          this.fileUploadService.getPreSignedURLToViewObject(imageKey)
-        )
-      );
-    }
+  async mapPresignedUrlsToProperty(property: PropertyEntity): Promise<TransformedPropertyDto> {
+    console.log('[PropertyController] Property Data:', property);
+    return {
+      id: property.id,
+      name: property.name,
+      description: property.description,
+      floor: property.floor,
+      address: property.address,
+      phoneNumber: property.phoneNumber,
+      email: property.email,
+      company: property.company.id,
+      building: property.building?.id || null,
+      resources: {
+        ...property.resources,
+        headerImage: property.resources?.headerImage
+          ? {
+              key: property.resources.headerImage,
+              url: await this.fileUploadService.getPreSignedURLToViewObject(property.resources.headerImage),
+            }
+          : null,
+        galleryImages: property.resources?.galleryImages
+          ? await Promise.all(
+              property.resources.galleryImages.map(async (imageKey) => ({
+                key: imageKey,
+                url: await this.fileUploadService.getPreSignedURLToViewObject(imageKey),
+              }))
+            )
+          : [],
+      },
+    };
   }
 }

@@ -22,18 +22,20 @@ function CompanyBox({
         id: string;
         name: string;
         description: string;
-        resources?: Record<string, string>;
+        resources?: {
+            logoImage: {url: string, key: string}
+        }
     };
     whenClicked: () => void;
     }) {
 
     return (
         <div className="border rounded-lg shadow-md p-4 cursor-pointer" onClick={whenClicked}>
-            {company.resources?.logo ? (
+            {company.resources?.logoImage.url ? (
                 <img 
-                src={company.resources?.logo} 
-                alt={company.name} 
-                className="w-20 h-20 rounded-lg mb-4 object-cover mx-auto"
+                    src={company.resources?.logoImage.url} 
+                    alt={company.name} 
+                    className="w-20 h-20 rounded-lg mb-4 object-cover mx-auto"
                 />
             ) : (
                 <p>No image available</p>

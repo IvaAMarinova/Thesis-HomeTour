@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { HttpService } from "../../services/http-service";
-import ImagesCarousel from "../../components/property/images-carousel";
+import ImagesCarousel from "../../components/images-carousel";
 import GoBackButton from "@/components/go-back-button";
 import ContactCompanyBox from "../../components/property/contact-company-box";
 import Visualization from "@/components/property/visualization";
@@ -13,14 +13,15 @@ function Property() {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const { userId } = useUser();
-    const [property, setProperty] = useState<any>(null);
+    const [property, setProperty] = useState<Record<string, any>>();
     const [isLiked, setIsLiked] = useState(false);
 
     useEffect(() => {
         const fetchProperty = async () => {
             try {
-                const response = await HttpService.get(`/properties/${id}`, undefined, false);
-                // console.log("Fetched property:", response);
+                const response = await HttpService.get<Record<string, string>>(`/properties/${id}`, undefined, false);
+                console.log("Fetched property:", response);
+
                 setProperty(response);
             } catch (error) {
                 // console.error("Error fetching property:", error);
@@ -102,10 +103,10 @@ function Property() {
                             </div>
                         )}
 
-                        {property?.resources?.headerImage && (
+                        {property?.resources?.headerImage.url && (
                             <div className="h-64 mt-10 overflow-hidden rounded-xl shadow-md">
                                 <img
-                                    src={property.resources.headerImage}
+                                    src={property.resources.headerImage.url}
                                     alt="Property header image"
                                     className="w-full h-full object-cover transform transition-transform duration-300 hover:scale-105"
                                 />
