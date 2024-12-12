@@ -137,7 +137,7 @@ export class HttpService {
         },
         credentials: 'include',
       });
-      console.log("Response me: ", response);S
+      console.log("Response me: ", response);
   
       if (!response.ok) {
         console.log("Response me: ", response);
