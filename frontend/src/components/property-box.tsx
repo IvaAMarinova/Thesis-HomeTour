@@ -63,7 +63,7 @@ function PropertyBox({
             await HttpService.put(`user-properties/user-id/${userId}`, {
                 liked: newLikedState,
                 propertyId: property.id,
-            });
+            }, undefined, true);
             setLiked(newLikedState);
             onLikeUpdate();
         } catch (error) {

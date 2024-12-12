@@ -20,21 +20,26 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUserId = useCallback(async () => {
     try {
-      console.log("[UserContext] Fetching user auth/me...");
-      const response = await HttpService.get<{ id: number; type: string; company: string }>('/auth/me/');
-      console.log("[UserContext] Response: ", response);
-
-      const type = response.type === "b2b" || response.type === "b2c" ? response.type : null;
-
-      setUserId(response.id);
-      setUserType(type);
-      setUserCompany(response.company)
+      console.log("[UserContext] Checking authentication...");
+      const isAuthenticated = await HttpService.isAuthenticated(async () => {
+        console.log("[UserContext] Fetching user auth/me...");
+        const response = await HttpService.get<{ id: number }>('/auth/me/', undefined, true, false);
+        console.log("[UserContext] Response: ", response);
+        setUserId(response.id);
+      });
+  
+      if (!isAuthenticated) {
+        console.log("[UserContext] User is not authenticated.");
+        setUserId(null);
+      }
     } catch (error) {
-      console.error("[UserContext] Error fetching user:", error);
+      console.error("[UserContext] Error fetching user ID:", error);
+ 
       setUserId(null);
       setUserType(null);
     }
   }, []);
+  
 
   return (
     <UserContext.Provider value={{ userId, setUserId, fetchUserId, userType, userCompany }}>

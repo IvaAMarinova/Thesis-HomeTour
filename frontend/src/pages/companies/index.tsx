@@ -18,7 +18,7 @@ function Companies() {
     useEffect(() => {
         const fetchCompanies = async () => {
             try {
-                const response = await HttpService.get('/companies', undefined, false);
+                const response = await HttpService.get('/companies');
                 setCompanies(response as any[]);
                 console.log("Companies: ", response);
             } catch (error) {

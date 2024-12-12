@@ -70,8 +70,8 @@ function Properties() {
         const fetchData = async () => {
             try {
                 const [propertiesResponse, companiesResponse] = await Promise.all([
-                    HttpService.get<Property[]>("/properties", undefined, false),
-                    HttpService.get<{ id: string; name: string }[]>("/companies", undefined, false),
+                    HttpService.get<Property[]>("/properties"),
+                    HttpService.get<{ id: string; name: string }[]>("/companies"),
                 ]);
 
                 const companyIdToNameMap = Object.fromEntries(

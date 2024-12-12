@@ -69,13 +69,8 @@ export function Login({ onLoginSuccess }: LoginProps) {
 
   async function onLogin(values: z.infer<typeof loginSchema>) {
     try {
-      const response = await HttpService.post<{ access_token: string; refresh_token: string }>('/auth/login',
-        values, undefined, false, true
-      );
-      console.log("[Login] Access token: ", response.access_token);
-      console.log("[Login] Refresh token: ", response.refresh_token);
-      HttpService.setAccessToken(response.access_token);
-      HttpService.setRefreshToken(response.refresh_token);
+      await HttpService.post('/auth/login', values, undefined, true, true);
+      
       onLoginSuccess();
       await fetchUserId();
       navigate('/');
@@ -98,18 +93,9 @@ export function Login({ onLoginSuccess }: LoginProps) {
         ...values,
         type: "b2b",
       };
-      const response = await HttpService.post<{ access_token: string; refresh_token: string }>(
-        '/auth/register',
-        registerData,
-        undefined,
-        false,
-        true
-      );
-      console.log("[Login] Response: ", response);
-      console.log("[Login] Access token: ", response.access_token);
-      console.log("[Login] Refresh token: ", response.refresh_token);
-      HttpService.setAccessToken(response.access_token);
-      HttpService.setRefreshToken(response.refresh_token);
+      console.log("Register data: ", registerData);
+      const response = await HttpService.post('/auth/register', registerData, undefined, true, true);
+      console.log("[Register] Response: ", response);
       await new Promise((resolve) => setTimeout(resolve, 100));
       onLoginSuccess();
       await fetchUserId();
@@ -128,7 +114,6 @@ export function Login({ onLoginSuccess }: LoginProps) {
     }
   }  
   
-
   return (
     <div className="flex items-center justify-center h-screen">
       <div className="rounded-lg shadow-md p-6 w-[400px] border">
