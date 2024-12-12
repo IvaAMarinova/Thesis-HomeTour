@@ -21,6 +21,7 @@ function Property() {
             try {
                 const response = await HttpService.get<Record<string, string>>(`/properties/${id}`, undefined, false);
                 console.log("Fetched property:", response);
+
                 setProperty(response);
             } catch (error) {
                 // console.error("Error fetching property:", error);
