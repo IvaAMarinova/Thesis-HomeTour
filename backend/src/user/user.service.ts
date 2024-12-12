@@ -92,6 +92,13 @@ export class UserService {
     return user;
   }
 
+  async saveTokens(id: string, accessToken: string, refreshToken: string): Promise<User> {
+    console.log("[User Service] User before put tokens: ", this.getUserById(id));
+    const user = this.update(id, {accessToken, refreshToken});
+    console.log("[User Service] User after put tokens: ", user);
+    return user;
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({ email });
   }

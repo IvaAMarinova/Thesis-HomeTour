@@ -1,4 +1,6 @@
-import { Controller, Get, Request, Post, UseGuards, Body } from '@nestjs/common';
+import { Controller, Get, Request, Post, UseGuards, Body, Res } from '@nestjs/common';
+import { Response } from 'express';
+import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -9,25 +11,155 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req) {
-    return this.authService.login(req.user);
+  async login(@Request() req, @Res({ passthrough: true }) res: Response) {
+    const { accessToken, refreshToken } = await this.authService.login(req.user);
+
+    console.log('Server Time:', new Date().toISOString());
+
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
+    });
+    
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+    }); 
+
+    return { message: 'Logged in successfully' };
   }
 
   @Post('register')
-  async register(@Body() registerData: { email: string; password: string; fullName: string; type: string; companyId?: string }) {
-    return this.authService.register(registerData.email, registerData.password, registerData.fullName, registerData.companyId, registerData.type);
+  async register(
+    @Body() registerData: { email: string; password: string; fullName: string; type: string; companyId?: string }, 
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const { accessToken, refreshToken } = await this.authService.register(registerData.email, registerData.password, registerData.fullName, registerData.companyId, registerData.type);
+  
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      path: '/',
+    });
+    
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 30 * 24 * 3600 * 1000,
+      path: '/',
+    });
+    
+    return { message: 'Register in successfully' };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMe(@Request() req) {
+    console.error('/////////////////////////////////////////////////////');
+    console.log('Server Time:', new Date().toISOString());
+
+    console.log('[Auth Controller] Hit /auth/me endpoint');
+
+    console.log('[Auth Controller] Cookies:', req.cookies);
+
+    if (!req.cookies || !req.cookies.accessToken) {
+      console.error("[Auth Controller] No access token in cookies");
+      throw new UnauthorizedException('No access token found');
+    }
+
+    // Log the request user from the JwtAuthGuard
+    console.log('[Auth Controller] req.user:', req.user);
+
+    // Validate if `req.user` exists
+    if (!req.user || !req.user.userId) {
+      console.error('[Auth Controller] Missing user information in request');
+      throw new UnauthorizedException('User information is missing in the token');
+    }
+
     const { userId } = req.user;
-    return this.authService.getMe(userId);
+    console.log("[Auth Controller] Extracted userId from token:", userId);
+
+    try {
+      const user = await this.authService.getMe(userId);
+      console.log("[Auth Controller] Successfully retrieved user:", user);
+      
+      return user;
+    } catch (error) {
+      console.error("[Auth Controller] Error retrieving user:", error.message);
+      throw error;
+    }
   }
 
 
   @Post('refresh-token')
-  async refreshToken(@Body() body: { refresh_token: string }) {
-    return this.authService.refreshToken(body.refresh_token);
+  async refreshToken(
+    @Body() body: { refreshToken: string; accessToken: string },
+    @Res({ passthrough: true }) res: Response
+  ) {
+    console.error('/////////////////////////////////////////////////////');
+    console.log('Server Time:', new Date().toISOString());
+
+    try {
+      const { accessToken, refreshToken } = await this.authService.refreshToken(
+        body.accessToken,
+        body.refreshToken
+      );
+
+      console.log("[Refresh Token] Successfully generated new tokens");
+      
+
+      // Set new tokens in cookies
+      res.cookie('accessToken', accessToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
+        path: '/',
+      });
+
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        path: '/',
+      });
+
+      return { message: 'Tokens refreshed successfully' };
+    } catch (error) {
+      console.error("[Refresh Token] Error:", error.message);
+      res.status(401).json({ message: 'Invalid or expired tokens' });
+    }
   }
+
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.cookie('accessToken', '', {
+      httpOnly: false,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 0,
+      path: '/',
+    });
+
+    res.cookie('refreshToken', '', {
+      httpOnly: false,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 0,
+      path: '/',
+    });
+
+    return { message: 'Logged out successfully' };
+  }
+
+  
+
 }

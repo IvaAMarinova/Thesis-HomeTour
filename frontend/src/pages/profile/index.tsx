@@ -14,7 +14,7 @@ function Profile() {
     useEffect(() => { 
         const fetchUser = async () => { 
             try {                
-                const response = await HttpService.get<Record<string, string>>(`/auth/me`);
+                const response = await HttpService.get<Record<string, string>>(`/auth/me`, undefined, true);
                 setUser(response);
             }
             catch (error) {
@@ -32,7 +32,7 @@ function Profile() {
 
     const handleUpdateProfile = async () => {
         try {
-            await HttpService.put<Record<string, string>>(`/users/${user.id}`, user);
+            await HttpService.put<Record<string, string>>(`/users/${user.id}`, user, undefined, true);
         } catch (error) {
             console.error("Error updating profile:", error);
         }
