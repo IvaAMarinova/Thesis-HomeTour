@@ -21,6 +21,7 @@ function Company() {
             try {
                 const response = await HttpService.get(`/companies/${id}`);
                 setCompany(response);
+                console.log("Response:", response);
             } catch (error) {
                 console.error("Error fetching company:", error);
             }

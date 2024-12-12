@@ -10,12 +10,14 @@ import { toast } from 'react-toastify';
 function Profile() {
     const navigate = useNavigate();
     const [user, setUser] = useState<Record<string, string>>({});
+    const [company, setCompany] = useState<Record<string, string>>({});
 
     useEffect(() => { 
         const fetchUser = async () => { 
             try {                
                 const response = await HttpService.get<Record<string, string>>(`/auth/me`, undefined, true);
                 setUser(response);
+                console.log(response);
             }
             catch (error) {
                 // console.error("Error fetching user:", error);
@@ -23,6 +25,20 @@ function Profile() {
             }
         }
         fetchUser();
+    }, []);
+
+    useEffect(() => { 
+        const fetchCompany = async () => { 
+            try {                
+                const response = await HttpService.get<Record<string, string>>(`companies/${user.company}`, undefined, true);
+                setCompany(response);
+            }
+            catch (error) {
+                // console.error("Error fetching user:", error);
+                toast.error('Възникна проблем при зареждането на профила. Моля, опитайте отново по-късно.');
+            }
+        }
+        fetchCompany();
     }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,7 +101,7 @@ function Profile() {
                     {user.company && (
                         <div>
                             <Label className="mb-2 block">Company</Label>
-                            <p className="text-italic text-sm text-gray-500">{user.company}</p>
+                            <p className="text-italic text-sm text-gray-500">{company.name}</p>
                         </div>
                     )}
                 </div>
