@@ -5,12 +5,18 @@ interface UserContextType {
   userId: number | null;
   setUserId: (id: number | null) => void;
   fetchUserId: () => Promise<void>;
+  userType: UserType | null;
+  userCompany?: string | null;
 }
+
+type UserType = "b2b" | "b2c";
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserId] = useState<number | null>(null);
+  const [userType, setUserType] = useState<UserType | null>(null);
+  const [userCompany, setUserCompany] = useState<string | null>(null);
 
   const fetchUserId = useCallback(async () => {
     try {
@@ -28,13 +34,15 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error) {
       console.error("[UserContext] Error fetching user ID:", error);
+ 
       setUserId(null);
+      setUserType(null);
     }
   }, []);
   
 
   return (
-    <UserContext.Provider value={{ userId, setUserId, fetchUserId }}>
+    <UserContext.Provider value={{ userId, setUserId, fetchUserId, userType, userCompany }}>
       {children}
     </UserContext.Provider>
   );

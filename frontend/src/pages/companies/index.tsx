@@ -3,7 +3,6 @@ import CompanyBox from '../../components/companies/company-box';
 import { HttpService } from '../../services/http-service';
 import { useNavigate } from 'react-router-dom';
 import GoUpButton from '@/components/go-up-button';
-import Footer from '../../components/footer';
 
 function Companies() {
     const navigate = useNavigate();
@@ -11,7 +10,9 @@ function Companies() {
         id: string;
         name: string; 
         description: string; 
-        resources?: Record<string, string>;
+        resources?: {
+            logoImage: {url: string, key: string}
+        };
     }[]>([]);
 
     useEffect(() => {
@@ -19,6 +20,7 @@ function Companies() {
             try {
                 const response = await HttpService.get('/companies');
                 setCompanies(response as any[]);
+                console.log("Companies: ", response);
             } catch (error) {
                 // console.error("Error fetching companies:", error);
                 setCompanies([]);
@@ -58,7 +60,6 @@ function Companies() {
 
                 <GoUpButton />
             </div>
-            <Footer />
         </div>
 
     );

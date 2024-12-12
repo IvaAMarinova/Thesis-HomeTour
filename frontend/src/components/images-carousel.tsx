@@ -7,13 +7,12 @@ import {
     CarouselPrevious,
 } from "@/components/ui/carousel";
 
-function ImagesCarousel({ galleryImages }: { galleryImages: string[] }) {
+function ImagesCarousel({ galleryImages }: { galleryImages: Record<string, string>[] }) {
 
 
     return (
         <Carousel className="relative w-full max-w-6xl mx-auto">
             <CarouselPrevious className="absolute -left-8 top-1/2 transform -translate-y-1/2 z-20" />
-            
             <CarouselContent className="-ml-1 p-3">
                 {galleryImages.map((image, index) => (
                     <CarouselItem
@@ -24,7 +23,7 @@ function ImagesCarousel({ galleryImages }: { galleryImages: string[] }) {
                             <Card>
                                 <CardContent className="flex aspect-square items-center justify-center p-6 transform transition-transform duration-300 hover:scale-105">
                                     <img
-                                        src={image}
+                                        src={image.url}
                                         alt={`Property image ${index + 1}`}
                                         className="w-full h-full object-cover rounded-lg"
                                     />

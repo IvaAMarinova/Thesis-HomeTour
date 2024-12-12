@@ -34,7 +34,7 @@ function PropertyBox({
         description: string;
         companyName: string;
         resources?: {
-            headerImage?: string | null;
+            headerImage?: { key: string; url: string };
             visualizationFolder?: string | null;
         };
     };
@@ -72,7 +72,7 @@ function PropertyBox({
     };
 
     return (
-        <div className="border rounded-lg shadow-md p-4 cursor-pointer" onClick={whenClicked}>
+        <div className="relative border rounded-lg shadow-md p-4 cursor-pointer" onClick={whenClicked}>
             <div className="flex flex-row items-center justify-between mb-2">
                 <div className="flex justify-end items-end">
                     {isLoggedIn && (
@@ -101,18 +101,18 @@ function PropertyBox({
                             )}
                         </div>
                     </HoverCardTrigger>
-                    <HoverCardContent>
+                    <HoverCardContent className="bg-white justify-start z-50 absolute top-full right-0 mt-2 shadow-lg rounded">
                         <p className="font-medium text-gray-600 mb-1 p-1">
-                            Try out our 3D visualization!
+                            Изпробвай нашата 3D визуализация!
                         </p>
-                        <p className="text-sm text-gray-700">Available for this property</p>
+                        <p className="text-sm text-gray-700">Налично за този имот</p>
                     </HoverCardContent>
                 </HoverCard>
             </div>
 
-            {property.resources?.headerImage ? (
+            {property.resources?.headerImage?.url ? (
                 <img
-                    src={property.resources?.headerImage}
+                    src={property.resources.headerImage.url}
                     alt={property.name}
                     className="w-full h-48 rounded-lg mb-4 object-cover"
                 />

@@ -91,7 +91,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
     try {
       const registerData = {
         ...values,
-        type: "b2c",
+        type: "b2b",
       };
       console.log("Register data: ", registerData);
       const response = await HttpService.post('/auth/register', registerData, undefined, true, true);

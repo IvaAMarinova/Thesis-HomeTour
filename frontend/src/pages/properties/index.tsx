@@ -4,7 +4,6 @@ import PropertyBox from "../../components/property-box";
 import { HttpService } from "../../services/http-service";
 import { useNavigate, useLocation } from "react-router-dom";
 import GoUpButton from "@/components/go-up-button";
-import Footer from "../../components/footer";
 import { useUser } from "@/contexts/UserContext";
 
 type Property = {
@@ -14,7 +13,9 @@ type Property = {
     company: string;
     address: Record<string, string>;
     floor: number;
-    resources?: { headerImage?: string | null };
+    resources?: { 
+        headerImage?: {key: string, url: string}
+    };
 };
 
 type Filters = {
@@ -146,7 +147,6 @@ function Properties() {
                 </div>
                 <GoUpButton />
             </div>
-            <Footer />
         </div>
     );
 }

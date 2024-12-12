@@ -15,6 +15,9 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Footer from './components/footer';
 import { CookiesProvider } from 'react-cookie';
+import EditProperties from './pages/edit-properties';
+import EditProperty from './pages/edit-property';
+import EditCompany from './pages/edit-company'
 
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -62,6 +65,27 @@ function App() {
           <AppContent />
         </Router>
       </CookiesProvider>
+      <Router>
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <div className="flex-grow">
+            <ToastContainer />
+            <Routes>
+              <Route path="/login" element={<Login onLoginSuccess={() => setIsAuthenticated(true)} />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/properties" element={<Properties />} />
+              <Route path="/properties/:id" element={<Property />} />
+              <Route path="/companies/:id" element={<Company />} />
+              <Route path="/companies" element={<Companies />} />
+              <Route path="/edit-properties/:id" element={<EditProperties />} />
+              <Route path="/edit-property/:id" element={<EditProperty />} />
+              <Route path="/edit-company/:id" element={<EditCompany />} />
+            </Routes>
+          </div>
+          <Footer />
+        </div>
+      </Router>
     </UserProvider>
   );
 }

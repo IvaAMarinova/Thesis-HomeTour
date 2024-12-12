@@ -11,6 +11,8 @@ function Visualization({ visualizationFolder }: { visualizationFolder: string })
         const response = await HttpService.get<Record<string, string>>(
           `/get-presigned-url/to-view?key=${visualizationFolder}`
         );
+
+        console.log("[Visualization] response: ", response);
         if (response.url) {
           setS3Url(response.url);
           setError(false);
@@ -32,9 +34,9 @@ function Visualization({ visualizationFolder }: { visualizationFolder: string })
   return (
     <div className="w-full flex flex-col items-center">
       <div className="text-center mt-8 mb-4">
-        <h1 className="text-3xl font-bold p-3">Step inside and explore this property...</h1>
-        <p className="text-xl p-1">Use your mouse and keys to move around the property.</p>
-        <p className="text-xl p-1">Use the fullscreen button to look around better.</p>
+        <h1 className="text-3xl font-bold p-3">Стъпи вътре в имота и разгледай как изглежда...</h1>
+        <p className="text-xl p-1">Използвай своята мишка и клавиатура, за да се разходиш.</p>
+        <p className="text-xl p-1">Използвай бутона "Fullscreen", за да оголемиш екрана.</p>
       </div>
       <div className="w-full max-w-5xl p-4">
         <iframe
