@@ -66,7 +66,6 @@ function Header() {
           <img src={logoUrl} alt="logo" className="h-10 w-10 mr-4" />
           <span className="font-bold text-xl">HomeTour</span>
         </Link>
-
         <nav className="flex items-center space-x-8 mt-1 mb-1 mr-4">
           <Link to="/properties" className="text-[#F2ECDD] text-xl font-bold py-2 cursor-pointer transform transition-transform duration-300 hover:scale-105">
             Жилища

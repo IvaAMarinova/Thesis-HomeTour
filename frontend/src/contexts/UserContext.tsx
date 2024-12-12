@@ -23,9 +23,11 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       console.log("[UserContext] Checking authentication...");
       const isAuthenticated = await HttpService.isAuthenticated(async () => {
         console.log("[UserContext] Fetching user auth/me...");
-        const response = await HttpService.get<{ id: number }>('/auth/me/', undefined, true, false);
+        const response = await HttpService.get<Record<string, any>>('/auth/me/', undefined, true, false);
         console.log("[UserContext] Response: ", response);
         setUserId(response.id);
+        setUserCompany(response.company);
+        setUserType(response.type);
       });
   
       if (!isAuthenticated) {
@@ -34,7 +36,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error) {
       console.error("[UserContext] Error fetching user ID:", error);
- 
+
       setUserId(null);
       setUserType(null);
     }

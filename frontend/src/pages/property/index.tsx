@@ -19,8 +19,8 @@ function Property() {
     useEffect(() => {
         const fetchProperty = async () => {
             try {
-                const response = await HttpService.get(`/properties/${id}`);
-                // console.log("Fetched property:", response);
+                const response = await HttpService.get<Record<string, any>>(`/properties/${id}`);
+                console.log("Fetched property:", response);
                 setProperty(response);
             } catch (error) {
                 // console.error("Error fetching property:", error);

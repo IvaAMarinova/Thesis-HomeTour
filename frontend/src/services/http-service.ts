@@ -133,12 +133,9 @@ export class HttpService {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          // Authorization: `Bearer ${this.accessToken}`,
         },
         credentials: 'include',
       });
-      console.log("Response me: ", response);
-  
       if (!response.ok) {
         console.log("Response me: ", response);
         if (response.status === 401) {
