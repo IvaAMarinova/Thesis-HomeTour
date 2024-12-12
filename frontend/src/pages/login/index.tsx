@@ -96,7 +96,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
     try {
       const registerData = {
         ...values,
-        type: "b2b",
+        type: "b2c",
       };
       const response = await HttpService.post<{ access_token: string; refresh_token: string }>(
         '/auth/register',

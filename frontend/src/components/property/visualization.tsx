@@ -36,7 +36,7 @@ function Visualization({ visualizationFolder }: { visualizationFolder: string })
       <div className="text-center mt-8 mb-4">
         <h1 className="text-3xl font-bold p-3">Стъпи вътре в имота и разгледай как изглежда...</h1>
         <p className="text-xl p-1">Използвай своята мишка и клавиатура, за да се разходиш.</p>
-        <p className="text-xl p-1">Използвай бутона "Fullscreen", за да оголемиш екрана.</p>
+        <p className="text-xl p-1">Използвай бутона "Fullscreen", за да уголемиш екрана.</p>
       </div>
       <div className="w-full max-w-5xl p-4">
         <iframe

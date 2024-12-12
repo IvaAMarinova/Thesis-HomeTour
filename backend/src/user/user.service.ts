@@ -30,6 +30,7 @@ export class UserService {
     if (companyId) {
       const company = await this.companyService.getCompanyById(companyId);
       if (!company) {
+	      console.log("Company with this id not found");
         throw new NotFoundException(`Company with id ${companyId} not found`);
       }
       user.company = company;

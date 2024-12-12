@@ -16,8 +16,7 @@ export class UserController {
       userData.fullName,
       userData.email,
       userData.password,
-      userData.type,
-      userData.companyId
+      userData.type
     );
     return new UserResponseDto(user);
   }
