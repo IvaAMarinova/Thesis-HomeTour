@@ -13,32 +13,19 @@ function Profile() {
     const [company, setCompany] = useState<Record<string, string>>({});
 
     useEffect(() => { 
-        const fetchUser = async () => { 
+        const fetchUserAndCompany = async () => { 
             try {                
-                const response = await HttpService.get<Record<string, string>>(`/auth/me`, undefined, true);
-                setUser(response);
-                console.log(response);
-            }
-            catch (error) {
-                // console.error("Error fetching user:", error);
+                const userResponse = await HttpService.get<Record<string, string>>(`/auth/me`, undefined, true);
+                setUser(userResponse);    
+                if (userResponse.company) {
+                    const companyResponse = await HttpService.get<Record<string, string>>(`/companies/${userResponse.company}`, undefined, true);
+                    setCompany(companyResponse);
+                }
+            } catch (error) {
                 toast.error('Възникна проблем при зареждането на профила. Моля, опитайте отново по-късно.');
             }
         }
-        fetchUser();
-    }, []);
-
-    useEffect(() => { 
-        const fetchCompany = async () => { 
-            try {                
-                const response = await HttpService.get<Record<string, string>>(`companies/${user.company}`, undefined, true);
-                setCompany(response);
-            }
-            catch (error) {
-                // console.error("Error fetching user:", error);
-                toast.error('Възникна проблем при зареждането на профила. Моля, опитайте отново по-късно.');
-            }
-        }
-        fetchCompany();
+        fetchUserAndCompany();
     }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
