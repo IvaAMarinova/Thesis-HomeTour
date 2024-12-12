@@ -19,7 +19,7 @@ function Property() {
     useEffect(() => {
         const fetchProperty = async () => {
             try {
-                const response = await HttpService.get(`/propertiess/${id}`, undefined, false);
+                const response = await HttpService.get(`/properties/${id}`, undefined, false);
                 // console.log("Fetched property:", response);
                 setProperty(response);
             } catch (error) {
