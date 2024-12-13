@@ -84,19 +84,23 @@ function EditProperties() {
     return (
         <div className="pt-16 align-middle flex flex-col items-center">
             <div className="relative p-9 w-full max-w-6xl mx-auto border rounded-lg mt-14">
-                <HoverCard>
-                    <HoverCardTrigger>
-                        <button
-                            onClick={() => navigate(`/edit-property/0`)}
-                            className="justify-end px-2 py-2 m-4 text-black border rounded-lg shadow border-green-500"
-                        >
-                            <Plus className="text-green-500" />
-                        </button>
-                    </HoverCardTrigger>
-                    <HoverCardContent className="bg-white justify-start absolute mt-1 shadow-lg rounded">
-                        <p>Създай нов имот</p>
-                    </HoverCardContent>
-                </HoverCard>
+                <div className="flex flex-row justify-between">
+                    <GoBackButton />
+                    <HoverCard>
+                        <HoverCardTrigger>
+                            <button
+                                onClick={() => navigate(`/edit-property/0`)}
+                                className="justify-end px-2 py-2 text-black border rounded-lg shadow border-green-500"
+                            >
+                                <Plus className="text-green-500" />
+                            </button>
+                        </HoverCardTrigger>
+                        <HoverCardContent className="bg-white justify-start absolute mt-1 shadow-lg rounded">
+                            <p>Създай нов имот</p>
+                        </HoverCardContent>
+                    </HoverCard>
+                </div>
+                
                 {properties &&
                     properties.map((property: Property) => {
                         return (
@@ -126,9 +130,6 @@ function EditProperties() {
                             </div>
                         );
                     })}
-                <div className="self-start ml-4 mt-6">
-                    <GoBackButton />
-                </div>
             </div>
             {showConfirmation && (
                 <ConfirmationPopup

@@ -9,7 +9,10 @@ import { toast } from 'react-toastify';
 
 function Profile() {
     const navigate = useNavigate();
-    const [user, setUser] = useState<Record<string, string>>({});
+    const [user, setUser] = useState<Record<string, string>>({
+        fullName: '',
+        email: ''
+    });
     const [company, setCompany] = useState<Record<string, string>>({});
 
     useEffect(() => { 
@@ -66,7 +69,7 @@ function Profile() {
 
                 <div className="space-y-6">
                     <div>
-                        <Label className="mb-2 block">Full Name</Label>
+                        <Label className="mb-2 block">Пълно име</Label>
                         <Input
                             id="fullName"
                             name="fullName"
@@ -76,7 +79,7 @@ function Profile() {
                         />
                     </div>
                     <div>
-                        <Label className="mb-2 block">Email Address</Label>
+                        <Label className="mb-2 block">Имейл адрес</Label>
                         <Input
                             id="email"
                             name="email"
@@ -87,15 +90,15 @@ function Profile() {
                     </div>
                     {user.company && (
                         <div>
-                            <Label className="mb-2 block">Company</Label>
+                            <Label className="mb-2 block">Компания</Label>
                             <p className="text-italic text-sm text-gray-500">{company.name}</p>
                         </div>
                     )}
                 </div>
 
                 <div className="flex justify-between mt-12">
-                    <Button variant="outline" className="w-1/4">Cancel</Button>
-                    <Button className="w-1/4 bg-black text-white" onClick={handleUpdateProfile}>Save</Button>
+                    <Button variant="outline" className="w-1/4">Откажи</Button>
+                    <Button className="w-1/4 bg-black text-white" onClick={handleUpdateProfile}>Запази</Button>
                 </div>
             </div>
         </div>

@@ -1,19 +1,3 @@
-import { useState, useEffect } from "react";
-import { HttpService } from "../../services/http-service";
-
-function truncateDescription(description: string) {
-    if (description.length <= 64) {
-        return description;
-    }
-
-    return (
-    <>
-        {description.substring(0, 64)}
-        <span className="text-gray-500 text-sm">... Learn more</span>
-    </>
-    );
-}
-
 function CompanyBox({
     company,
     whenClicked,
@@ -23,26 +7,42 @@ function CompanyBox({
         name: string;
         description: string;
         resources?: {
-            logoImage: {url: string, key: string}
-        }
+            logoImage: { url: string; key: string };
+        };
     };
     whenClicked: () => void;
-    }) {
-
+}) {
     return (
-        <div className="border rounded-lg shadow-md p-4 cursor-pointer" onClick={whenClicked}>
-            {company.resources?.logoImage.url ? (
-                <img 
-                    src={company.resources?.logoImage.url} 
-                    alt={company.name} 
-                    className="w-20 h-20 rounded-lg mb-4 object-cover mx-auto"
-                />
-            ) : (
-                <p>No image available</p>
-            )}
-            
-            <h1 className="text-2xl font-bold text-gray-800 mb-1 p-1">{company.name}</h1>
-            <p className="text-base text-gray-700 mb-3">{truncateDescription(company.description)}</p>
+        <div
+            className="relative border rounded-xl shadow-lg p-6 cursor-pointer w-full h-full flex flex-col justify-between hover:shadow-2xl transition-shadow"
+            onClick={whenClicked}
+        >
+            {/* Logo */}
+            <div className="flex items-center justify-center mb-4">
+                {company.resources?.logoImage.url ? (
+                    <img
+                        src={company.resources.logoImage.url}
+                        alt={company.name}
+                        className="max-w-16 max-h-16 mt-1 overflow-hidden"
+                    />
+                ) : (
+                    <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-full text-gray-500 text-sm">
+                        No Image
+                    </div>
+                )}
+            </div>
+
+            {/* Name */}
+            <h1 className="text-xl font-semibold text-gray-900 text-center mb-3">
+                {company.name}
+            </h1>
+
+            {/* Description */}
+            <div className="flex-grow">
+                <p className="text-sm text-gray-600 text-center line-clamp-3">
+                    {company.description}
+                </p>
+            </div>
         </div>
     );
 }

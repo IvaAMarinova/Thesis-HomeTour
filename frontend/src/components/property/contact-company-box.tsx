@@ -40,7 +40,7 @@ function ContactCompanyBox({ company, onClick }: { company: string; onClick: () 
             {companyData ? (
                 <>
                     <h1 className="text-2xl font-bold text-gray-800 mb-4">
-                        Contact the Company Owner
+                        Свържи се с продавача
                     </h1>
                     <div className="mb-2">
                         <p className="text-xl font-semibold text-gray-800">
@@ -52,15 +52,15 @@ function ContactCompanyBox({ company, onClick }: { company: string; onClick: () 
                     </div>
                     <div className="mt-4 space-y-2">
                         <p className="text-sm font-medium text-gray-600 italic">
-                            Email: {companyData.email}
+                            Имейл: {companyData.email}
                         </p>
                         <p className="text-sm font-medium text-gray-600 italic">
-                            Phone: {companyData.phoneNumber}
+                            Телефон: {companyData.phoneNumber}
                         </p>
                     </div>
                 </>
             ) : (
-                <p>Loading company information...</p>
+                <p>Зарежда се информация...</p>
             )}
         </div>
     );

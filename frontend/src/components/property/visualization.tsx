@@ -11,8 +11,6 @@ function Visualization({ visualizationFolder }: { visualizationFolder: string })
         const response = await HttpService.get<Record<string, string>>(
           `/get-presigned-url/to-view?key=${visualizationFolder}`
         );
-
-        console.log("[Visualization] response: ", response);
         if (response.url) {
           setS3Url(response.url);
           setError(false);
@@ -38,12 +36,15 @@ function Visualization({ visualizationFolder }: { visualizationFolder: string })
         <p className="text-xl p-1">Използвай своята мишка и клавиатура, за да се разходиш.</p>
         <p className="text-xl p-1">Използвай бутона "Fullscreen", за да уголемиш екрана.</p>
       </div>
-      <div className="w-full max-w-5xl p-4">
+      <div
+        className="relative w-full max-w-full overflow-hidden flex justify-center"
+        style={{ height: "750px" }}
+      >
         <iframe
           src={s3Url}
           title="Unity Game"
-          className="w-[1000px] h-[750px] rounded-lg border-none"
-          style={{ overflow: 'hidden' }}
+          className="absolute top-0 left-1/2 transform -translate-x-1/2"
+          style={{ width: "1000px", height: "750px" }}
           allowFullScreen
         />
       </div>

@@ -267,11 +267,11 @@ function EditCompany() {
 
     return (
         <div className="pt-16 align-middle flex flex-col items-center">
-            <div className="relative p-9 w-full max-w-6xl mx-auto border rounded-lg mt-14">
+            <div className="relative p-9 w-full max-w-6xl mx-auto lg:border rounded-lg lg:mt-14">
                 <GoBackButton />
-                <h2 className="text-3xl font-bold text-center">Редактирай тази компания</h2>
+                <h2 className="text-3xl font-bold text-center mt-4">Редактирай тази компания</h2>
                 <div className="space-y-6 mt-12">
-                    <div className="flex flex-row justify-start space-x-12">
+                    <div className="flex flex-col md:flex-row justify-start md:space-x-12 space-y-6 md:space-y-0">
                         <div>
                             <Label className="mb-2 block">Име на компанията</Label>
                             <Input

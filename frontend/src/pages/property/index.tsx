@@ -80,7 +80,7 @@ function Property() {
 
     return (
         <div className="pt-16 align-middle flex flex-col items-center">
-            <div className="relative p-9 w-full max-w-6xl mx-auto border rounded-lg mt-14">
+            <div className="relative p-9 w-full max-w-6xl mx-auto lg:border md:border rounded-lg lg:mt-14">
                 <div className="self-start ml-4 mt-6">
                     <GoBackButton />
                 </div>
@@ -112,27 +112,31 @@ function Property() {
                             </div>
                         )}
 
-                        <div className="mt-10 w-full max-w-6xl mx-auto px-4">
+                        <div className="flex flex-col md:flex-row sm:flex-row mt-10 w-full max-w-6xl mx-auto px-4">
                             {property ? (
-                                <div className="flex flex-wrap w-full max-w-6xl mx-auto mt-4 mb-10">
-                                    <div className="w-full md:w-2/3 p-4">
-                                        <h1 className="text-3xl font-bold text-gray-800 mb-4">{property.name}</h1>
-
-                                        <div className="text-base text-gray-700 whitespace-pre-line">
+                                <div className="flex flex-col md:flex-row w-full max-w-6xl mx-auto mt-4 mb-10">
+                                    <div className="flex-1 md:basis-1/2 p-4">
+                                        <h1
+                                            className="text-3xl font-bold mb-4 text-center md:text-left"
+                                        >
+                                            {property.name}
+                                        </h1>
+                                
+                                        <div className="text-base text-gray-700 whitespace-pre-line lg:mr-12">
                                             {property.description?.split("\n").map((paragraph: string, index: string) => (
                                                 <p
                                                     key={index}
-                                                    className="mb-4"
+                                                    className="mb-4 text-justify"
                                                     style={{ textIndent: "2em" }}
                                                 >
                                                     {paragraph}
                                                 </p>
                                             ))}
                                         </div>
-
+                                
                                         <div className="mt-4">
                                             <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                                                Property Address
+                                                Адрес на имота
                                             </h2>
                                             <p className="text-base text-gray-700">
                                                 {[property.address?.city, property.address?.neighborhood, property.address?.street]
@@ -141,11 +145,14 @@ function Property() {
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="w-full md:w-1/3 p-4">
-                                        <ContactCompanyBox
-                                            company={property.company}
-                                            onClick={() => navigate(`/companies/${property.company}`)}
-                                        />
+                                
+                                    <div className="flex justify-center items-center md:flex-shrink-0 md:basis-1/2 p-4 w-full md:w-auto">
+                                        <div className="w-96">
+                                            <ContactCompanyBox
+                                                company={property.company}
+                                                onClick={() => navigate(`/companies/${property.company}`)}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             ) : (

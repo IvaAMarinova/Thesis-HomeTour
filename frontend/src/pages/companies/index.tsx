@@ -22,9 +22,7 @@ function Companies() {
                 setCompanies(response as any[]);
                 console.log("Companies: ", response);
             } catch (error) {
-                // console.error("Error fetching companies:", error);
                 setCompanies([]);
-                // toast.error('Failed to load companies. Please try again later.');
             }
         };
 
@@ -46,9 +44,12 @@ function Companies() {
                         </p>
                     </div>
                 ) : (
-                    <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 mt-16">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         {companies.map((company, index) => (
-                            <div key={index} className="break-inside-avoid mb-4 flex justify-center">
+                            <div
+                            key={index}
+                            className="transform transition-transform duration-300 hover:scale-105 h-[260px]"
+                        >
                                 <CompanyBox
                                     company={company}
                                     whenClicked={() => navigate(`/companies/${company.id}`)}

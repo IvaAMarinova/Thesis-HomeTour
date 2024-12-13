@@ -12,7 +12,7 @@ function GoUpButton() {
                 className="px-6 py-3 text-black border rounded-lg shadow transition duration-300 flex items-center hover:scale-105"
             >
                 <ArrowUp className="mr-2" />
-                Go Back Up
+                Върни се горе
             </button>
         </div>
     );

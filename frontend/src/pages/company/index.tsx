@@ -21,7 +21,6 @@ function Company() {
             try {
                 const response = await HttpService.get(`/companies/${id}`);
                 setCompany(response);
-                console.log("Response:", response);
             } catch (error) {
                 console.error("Error fetching company:", error);
             }
@@ -67,8 +66,8 @@ function Company() {
 
     return (
         <div className="pt-16 align-middle flex flex-col items-center">
-            <div className="p-9 w-full max-w-6xl mx-auto border rounded-lg flex flex-col items-center mt-14">
-                <div className="self-start ml-4">
+            <div className="p-9 w-full max-w-6xl mx-auto lg:border md:lg rounded-lg flex flex-col items-center lg:mt-14 md:mt-14">
+                <div className="self-start ml-4 mb-4">
                     <GoBackButton />
                 </div>
                 <h1 className="text-4xl font-bold mt-3 mb-4 text-center">
@@ -84,7 +83,7 @@ function Company() {
                     )}
                 </div>
                 <div className="flex flex-col md:flex-row justify-between items-center w-full mt-4 border-t-2 border-gray-500 pt-4">
-                    <div className="text-base mt-12 text-gray-700 whitespace-pre-line md:w-1/2 md:pr-8">
+                    <div className="text-base mt-12 text-gray-700 whitespace-pre-line md:w-1/2 md:pr-8 text-justify p-2 lg:ml-5 md:ml-5">
                         {company?.description ? (
                             company.description.split("\n").map((paragraph: string, index: number) => (
                                 <p
@@ -109,7 +108,7 @@ function Company() {
                         )}
                     </div>
                 </div>
-                <div className="flex flex-col md:flex-row justify-center items-start mt-4 md:space-x-8 text-center space-y-8 md:space-y-0">
+                <div className="flex flex-col md:flex-row justify-center items-center mt-4 md:space-x-8 text-center space-y-8 md:space-y-0">
                     <div className="flex flex-col items-center">
                         <h2 className="text-lg font-semibold text-gray-800">Телефонен номер</h2>
                         <TelephoneCall className="text-6xl mt-2" />
@@ -135,6 +134,7 @@ function Company() {
                         </a>
                     </div>
                 </div>
+
                 <div className="flex flex-col border-t-2 border-gray-500 pt-4 mt-12">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 -mx-2">
                         {properties.map((property) => {

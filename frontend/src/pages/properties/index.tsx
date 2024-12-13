@@ -118,14 +118,14 @@ function Properties() {
                         setAppliedFilters={setAppliedFilters}
                     />
                 </div>
-                <div className="columns-1 sm:columns-2 md:columns-4 lg:columns-4 gap-4 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {filteredProperties.length > 0 ? (
                         filteredProperties.map((property) => {
                             const isLiked = likedProperties.some((liked) => liked.property?.id === property.id);
                             return (
                                 <div
                                     key={property.id}
-                                    className="break-inside-avoid mb-4 transform transition-transform duration-300 hover:scale-105"
+                                    className="transform transition-transform duration-300 hover:scale-105 h-[420px]"
                                 >
                                     <PropertyBox
                                         property={{
@@ -140,11 +140,12 @@ function Properties() {
                             );
                         })
                     ) : (
-                        <div className="justify-center text-center text-xl font-semibold text-gray-800 mb-2">
+                        <div className="col-span-full justify-center text-center text-xl font-semibold text-gray-800">
                             Няма намерени имоти
                         </div>
                     )}
                 </div>
+
                 <GoUpButton />
             </div>
         </div>
