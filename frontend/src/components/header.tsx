@@ -24,6 +24,10 @@ function Header() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  useEffect(() => {
     const checkScreenSize = () => {
       setIsSmallScreen(window.innerWidth < 640);
     };
@@ -70,7 +74,7 @@ function Header() {
   };
 
   return (
-    <header className={`p-4 fixed top-0 left-0 right-0 z-10 ${isHomePage && !isScrolled ? 'bg-transparent' : 'bg-black'} text-[#F2ECDD] transition-colors duration-400 ease-in-out`}>
+    <header className={`p-4 fixed top-0 left-0 right-0 z-50 ${isHomePage && !isScrolled ? 'bg-transparent' : 'bg-black'} text-[#F2ECDD] transition-colors duration-400 ease-in-out`}>
       <div className="container mx-auto flex justify-between items-center">
         <Link to="/" className="flex items-center cursor-pointer transform ml-4 transition-transform duration-300 hover:scale-105">
           <img src={logoLight} alt="logo" className="h-10 w-10 mr-4" />

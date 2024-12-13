@@ -4,6 +4,20 @@ import { HttpService } from '../../services/http-service';
 function Visualization({ visualizationFolder }: { visualizationFolder: string }) {
   const [s3Url, setS3Url] = useState<string | null>(null);
   const [error, setError] = useState<boolean>(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsSmallScreen(window.innerWidth < 640);
+    };
+    checkScreenSize();
+
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => {
+      window.removeEventListener("resize", checkScreenSize);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchS3Url = async () => {
@@ -33,8 +47,13 @@ function Visualization({ visualizationFolder }: { visualizationFolder: string })
     <div className="w-full flex flex-col items-center">
       <div className="text-center mt-8 mb-4">
         <h1 className="text-3xl font-bold p-3">Стъпи вътре в имота и разгледай как изглежда...</h1>
-        <p className="text-xl p-1">Използвай своята мишка и клавиатура, за да се разходиш.</p>
-        <p className="text-xl p-1">Използвай бутона "Fullscreen", за да уголемиш екрана.</p>
+        {!isSmallScreen && 
+          <div>
+            <p className="text-xl p-1 mb-3">Използвай своята мишка и клавиатура, за да се разходиш.</p>
+            <p className="text-md p-1">Използвай бутона "Fullscreen", за да уголемиш екрана.</p>
+            <p className="text-md p-1">За да излезеш от екрана на разходката, натисни клавиш "Esc" и цъкни извън него.</p>
+          </div>
+        }
       </div>
       <div
         className="relative w-full max-w-full overflow-hidden flex justify-center"
@@ -48,6 +67,9 @@ function Visualization({ visualizationFolder }: { visualizationFolder: string })
           allowFullScreen
         />
       </div>
+      {isSmallScreen && 
+          <p className="text-md p-1 text-center mt-8">Подсказка - разходката е по-лесна и удобна за навигация на по-голям екран :)</p>
+      }
     </div>
   );
 }
