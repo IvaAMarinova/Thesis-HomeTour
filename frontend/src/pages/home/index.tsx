@@ -159,23 +159,26 @@ function Home() {
       </div>
 
       <div className="w-full flex flex-col items-center p-8 mb-12">
-        <h2 className="text-3xl font-bold flex items-center">
-          Свържете се с нас
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-12 w-full justify-items-center">
-          <div className="flex flex-col items-center p-3 border rounded-lg shadow-md w-full max-w-[320px]">
+        <h2 className="text-3xl font-bold flex items-center">Свържете се с нас</h2>
+        <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full max-w-2xl justify-center">
+          <div className="flex flex-col items-center p-3 border rounded-lg shadow-md w-full sm:w-[320px]">
             <h2 className="text-2xl font-semibold p-3">Телефонен номер</h2>
             <TelephoneCall className="w-12 h-12" />
-            <p className="text-lg max-w-2xl text-center p-3">{phoneNumber}</p>
+            <p className="text-lg text-center p-3">{phoneNumber}</p>
           </div>
 
-          <div className="flex flex-col items-center p-3 border rounded-lg shadow-md w-full max-w-[320px]">
+          <div className="flex flex-col items-center p-3 border rounded-lg shadow-md w-full sm:w-[320px]">
             <h2 className="text-2xl font-semibold p-3">Имейл</h2>
             <Envelope className="w-12 h-12" />
-            <p className="text-lg max-w-2xl text-center p-3">{email}</p>
+            <p className="text-lg text-center p-3">{email}</p>
           </div>
         </div>
       </div>
+
+
+
+
+
 
     </div>
   );
