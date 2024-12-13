@@ -1,24 +1,19 @@
 import { IsString, IsEmail, IsEnum, IsOptional } from 'class-validator';
-import { UserType } from '../user.entity';
 
 export class UpdateUserDto {
-    @IsOptional()
-    @IsString()
-    fullName?: string;
+  @IsString()
+  fullName!: string;
 
-    @IsOptional()
-    @IsEmail()
-    email?: string;
+  @IsEmail()
+  email!: string;
 
-    @IsOptional()
-    @IsString()
-    password?: string;
+  @IsString()
+  password!: string;
 
-    @IsOptional()
-    @IsEnum(UserType)
-    type?: UserType;
+  @IsEnum(['b2b', 'b2c'])
+  type!: string;
 
-    @IsOptional()
-    @IsString()
-    companyId?: string;
+  @IsOptional()
+  @IsString()
+  companyId?: string;
 }

@@ -5,6 +5,7 @@ import { User } from './user.entity';
 import { CompanyService } from '../company/company.service';
 import { UserType } from './user.entity';
 import { hash, compare } from 'bcrypt';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -47,17 +48,24 @@ export class UserService {
     return user;
   }
 
-  async update(id: string, userData: Partial<User>): Promise<User> {
+  async update(id: string, userData: UpdateUserDto): Promise<User> {
     const existingUser = await this.userRepository.findOne({ id });
     if (!existingUser) {
+      console.log("[User service] User not found: ", userData);
       throw new NotFoundException(`User with id ${id} not found`);
     }
-
-    this.em.assign(existingUser, userData);
-
+  
+    if (userData.companyId) {
+      const company = await this.companyService.getCompanyById(userData.companyId);
+      if (!company) {
+        throw new NotFoundException(`Company with id ${userData.companyId} not found`);
+      }
+      existingUser.company = company;
+    }
     await this.em.flush();
     return existingUser;
   }
+  
 
   async delete(id: string): Promise<void> {
     const user = await this.userRepository.findOne({ id });
@@ -93,11 +101,18 @@ export class UserService {
   }
 
   async saveTokens(id: string, accessToken: string, refreshToken: string): Promise<User> {
-    console.log("[User Service] User before put tokens: ", this.getUserById(id));
-    const user = this.update(id, {accessToken, refreshToken});
-    console.log("[User Service] User after put tokens: ", user);
+    const user = await this.userRepository.findOne({ id });
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+  
+    user.accessToken = accessToken;
+    user.refreshToken = refreshToken;
+  
+    await this.em.flush();
     return user;
   }
+  
 
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({ email });

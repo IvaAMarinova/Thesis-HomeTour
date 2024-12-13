@@ -1,18 +1,18 @@
 import { IsString, IsEmail, IsEnum, IsOptional } from 'class-validator';
-import { UserType } from '../user.entity';
+import { IUser } from './../user.inteface';
 
-export class CreateUserDto {
+export class CreateUserDto implements Partial<IUser> {
     @IsString()
-    fullName: string;
+    fullName!: string;
 
     @IsEmail()
-    email: string;
+    email!: string;
 
     @IsString()
-    password: string;
+    password!: string;
 
-    @IsEnum(UserType)
-    type: UserType;
+    @IsEnum(['b2b', 'b2c'])
+    type!: IUser['type'];
 
     @IsOptional()
     @IsString()
