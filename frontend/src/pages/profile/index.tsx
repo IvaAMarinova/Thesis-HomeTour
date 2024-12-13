@@ -70,7 +70,7 @@ function Profile() {
                 </button>
             </div>
 
-            <div className="p-8 max-w-lg w-full bg-white border rounded-lg shadow-lg">
+            <div className="p-8 max-w-lg w-full bg-white lg:border rounded-lg lg:shadow-lg">
                 <h2 className="text-2xl font-semibold mb-6 text-center">Редактирай своя профил</h2>
                 
                 <div className="flex items-center mb-8 space-x-4">

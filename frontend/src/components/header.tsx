@@ -20,6 +20,8 @@ function Header() {
   const { userCompany } = useUser();
   const { userType } = useUser();
   const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [isMainMenuOpen, setIsMainMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -53,10 +55,18 @@ function Header() {
     HttpService.logout();
     setUserId(null);
     navigate('/');
+    setIsUserMenuOpen(false);
   };
 
   const handleHeartClick = () => {
     navigate('/properties?isLikedOnly=true');
+    setIsMainMenuOpen(false);
+    setIsUserMenuOpen(false);
+  };
+
+  const closeMenus = () => {
+    setIsMainMenuOpen(false);
+    setIsUserMenuOpen(false);
   };
 
   return (
@@ -76,132 +86,124 @@ function Header() {
             </Link>
 
             {userId && (
-              <Heart 
-                className="text-[#F2ECDD] h-6 w-6 cursor-pointer transform transition-transform duration-300 hover:scale-105" 
-                onClick={handleHeartClick} 
+              <Heart
+                className="text-[#F2ECDD] h-6 w-6 cursor-pointer transform transition-transform duration-300 hover:scale-105"
+                onClick={handleHeartClick}
               />
             )}
-            
+
             <DropdownMenu>
-              <DropdownMenuTrigger>
+              <DropdownMenuTrigger onClick={() => { setIsUserMenuOpen(!isUserMenuOpen); setIsMainMenuOpen(false); }}>
                 <UserCircle className="h-8 w-8" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="p-1">
-                {userId ? (
-                  <div>
-                    {userType === "b2b" &&
-                      <div>
-                        <DropdownMenuItem>
-                          <Link to={`/edit-properties/${userId}`} className="flex flex-row items-center mt-1">
-                            <p className="font-bold"> Моите имоти</p>
-                            <Building className="h-4"/>
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Link to={`/edit-company/${userCompany}`} className="flex flex-row items-center">
-                            <p className="font-bold"> Моята компания</p>
-                            <Briefcase className="h-4"/>
-                          </Link>
-                        </DropdownMenuItem>
-                      </div>
-                    }
-                    <DropdownMenuItem>
-                      <Link to="/profile">
-                        Профил
+              {isUserMenuOpen && (
+                <DropdownMenuContent className="p-1">
+                  {userId ? (
+                    <div>
+                      {userType === "b2b" &&
+                        <div>
+                          <DropdownMenuItem onClick={closeMenus}>
+                            <Link to={`/edit-properties/${userId}`} className="flex flex-row items-center mt-1">
+                              <p className="font-bold">Моите имоти</p>
+                              <Building className="h-4" />
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={closeMenus}>
+                            <Link to={`/edit-company/${userCompany}`} className="flex flex-row items-center">
+                              <p className="font-bold">Моята компания</p>
+                              <Briefcase className="h-4" />
+                            </Link>
+                          </DropdownMenuItem>
+                        </div>
+                      }
+                      <DropdownMenuItem onClick={closeMenus}>
+                        <Link to="/profile">
+                          Профил
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleLogout}>
+                        Изход
+                      </DropdownMenuItem>
+                    </div>
+                  ) : (
+                    <DropdownMenuItem onClick={closeMenus}>
+                      <Link to="/login">
+                        Вход
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLogout}>
-                        Изход
-                    </DropdownMenuItem>
-                  </div>
-                ) : (
-                  <DropdownMenuItem>
-                    <Link to="/login">
-                      Вход
-                    </Link>
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
+                  )}
+                </DropdownMenuContent>
+              )}
             </DropdownMenu>
           </nav>
         ) : (
           <div className="flex items-center space-x-4">
             <DropdownMenu>
-              <DropdownMenuTrigger>
+              <DropdownMenuTrigger onClick={() => { setIsMainMenuOpen(!isMainMenuOpen); setIsUserMenuOpen(false); }}>
                 <Menu className="h-8 w-8" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="p-1 bg-white shadow-md rounded-md">
-                <DropdownMenuItem>
-                  <Link to="/properties" className="block font-semibold px-3 py-1 text-center w-full">
-                    Жилища
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link to="/companies" className="block font-semibold px-3 py-1 text-center w-full">
-                    Партньори
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <UserCircle className="h-8 w-8" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="p-1 bg-white shadow-md rounded-md mr-2">
-                {userId ? (
-                  <div>
-                    {userType === "b2b" && (
-                      <div>
-                        <DropdownMenuItem>
-                          <Link
-                            to={`/edit-properties/${userId}`}
-                            className="flex items-center justify-center text-center font-bold px-3 py-1 w-full"
-                          >
-                            Моите имоти
-                            <Building className="h-5 ml-1" />
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Link
-                            to={`/edit-company/${userCompany}`}
-                            className="flex items-center justify-center text-center font-bold px-3 py-1 w-full"
-                          >
-                            Моята компания
-                            <Briefcase className="h-5 ml-1" />
-                          </Link>
-                        </DropdownMenuItem>
-                      </div>
-                    )}
-                    <DropdownMenuItem>
-                      <Link
-                        to="/profile"
-                        className="flex items-center justify-center text-center font-semibold px-3 py-1 w-full"
-                      >
-                        Профил
-                        <UserCircle className="h-5 ml-1" />
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLogout}>
-                      <span className="flex items-center justify-center text-center font-semibold px-3 py-1 w-full">
-                        Изход
-                      </span>
-                    </DropdownMenuItem>
-                  </div>
-                ) : (
-                  <DropdownMenuItem>
-                    <Link
-                      to="/login"
-                      className="flex items-center justify-center text-center font-semibold px-3 py-1 w-full"
-                    >
-                      Вход
+              {isMainMenuOpen && (
+                <DropdownMenuContent className="p-1 bg-white shadow-md rounded-md">
+                  <DropdownMenuItem onClick={closeMenus}>
+                    <Link to="/properties" className="block font-semibold px-3 py-1 text-center w-full">
+                      Жилища
                     </Link>
                   </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
+                  <DropdownMenuItem onClick={closeMenus}>
+                    <Link to="/companies" className="block font-semibold px-3 py-1 text-center w-full">
+                      Партньори
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              )}
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger onClick={() => { setIsUserMenuOpen(!isUserMenuOpen); setIsMainMenuOpen(false); }}>
+                <UserCircle className="h-8 w-8" />
+              </DropdownMenuTrigger>
+              {isUserMenuOpen && (
+                <DropdownMenuContent className="p-1 bg-white shadow-md rounded-md">
+                  {userId ? (
+                    <div>
+                      {userType === "b2b" && (
+                        <div>
+                          <DropdownMenuItem onClick={closeMenus}>
+                            <Link to={`/edit-properties/${userId}`} className="flex items-center justify-center text-center font-bold px-3 py-1 w-full">
+                              Моите имоти
+                              <Building className="h-5 ml-1" />
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={closeMenus}>
+                            <Link to={`/edit-company/${userCompany}`} className="flex items-center justify-center text-center font-bold px-3 py-1 w-full">
+                              Моята компания
+                              <Briefcase className="h-5 ml-1" />
+                            </Link>
+                          </DropdownMenuItem>
+                        </div>
+                      )}
+                      <DropdownMenuItem onClick={closeMenus}>
+                        <Link to="/profile" className="flex items-center justify-center text-center font-semibold px-3 py-1 w-full">
+                          Профил
+                          <UserCircle className="h-5 ml-1" />
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={handleLogout}>
+                        <span className="flex items-center justify-center text-center font-semibold px-3 py-1 w-full">
+                          Изход
+                        </span>
+                      </DropdownMenuItem>
+                    </div>
+                  ) : (
+                    <DropdownMenuItem onClick={closeMenus}>
+                      <Link to="/login" className="flex items-center justify-center text-center font-semibold px-3 py-1 w-full">
+                        Вход
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              )}
             </DropdownMenu>
           </div>
-
         )}
       </div>
     </header>
