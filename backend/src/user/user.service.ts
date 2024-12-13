@@ -51,7 +51,6 @@ export class UserService {
   async update(id: string, userData: UpdateUserDto): Promise<User> {
     const existingUser = await this.userRepository.findOne({ id });
     if (!existingUser) {
-      console.log("[User service] User not found: ", userData);
       throw new NotFoundException(`User with id ${id} not found`);
     }
   
@@ -62,11 +61,14 @@ export class UserService {
       }
       existingUser.company = company;
     }
+  
+    const { companyId, ...otherUserData } = userData; 
+    Object.assign(existingUser, otherUserData);
+  
     await this.em.flush();
     return existingUser;
   }
   
-
   async delete(id: string): Promise<void> {
     const user = await this.userRepository.findOne({ id });
     if (!user) {

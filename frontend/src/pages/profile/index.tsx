@@ -6,12 +6,18 @@ import { UserCircle, ArrowLeft } from "@mynaui/icons-react";
 import { HttpService } from '../../services/http-service';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { z } from "zod";
+
+const profileSchema = z.object({
+    fullName: z.string().min(2, {
+        message: "Пълното име трябва да има поне две букви.",
+    })
+});
 
 function Profile() {
     const navigate = useNavigate();
     const [user, setUser] = useState<Record<string, string>>({
-        fullName: '',
-        email: ''
+        fullName: ''    
     });
     const [company, setCompany] = useState<Record<string, string>>({});
 
@@ -19,7 +25,7 @@ function Profile() {
         const fetchUserAndCompany = async () => { 
             try {                
                 const userResponse = await HttpService.get<Record<string, string>>(`/auth/me`, undefined, true);
-                setUser(userResponse);    
+                setUser(userResponse);
                 if (userResponse.company) {
                     const companyResponse = await HttpService.get<Record<string, string>>(`/companies/${userResponse.company}`, undefined, true);
                     setCompany(companyResponse);
@@ -37,10 +43,18 @@ function Profile() {
     };
 
     const handleUpdateProfile = async () => {
-        try {
+        try{
+            profileSchema.parse(user);
+
             await HttpService.put<Record<string, string>>(`/users/${user.id}`, user, undefined, true);
-        } catch (error) {
-            console.error("Error updating profile:", error);
+            toast.success("Успешно обновихте акаунта си!")
+        } catch(error) {
+            if (error instanceof z.ZodError) {
+                error.errors.forEach((err) => toast.error(err.message));
+                error.errors.forEach((err) => console.log(err));
+            } else {
+                toast.error("Възникна грешка. Опитайте отново!");
+            }
         }
     };
 
@@ -79,14 +93,10 @@ function Profile() {
                         />
                     </div>
                     <div>
-                        <Label className="mb-2 block">Имейл адрес</Label>
-                        <Input
-                            id="email"
-                            name="email"
-                            value={user.email}
-                            onChange={handleChange}
-                            className="mt-2 w-full"
-                        />
+                        <div>
+                            <Label className="mb-2 block">Имейл адрес</Label>
+                            <p className="text-italic text-sm text-gray-500">{user.email}</p>
+                        </div>
                     </div>
                     {user.company && (
                         <div>

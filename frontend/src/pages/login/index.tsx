@@ -119,8 +119,8 @@ export function Login({ onLoginSuccess }: LoginProps) {
       <div className="rounded-lg shadow-md p-6 w-[400px] border">
         <Tabs defaultValue="login">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="register">Register</TabsTrigger>
+            <TabsTrigger value="login">Влез в акаунт</TabsTrigger>
+            <TabsTrigger value="register">Регистрирай се</TabsTrigger>
           </TabsList>
           <TabsContent value="login">
             <Form {...loginForm}>
@@ -130,7 +130,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Имейл адрес</FormLabel>
                       <FormControl>
                         <Input placeholder="Type here..." {...field} />
                       </FormControl>
@@ -143,7 +143,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>Парола</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input
@@ -170,7 +170,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                     </FormItem>
                   )}
                 />
-                <Button type="submit">Login</Button>
+                <Button type="submit">Вход</Button>
               </form>
             </Form>
           </TabsContent>
@@ -182,7 +182,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                   name="fullName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Full Name</FormLabel>
+                      <FormLabel>Пълно име</FormLabel>
                       <FormControl>
                         <Input placeholder="Type here..." {...field} />
                       </FormControl>
@@ -195,7 +195,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Имейл адрес</FormLabel>
                       <FormControl>
                         <Input placeholder="Type here..." {...field} />
                       </FormControl>
@@ -208,7 +208,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>Парола</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input
@@ -235,7 +235,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                     </FormItem>
                   )}
                 />
-                <Button type="submit">Register</Button>
+                <Button type="submit">Регистрация</Button>
               </form>
             </Form>
           </TabsContent>
