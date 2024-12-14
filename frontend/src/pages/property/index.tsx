@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { HttpService } from "../../services/http-service";
-import ImagesCarousel from "../../components/images-carousel";
+import ImagesCarousel from "../../components/property/images-carousel";
 import GoBackButton from "@/components/go-back-button";
 import ContactCompanyBox from "../../components/property/contact-company-box";
 import Visualization from "@/components/property/visualization";
