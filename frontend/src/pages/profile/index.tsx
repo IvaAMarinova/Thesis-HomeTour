@@ -59,7 +59,7 @@ function Profile() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center min-h-screen mt-20 lg:mt-1 md:mt-1">
             <div className="w-full flex flex-row px-4 justify-center mb-4">
                 <button
                     onClick={() => navigate(-1)}

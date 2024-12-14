@@ -94,11 +94,11 @@ function Home() {
       </div>
 
       <div className="w-full flex flex-col items-center p-8 mb-6">
-        <h2 className="text-3xl font-bold flex items-center mb-6">
+        <h2 className="text-3xl font-bold flex items-center text-center mb-6">
           Изберете нас ако..
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          <div className="flex flex-col items-center justify-center border shadow-md rounded-lg py-10 px-2 h-[500px]">
+          <div className="flex flex-col items-center justify-center border shadow-md rounded-lg py-10 px-2 h-auto">
             <Leaves className="w-12 h-12" />
             <p className="text-lg max-w-2xl text-center p-4">
               Търсите <strong>иновативен и креативен начин</strong> да представите вашите проектим, които са още в етап „на зелено”. 
@@ -106,7 +106,7 @@ function Home() {
               турове, които ангажират и впечатляват.<br /><br />
             </p>
           </div>
-          <div className="flex flex-col items-center justify-center border shadow-md rounded-lg py-10 px-2 h-[500px]">
+          <div className="flex flex-col items-center justify-center border shadow-md rounded-lg py-10 px-2 h-auto">
             <HomeSmile className="w-12 h-12" />
             <p className="text-lg max-w-2xl text-center p-4">
               Вече разполагате с готови сгради и искате да избегнете стандартното представяне чрез обикновени снимки, ние ви 
@@ -115,7 +115,7 @@ function Home() {
               атмосферата на мястото.<br /><br />
             </p>
           </div>
-          <div className="flex flex-col items-center justify-center border shadow-md rounded-lg py-10 px-2 h-[500px]">
+          <div className="flex flex-col items-center justify-center border shadow-md rounded-lg py-10 px-2 h-auto">
             <BrightnessHigh className="w-12 h-12" />
             <p className="text-lg max-w-2xl text-center p-4">
               Доверете се на нас, ако искате <strong>да разнообразите своята визия</strong> и да предоставите нещо ново и различно на 
@@ -159,16 +159,16 @@ function Home() {
       </div>
 
       <div className="w-full flex flex-col items-center p-8 mb-12">
-        <h2 className="text-3xl font-bold flex items-center">Свържете се с нас</h2>
+        <h2 className="text-3xl font-bold flex items-center text-center">Свържете се с нас</h2>
         <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full max-w-2xl justify-center">
           <div className="flex flex-col items-center p-3 border rounded-lg shadow-md w-full sm:w-[320px]">
-            <h2 className="text-2xl font-semibold p-3">Телефонен номер</h2>
+            <h2 className="text-2xl font-semibold p-3 text-center">Телефонен номер</h2>
             <TelephoneCall className="w-12 h-12" />
             <p className="text-lg text-center p-3">{phoneNumber}</p>
           </div>
 
           <div className="flex flex-col items-center p-3 border rounded-lg shadow-md w-full sm:w-[320px]">
-            <h2 className="text-2xl font-semibold p-3">Имейл</h2>
+            <h2 className="text-2xl font-semibold p-3 text-center">Имейл</h2>
             <Envelope className="w-12 h-12" />
             <p className="text-lg text-center p-3">{email}</p>
           </div>
