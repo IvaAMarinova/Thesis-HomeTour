@@ -5,7 +5,6 @@ import { User } from './user.entity';
 import { CompanyService } from '../company/company.service';
 import { UserType } from './user.entity';
 import { hash, compare } from 'bcrypt';
-import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -48,7 +47,7 @@ export class UserService {
     return user;
   }
 
-  async update(id: string, userData: UpdateUserDto): Promise<User> {
+  async update(id: string, userData: {fullName: string, email: string, password: string, type: UserType, companyId?: string}): Promise<User> {
     const existingUser = await this.userRepository.findOne({ id });
     if (!existingUser) {
       throw new NotFoundException(`User with id ${id} not found`);

@@ -6,7 +6,7 @@ interface UserContextType {
   setUserId: (id: number | null) => void;
   fetchUserId: () => Promise<void>;
   userType: UserType | null;
-  userCompany?: string | null;
+  userCompany?: string;
 }
 
 type UserType = "b2b" | "b2c";
@@ -16,7 +16,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserId] = useState<number | null>(null);
   const [userType, setUserType] = useState<UserType | null>(null);
-  const [userCompany, setUserCompany] = useState<string | null>(null);
+  const [userCompany, setUserCompany] = useState<string | undefined>(undefined);
 
   const fetchUserId = useCallback(async () => {
     try {
@@ -29,19 +29,20 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         setUserCompany(response.company);
         setUserType(response.type);
       });
-  
+
       if (!isAuthenticated) {
         console.log("[UserContext] User is not authenticated.");
         setUserId(null);
+        setUserCompany(undefined);
       }
     } catch (error) {
       console.error("[UserContext] Error fetching user ID:", error);
 
       setUserId(null);
       setUserType(null);
+      setUserCompany(undefined);
     }
   }, []);
-  
 
   return (
     <UserContext.Provider value={{ userId, setUserId, fetchUserId, userType, userCompany }}>

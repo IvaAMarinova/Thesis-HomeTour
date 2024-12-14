@@ -1,13 +1,14 @@
 import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
 import { UserPropertyService } from './user-property.service';
 import { UserProperty } from './user-property.entity';
+import { UserPropertyInputDto } from './dto/user-property-input.dto';
 
 @Controller('user-properties')
 export class UserPropertyController {
   constructor(private readonly userPropertyService: UserPropertyService) {}
 
   @Post()
-  async createUserProperty(@Body() body: { userId: string; propertyId: string; liked: boolean }): Promise<UserProperty> {
+  async createUserProperty(@Body() body:UserPropertyInputDto): Promise<UserProperty> {
     return this.userPropertyService.create(body.userId, body.propertyId, body.liked);
   }
 

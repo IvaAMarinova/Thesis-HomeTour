@@ -161,7 +161,7 @@ function Property() {
                         </div>
 
                         <div className="w-full max-w-6xl mx-auto px-4 mt-4">
-                            {property?.resources?.galleryImages?.length > 1 && (
+                            {property?.resources?.galleryImages?.length > 0 && (
                                 <ImagesCarousel galleryImages={property.resources.galleryImages} />
                             )}
                         </div>

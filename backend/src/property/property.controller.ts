@@ -1,8 +1,10 @@
 import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { PropertyService } from './property.service';
 import { PropertyEntity } from './property.entity';
 import { FileUploadService } from '../upload/upload.service';
 import { TransformedPropertyDto } from './dto/property-transformed-response.dto';
+import { PropertyInputDto } from './dto/property-input.dto';
 
 @Controller('properties')
 export class PropertyController {
@@ -12,32 +14,17 @@ export class PropertyController {
   ) {}
 
   @Post()
-  async createProperty(@Body() body: {
-    description: string, 
-    name: string, 
-    address: Record<string, string>, 
-    phoneNumber: string, 
-    email: string, 
-    company: string,
-    resources?: {
-      headerImage?: string | null;
-      galleryImages?: string[];
-      visualizationFolder?: string | null;
-    }, 
-    floor?: number, 
-    buildingId?: string
-  }): Promise<PropertyEntity> {
-    console.log(body);
+  async createProperty(@Body() body: PropertyInputDto): Promise<PropertyEntity> {
     return this.propertyService.create(
       body.address,
       body.phoneNumber,
       body.email,
-      body.company,
+      body.companyId,
       body.name,
       body.description,
       body.floor,
-      body.buildingId,
-      body.resources
+      body.resources,
+      body.buildingId
     );
   }
 
@@ -52,7 +39,7 @@ export class PropertyController {
   }
 
   @Put(':id')
-  async updateProperty(@Param('id') id: string, @Body() body: PropertyEntity): Promise<PropertyEntity | null> {
+  async updateProperty(@Param('id') id: string, @Body() body: PropertyInputDto): Promise<PropertyEntity | null> {
     return this.propertyService.update(id, body);
   }
 
@@ -119,7 +106,4 @@ export class PropertyController {
       },
     };
   }
-  
-  
-
 }

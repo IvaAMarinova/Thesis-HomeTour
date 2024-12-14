@@ -21,7 +21,11 @@ export class PropertyEntity {
   floor: number;
 
   @Property({ type: JsonType })
-  address!: Record<string, string>;
+  address!: {
+    street: string;
+    city: string;
+    neighborhood: string;
+  }
 
   @Property()
   phoneNumber!: string;
@@ -29,16 +33,16 @@ export class PropertyEntity {
   @Property()
   email!: string;
 
-  @Property({ type: JsonType, nullable: true })
-  resources?: {
-    headerImage?: string | null;
-    galleryImages?: string[];
-    visualizationFolder?: string | null;
+  @Property({ type: JsonType })
+  resources!: {
+    headerImage: string;
+    galleryImages: string[];
+    visualizationFolder?: string;
   };
 
   @ManyToOne(() => Company)
   company!: Company;
 
   @ManyToOne(() => Building, { nullable: true })
-  building!: Building;
+  building?: Building;
 }

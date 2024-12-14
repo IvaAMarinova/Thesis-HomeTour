@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, BadRequestException } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { Company } from './company.entity';
 import { PropertyEntity } from '../property/property.entity';
 import { FileUploadService } from '../upload/upload.service';
 import { TransformedCompanyDto } from './dto/company-transformed-response.dto'
 import { TransformedPropertyDto } from '../property/dto/property-transformed-response.dto'
+import { CompanyInputDto } from './dto/company-input.dto';
 
 @Controller('companies')
 export class CompanyController {
@@ -14,12 +15,13 @@ export class CompanyController {
   ) {}
 
   @Post()
-  async createCompany(@Body() body: {name: string, description: string, email: string, phoneNumber: string, website: string, resources?: {logoImage?: string | null, galleryImage?: string}}): Promise<Company> {
+  async createCompany(
+    @Body() body: CompanyInputDto ): Promise<Company> {
     return this.companyService.create(body.name, body.description, body.email, body.phoneNumber, body.website, body.resources);
   }
 
   @Put(':id')
-  async updateCompany(@Param('id') id: string, @Body() body: Company): Promise<Company | null> {
+  async updateCompany(@Param('id') id: string, @Body() body: CompanyInputDto): Promise<Company | null> {
     return this.companyService.update(id, body);
   }
 

@@ -49,22 +49,14 @@ const propertySchema = z.object({
             .object({
                 key: z.string().min(1, {
                     message: "Ключът на заглавното изображение не може да бъде празен.",
-                }),
-                url: z.string().url({
-                    message: "URL адресът на заглавното изображение трябва да бъде валиден.",
-                }),
-            })
+                })            })
             .optional(),
         galleryImages: z
             .array(
                 z.object({
                     key: z.string().min(1, {
                         message: "Ключът на изображението в галерията не може да бъде празен.",
-                    }),
-                    url: z.string().url({
-                        message: "URL адресът на изображението в галерията трябва да бъде валиден.",
-                    }),
-                })
+                    })                })
             )
             .optional(),
         vizualizationFolder: z.string().optional(),
@@ -177,7 +169,7 @@ function EditProperty() {
                 { key: "email", value: property.email },
                 { key: "name", value: property.name },
                 { key: "description", value: property.description },
-                { key: "resources.headerImage", value: property.resources?.headerImage },
+                { key: "resources.headerImage", value: property.resources?.headerImage }            
             ];
             
             const missingFields = requiredFields.filter((field) => !field.value);
@@ -207,7 +199,7 @@ function EditProperty() {
             const updatedProperty = {
                 ...property,
                 resources: updatedResources,
-                ...(isNewProperty && { company: userCompany })
+                companyId: userCompany
             };
             const url = isNewProperty ? "/properties" : `/properties/${id}`;
             const method = isNewProperty ? "post" : "put";

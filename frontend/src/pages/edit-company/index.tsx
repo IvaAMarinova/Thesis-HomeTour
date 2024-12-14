@@ -34,8 +34,8 @@ const companySchema = z.object({
     name: z.string().min(1, {
         message: "Името не може да бъде празно.",
     }),
-    website: z.string().min(1, {
-        message: "Уебсайтът не може да бъде празен.",
+    website: z.string().url({
+        message: "Моля, въведете валиден уеб адрес.",
     }),
     description: z
         .string()

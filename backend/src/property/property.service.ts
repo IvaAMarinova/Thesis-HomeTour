@@ -19,24 +19,28 @@ export class PropertyService {
   ) {}
 
   async create(
-    address: Record<string, string>,
+    address: {
+      street: string;
+      city: string;
+      neighborhood: string;
+    },
     phoneNumber: string,
     email: string,
-    company: string,
+    companyId: string,
     name: string,
     description: string,
-    floor?: number,
-    buildingId?: string,
-    resources?: {
-      headerImage?: string | null;
-      galleryImages?: string[];
+    floor: number,
+    resources: {
+      headerImage: string | null;
+      galleryImages: string[];
       visualizationFolder?: string | null;
     },
+    buildingId?: string,
   ): Promise<PropertyEntity> {
-    const companyObject = await this.companyRepository.findOne({ id: company });
-    console.log('[PropertyService] company: ', company);
-    if (!company) {
-      throw new NotFoundException(`Company with id ${company} not found`);
+    const companyObject = await this.companyRepository.findOne({ id: companyId });
+    if (!companyObject) {
+      console.error(`Company with id ${companyId} not found`);
+      throw new NotFoundException(`Company with id ${companyId} not found`);
     }
     
     const property = new PropertyEntity();
@@ -44,7 +48,7 @@ export class PropertyService {
     property.address = address;
     property.phoneNumber = phoneNumber;
     property.email = email;
-    property.resources = resources || {};
+    property.resources = resources;
     property.company = companyObject;
     property.name = name;
     property.description = description;

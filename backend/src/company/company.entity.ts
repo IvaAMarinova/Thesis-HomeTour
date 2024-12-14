@@ -24,9 +24,9 @@ export class Company {
   @Property()
   website!: string;
 
-  @Property({ type: JsonType, nullable: true })
-  resources?: {
-    logoImage?: string | null;
-    galleryImage?: string;
+  @Property({ type: JsonType })
+  resources!: {
+    logoImage: string;
+    galleryImage: string;
   };
 }
