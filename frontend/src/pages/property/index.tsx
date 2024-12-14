@@ -6,7 +6,8 @@ import GoBackButton from "@/components/go-back-button";
 import ContactCompanyBox from "../../components/property/contact-company-box";
 import Visualization from "@/components/property/visualization";
 import GoUpButton from "../../components/go-up-button";
-import { Heart, HeartSolid } from "@mynaui/icons-react";
+import { Heart, HeartSolid, TelephoneCall, Envelope } from "@mynaui/icons-react";
+
 import { useUser } from "@/contexts/UserContext";
 
 function Property() {
@@ -122,7 +123,7 @@ function Property() {
                                             {property.name}
                                         </h1>
                                 
-                                        <div className="text-base text-gray-700 whitespace-pre-line lg:mr-12">
+                                        <div className="whitespace-pre-line lg:mr-12">
                                             {property.description?.split("\n").map((paragraph: string, index: string) => (
                                                 <p
                                                     key={index}
@@ -135,14 +136,28 @@ function Property() {
                                         </div>
                                 
                                         <div className="mt-4">
-                                            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+                                            <h2 className="text-xl font-semibold mb-2">
                                                 Адрес на имота
                                             </h2>
-                                            <p className="text-base text-gray-700">
+                                            <p>
                                                 {[property.address?.city, property.address?.neighborhood, property.address?.street]
                                                     .filter(Boolean)
                                                     .join(", ")}
                                             </p>
+                                        </div>
+
+                                        <div className="mt-4">
+                                            <h3 className="text-md font-semibold mb-2">
+                                                За повече информация за този обект потърси:
+                                            </h3>
+                                            <div className="flex flex-row items-center gap-2 mb-1">
+                                                <TelephoneCall className="h-5"/>
+                                                {property.email}
+                                            </div>
+                                            <div className="flex flex-row items-center gap-2">
+                                                <Envelope className="h-5"/>
+                                                {property.phoneNumber}
+                                            </div>
                                         </div>
                                     </div>
                                 
@@ -175,7 +190,7 @@ function Property() {
                     </div>
                 ) : (
                     <div className="flex items-center justify-center h-16">
-                        <p className="text-center text-gray-700">
+                        <p className="text-center">
                             За момента не можем да визуализираме този имот. Пробвайте пак по-късно!
                         </p>
                     </div>
