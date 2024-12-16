@@ -58,7 +58,8 @@ function Properties() {
             const response = await HttpService.get<{ property: { id: string } }[]>(
                 `/user-properties/user-id-liked/${userId}`,
                 undefined,
-                true
+                true,
+                false
             );
             setLikedProperties(response);
         } catch (error) {

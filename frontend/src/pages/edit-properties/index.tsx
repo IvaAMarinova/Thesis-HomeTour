@@ -57,7 +57,7 @@ function EditProperties() {
 
     const handleDeleteProperty = async (propertyId: string) => {
         try {
-            await HttpService.delete(`properties/${propertyId}`);
+            await HttpService.delete(`properties/${propertyId}`, undefined, true, false);
             toast.success("Успешно изтрихте имота!");
 
             setProperties((prevState) =>

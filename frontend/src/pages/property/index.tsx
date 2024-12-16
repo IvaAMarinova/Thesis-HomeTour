@@ -70,7 +70,7 @@ function Property() {
             await HttpService.put(`/user-properties/user-id/${userId}`, {
                 liked: newLikedState,
                 propertyId: id,
-            }, undefined, true);
+            }, undefined, true, false);
 
             setIsLiked(newLikedState);
             console.log(`Property ${newLikedState ? "liked" : "unliked"} successfully.`);

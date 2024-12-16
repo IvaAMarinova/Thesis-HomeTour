@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, NotFoundException } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { Company } from './company.entity';
 import { PropertyEntity } from '../property/property.entity';
@@ -6,6 +6,7 @@ import { FileUploadService } from '../upload/upload.service';
 import { TransformedCompanyDto } from './dto/company-transformed-response.dto'
 import { TransformedPropertyDto } from '../property/dto/property-transformed-response.dto'
 import { CompanyInputDto } from './dto/company-input.dto';
+import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 
 @Controller('companies')
 export class CompanyController {
@@ -14,17 +15,21 @@ export class CompanyController {
     private readonly fileUploadService: FileUploadService
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   async createCompany(
-    @Body() body: CompanyInputDto ): Promise<Company> {
-    return this.companyService.create(body.name, body.description, body.email, body.phoneNumber, body.website, body.resources);
+    @Body() body: CompanyInputDto ): Promise<TransformedCompanyDto> {
+    const user = await this.companyService.create(body.name, body.description, body.email, body.phoneNumber, body.website, body.resources);
+    return this.mapPresignedUrlsToCompany(user);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
   async updateCompany(@Param('id') id: string, @Body() body: CompanyInputDto): Promise<Company | null> {
     return this.companyService.update(id, body);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async deleteCompany(@Param('id') id: string): Promise<void> {
     await this.companyService.delete(id);
@@ -40,10 +45,14 @@ export class CompanyController {
   @Get(':id')
   async getCompany(@Param('id') id: string): Promise<TransformedCompanyDto> {
     const company = await this.companyService.getCompanyById(id);
-    const updatedCompany = await this.mapPresignedUrlsToCompany(company);
-    console.log("[Company controller] Company after mapped: ", updatedCompany);
-    return updatedCompany;
+
+    if (!company) {
+      throw new NotFoundException('Company not found');
+    }
+
+    return await this.mapPresignedUrlsToCompany(company);
   }
+
 
   @Get(':id/properties')
   async getallPropertiesByCompany(@Param('id') id: string): Promise<TransformedPropertyDto[]> {
@@ -57,34 +66,58 @@ export class CompanyController {
   }
 
   async mapPresignedUrlsToCompany(company: Company): Promise<TransformedCompanyDto> {
-    return {
-      id: company.id,
+    const logoImage = company.resources?.logoImage
+      ? {
+          key: company.resources.logoImage,
+          url: await this.fileUploadService.getPreSignedURLToViewObject(company.resources.logoImage),
+        }
+      : null;
+  
+    const galleryImage = company.resources?.galleryImage
+      ? {
+          key: company.resources.galleryImage,
+          url: await this.fileUploadService.getPreSignedURLToViewObject(company.resources.galleryImage),
+        }
+      : null;
+  
+    const transformedResources = {
+      logoImage,
+      galleryImage,
+    };
+  
+    return new TransformedCompanyDto({
       name: company.name,
       description: company.description,
       phoneNumber: company.phoneNumber,
       email: company.email,
       website: company.website,
-      resources: {
-        ...company.resources,
-        logoImage: company.resources?.logoImage
-          ? {
-              key: company.resources.logoImage,
-              url: await this.fileUploadService.getPreSignedURLToViewObject(company.resources.logoImage),
-            }
-          : null,
-        galleryImage: company.resources?.galleryImage
-          ? {
-            key: company.resources.galleryImage,
-            url: await this.fileUploadService.getPreSignedURLToViewObject(company.resources.galleryImage),
-          }
-          : null,
-      },
-    };
+      resources: transformedResources,
+    });
   }
-
+  
   async mapPresignedUrlsToProperty(property: PropertyEntity): Promise<TransformedPropertyDto> {
-    console.log('[PropertyController] Property Data:', property);
-    return {
+    const headerImage = property.resources?.headerImage
+      ? {
+          key: property.resources.headerImage,
+          url: await this.fileUploadService.getPreSignedURLToViewObject(property.resources.headerImage),
+        }
+      : null;
+  
+    const galleryImages = property.resources?.galleryImages
+      ? await Promise.all(
+          property.resources.galleryImages.map(async (imageKey) => ({
+            key: imageKey,
+            url: await this.fileUploadService.getPreSignedURLToViewObject(imageKey),
+          }))
+        )
+      : [];
+  
+    const transformedResources = {
+      headerImage,
+      galleryImages,
+    };
+  
+    return new TransformedPropertyDto({
       id: property.id,
       name: property.name,
       description: property.description,
@@ -94,23 +127,8 @@ export class CompanyController {
       email: property.email,
       company: property.company.id,
       building: property.building?.id || null,
-      resources: {
-        ...property.resources,
-        headerImage: property.resources?.headerImage
-          ? {
-              key: property.resources.headerImage,
-              url: await this.fileUploadService.getPreSignedURLToViewObject(property.resources.headerImage),
-            }
-          : null,
-        galleryImages: property.resources?.galleryImages
-          ? await Promise.all(
-              property.resources.galleryImages.map(async (imageKey) => ({
-                key: imageKey,
-                url: await this.fileUploadService.getPreSignedURLToViewObject(imageKey),
-              }))
-            )
-          : [],
-      },
-    };
+      resources: transformedResources,
+    });
   }
+  
 }

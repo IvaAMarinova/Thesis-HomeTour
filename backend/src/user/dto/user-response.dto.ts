@@ -17,6 +17,5 @@ export class UserResponseDto {
     this.email = user.email;
     this.type = user.type;
     this.companyId = user.company?.id;
-    this.password = user.password;
   }
 }

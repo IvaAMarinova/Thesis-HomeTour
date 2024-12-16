@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
-import { BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
 import { PropertyService } from './property.service';
 import { PropertyEntity } from './property.entity';
 import { FileUploadService } from '../upload/upload.service';
 import { TransformedPropertyDto } from './dto/property-transformed-response.dto';
 import { PropertyInputDto } from './dto/property-input.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'; 
 
 @Controller('properties')
 export class PropertyController {
@@ -13,9 +13,10 @@ export class PropertyController {
     private readonly fileUploadService: FileUploadService
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  async createProperty(@Body() body: PropertyInputDto): Promise<PropertyEntity> {
-    return this.propertyService.create(
+  async createProperty(@Body() body: PropertyInputDto): Promise<TransformedPropertyDto> {
+    const property = await this.propertyService.create(
       body.address,
       body.phoneNumber,
       body.email,
@@ -24,8 +25,9 @@ export class PropertyController {
       body.description,
       body.floor,
       body.resources,
-      body.buildingId
+      body.buildingId,
     );
+    return this.mapPresignedUrlsToProperty(property);
   }
 
   @Get('addresses')
@@ -38,72 +40,99 @@ export class PropertyController {
     return this.propertyService.getAllFloors();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async updateProperty(@Param('id') id: string, @Body() body: PropertyInputDto): Promise<PropertyEntity | null> {
-    return this.propertyService.update(id, body);
+  async updateProperty(@Param('id') id: string, @Body() body: PropertyInputDto): Promise<{ message: string }> {
+    try {
+      await this.propertyService.update(id, body);
+      return { message: 'Property updated successfully' };
+    } catch (error) {
+      throw error;
+    }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async deleteProperty(@Param('id') id: string): Promise<void> {
-    await this.propertyService.delete(id);
+  async deleteProperty(@Param('id') id: string): Promise<{ message: string }> {
+    try {
+      await this.propertyService.delete(id);
+      return { message: 'Property deleted successfully' };
+    } catch (error) {
+      throw error;
+    }
   }
 
   @Get()
   async getAllProperties(): Promise<TransformedPropertyDto[]> {
     const properties = await this.propertyService.getAllProperties();
-    return Promise.all(properties.map((property) => this.mapPresignedUrlsToProperty(property)));
+
+    const mappedProperties = await Promise.all(
+      properties.map((property) => this.mapPresignedUrlsToProperty(property))
+    );
+
+    return mappedProperties;
   }
 
   @Get('ids')
   async getAllPropertyIds(): Promise<{ id: string }[]> {
       const ids = await this.propertyService.getAllPropertyIds();
-      console.log('[Controller] Retrieved IDs:', ids); // Debug log
       return ids;
   }
 
   @Get(':id')
-  async getPropertyById(@Param('id') id: string): Promise<TransformedPropertyDto | null> {
+  async getPropertyById(@Param('id') id: string): Promise<TransformedPropertyDto> {
     const property = await this.propertyService.getPropertyById(id);
     if (!property) return null;
     return this.mapPresignedUrlsToProperty(property);
   }
 
-
+  @UseGuards(JwtAuthGuard)
   @Delete('all')
   async deleteAllProperties(): Promise<{ message: string }> {
-      await this.propertyService.deleteAllProperties();
-      return { message: 'All properties have been deleted.' };
+      try {
+          await this.propertyService.deleteAllProperties();
+          return { message: 'All properties deleted successfully' };
+      } catch (error) {
+          throw error;
+      }
   }
 
   async mapPresignedUrlsToProperty(property: PropertyEntity): Promise<TransformedPropertyDto> {
-    console.log('[PropertyController] Property Data:', property);
-    return {
+    const headerImage = property.resources?.headerImage
+      ? {
+          key: property.resources.headerImage,
+          url: await this.fileUploadService.getPreSignedURLToViewObject(property.resources.headerImage),
+        }
+      : null;
+  
+    const galleryImages = property.resources?.galleryImages
+      ? await Promise.all(
+          property.resources.galleryImages.map(async (imageKey) => ({
+            key: imageKey,
+            url: await this.fileUploadService.getPreSignedURLToViewObject(imageKey),
+          }))
+        )
+      : [];
+  
+    const transformedResources = {
+      headerImage,
+      galleryImages,
+      visualizationFolder: property.resources?.visualizationFolder || null,
+    };
+  
+    return new TransformedPropertyDto({
       id: property.id,
       name: property.name,
       description: property.description,
       floor: property.floor,
-      address: property.address,
+      address: property.address as { street: string; city: string; neighborhood: string },
       phoneNumber: property.phoneNumber,
       email: property.email,
       company: property.company.id,
-      building: property.building?.id || null,
-      resources: {
-        ...property.resources,
-        headerImage: property.resources?.headerImage
-          ? {
-              key: property.resources.headerImage,
-              url: await this.fileUploadService.getPreSignedURLToViewObject(property.resources.headerImage),
-            }
-          : null,
-        galleryImages: property.resources?.galleryImages
-          ? await Promise.all(
-              property.resources.galleryImages.map(async (imageKey) => ({
-                key: imageKey,
-                url: await this.fileUploadService.getPreSignedURLToViewObject(imageKey),
-              }))
-            )
-          : [],
-      },
-    };
+      resources: transformedResources,
+      building: property.building?.id || undefined,
+    });
   }
+  
+  
 }

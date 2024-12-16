@@ -1,62 +1,67 @@
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import { UserPropertyResponseDto } from './dto/user-property-response.dto';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
 import { UserPropertyService } from './user-property.service';
-import { UserProperty } from './user-property.entity';
 import { UserPropertyInputDto } from './dto/user-property-input.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('user-properties')
 export class UserPropertyController {
-  constructor(private readonly userPropertyService: UserPropertyService) {}
+    constructor(private readonly userPropertyService: UserPropertyService) {}
 
-  @Post()
-  async createUserProperty(@Body() body:UserPropertyInputDto): Promise<UserProperty> {
-    return this.userPropertyService.create(body.userId, body.propertyId, body.liked);
-  }
-
-  @Get()
-  async getAllUserProperties(): Promise<UserProperty[]> {
-    return this.userPropertyService.getAllUserProperties();
-  }
-
-  @Put(':id')
-  async updateUserProperty(@Param('id') id: string, @Body() body: { liked: boolean }): Promise<UserProperty> {
-    return this.userPropertyService.update(id, body.liked);
-  }
-
-  @Delete(':id')
-  async deleteUserProperty(@Param('id') id: string): Promise<void> {
-    await this.userPropertyService.delete(id);
-  }
-
-  @Get('/user-id-liked/:userId')
-  async getLikedUserProperties(@Param('userId') userId: string): Promise<UserProperty[]> {
-    return this.userPropertyService.getLikedUserProperties(userId);
-  }
-
-  @Get('/property-id/:propertyId')
-  async getPropertyUsers(@Param('propertyId') propertyId: string): Promise<UserProperty[]> {
-    return this.userPropertyService.getPropertyUsers(propertyId);
-  }
-
-  @Put('/user-id/:userId')
-  async updateUserPropertyByUserId(@Param('userId') userId: string, @Body() body: { propertyId: string; liked: boolean }): Promise<UserProperty> {
-    console.log("[UserPropertyController] User id:", userId);
-    console.log("[UserPropertyController] Property id:", body.propertyId);
-    console.log("[UserPropertyController] Liked:", body.liked);
-
-    let userProperty;
-    try {
-      userProperty = await this.userPropertyService.getByIds(userId, body.propertyId);
-    } catch (error) {
-      console.log("[UserPropertyController] Error getting user property.");
-    } 
-
-    if (!userProperty) {
-      console.log("[UserPropertyController] User property not found. Creating new one");
-      return await this.userPropertyService.create(userId, body.propertyId, body.liked);
-    } else {
-      console.log("[UserPropertyController] User property found. Updating it");
-      return await this.userPropertyService.update(userProperty.id, body.liked);
+    @UseGuards(JwtAuthGuard)
+    @Post()
+    async createUserProperty(@Body() body: UserPropertyInputDto): Promise<UserPropertyResponseDto> {
+        const userProperty = await this.userPropertyService.create(body.userId, body.propertyId, body.liked);
+        return new UserPropertyResponseDto(userProperty);
     }
-  }
 
+    @Get()
+    async getAllUserProperties(): Promise<UserPropertyResponseDto[]> {
+        const userProperties = await this.userPropertyService.getAllUserProperties();
+        return userProperties.map(userProperty => new UserPropertyResponseDto(userProperty));
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Put(':id')
+    async updateUserProperty(@Param('id') id: string, @Body() body: { liked: boolean }): Promise<{ message: string }> {
+        await this.userPropertyService.update(id, body.liked);
+        return { message: 'User property updated successfully' };
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Delete(':id')
+    async deleteUserProperty(@Param('id') id: string): Promise<{ message: string }> {
+        await this.userPropertyService.delete(id);
+        return { message: 'User property deleted successfully' };
+    }
+
+    @Get('/user-id-liked/:userId')
+    async getLikedUserProperties(@Param('userId') userId: string): Promise<UserPropertyResponseDto[]> {
+        const likedUserProperties = await this.userPropertyService.getLikedUserProperties(userId);
+        return likedUserProperties.map(userProperty => new UserPropertyResponseDto(userProperty));
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('/property-id/:propertyId')
+    async getPropertyUsers(@Param('propertyId') propertyId: string): Promise<UserPropertyResponseDto[]> {
+        const userProperties = await this.userPropertyService.getPropertyUsers(propertyId);
+        return userProperties.map(userProperty => new UserPropertyResponseDto(userProperty));
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Put('/user-id/:userId')
+    async updateUserPropertyByUserId(
+        @Param('userId') userId: string,
+        @Body() body: { propertyId: string; liked: boolean }
+    ): Promise<{ message: string }> {
+        const existingUserProperty = await this.userPropertyService.getByIds(userId, body.propertyId);
+
+        if (!existingUserProperty) {
+            await this.userPropertyService.create(userId, body.propertyId, body.liked);
+            return { message: 'User property created successfully' };
+        } else {
+            await this.userPropertyService.update(existingUserProperty.id, body.liked);
+            return { message: 'User property updated successfully' };
+        }
+    }
 }

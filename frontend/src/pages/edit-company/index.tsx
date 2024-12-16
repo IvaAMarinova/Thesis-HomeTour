@@ -159,7 +159,7 @@ function EditCompany() {
             const url = `/companies/${id}`;
             const method = "put";
 
-            await HttpService[method](url, updatedCompany);
+            await HttpService[method](url, updatedCompany, undefined, true, false);
 
             toast.success("Компанията беше успешно обновенa!");
         } catch (error) {

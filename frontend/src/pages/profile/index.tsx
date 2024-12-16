@@ -7,6 +7,7 @@ import { HttpService } from '../../services/http-service';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { z } from "zod";
+import { useUser } from '@/contexts/UserContext';
 
 const profileSchema = z.object({
     fullName: z.string().min(2, {
@@ -17,17 +18,23 @@ const profileSchema = z.object({
 function Profile() {
     const navigate = useNavigate();
     const [user, setUser] = useState<Record<string, string>>({
-        fullName: ''    
+        fullName: '',
+        email: '',
+        companyId: '',
+        type: '',
     });
     const [company, setCompany] = useState<Record<string, string>>({});
+    const {userId} = useUser();
 
     useEffect(() => { 
         const fetchUserAndCompany = async () => { 
             try {                
                 const userResponse = await HttpService.get<Record<string, string>>(`/auth/me`, undefined, true);
-                setUser(userResponse);
-                if (userResponse.company) {
-                    const companyResponse = await HttpService.get<Record<string, string>>(`/companies/${userResponse.company}`, undefined, true);
+                const { fullName, email, companyId, type } = userResponse;
+
+                setUser({ fullName, email, companyId, type });
+                if (userResponse.companyId) {
+                    const companyResponse = await HttpService.get<Record<string, string>>(`/companies/${userResponse.companyId}`, undefined, true);
                     setCompany(companyResponse);
                 }
             } catch (error) {
@@ -46,7 +53,7 @@ function Profile() {
         try{
             profileSchema.parse(user);
 
-            await HttpService.put<Record<string, string>>(`/users/${user.id}`, user, undefined, true);
+            await HttpService.put<Record<string, string>>(`/users/${userId}`, user, undefined, true);
             toast.success("Успешно обновихте акаунта си!")
         } catch(error) {
             if (error instanceof z.ZodError) {
@@ -98,7 +105,7 @@ function Profile() {
                             <p className="text-italic text-sm text-gray-500">{user.email}</p>
                         </div>
                     </div>
-                    {user.company && (
+                    {user.companyId && (
                         <div>
                             <Label className="mb-2 block">Компания</Label>
                             <p className="text-italic text-sm text-gray-500">{company.name}</p>
@@ -107,7 +114,7 @@ function Profile() {
                 </div>
 
                 <div className="flex justify-between mt-12">
-                    <Button variant="outline" className="w-1/4">Откажи</Button>
+                    <Button variant="outline" className="w-1/4" onClick={() => navigate(-1)}>Откажи</Button>
                     <Button className="w-1/4 bg-black text-white" onClick={handleUpdateProfile}>Запази</Button>
                 </div>
             </div>

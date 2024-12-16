@@ -135,6 +135,7 @@ function EditProperty() {
                 const response = await HttpService.get<Record<string, string>>(
                     `/properties/${id}`,
                     undefined,
+                    true,
                     false
                 );
                 const mappedProperty = mapResponseToProperty(response);
@@ -204,7 +205,7 @@ function EditProperty() {
             const url = isNewProperty ? "/properties" : `/properties/${id}`;
             const method = isNewProperty ? "post" : "put";
 
-            await HttpService[method](url, updatedProperty);
+            await HttpService[method](url, updatedProperty, undefined, true, false);
 
             toast.success(
                 isNewProperty ? "Имотът беше успешно създаден!" : "Имотът беше успешно обновен!"

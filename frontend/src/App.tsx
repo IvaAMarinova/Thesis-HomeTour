@@ -1,5 +1,5 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from '@tanstack/react-query';
 import Login from './pages/login';
 import Home from './pages/home';
 import { HttpService } from './services/http-service';
@@ -17,25 +17,40 @@ import Footer from './components/footer';
 import { CookiesProvider } from 'react-cookie';
 import EditProperties from './pages/edit-properties';
 import EditProperty from './pages/edit-property';
-import EditCompany from './pages/edit-company'
+import EditCompany from './pages/edit-company';
+import { PrivateRoute } from './pages/unauthorized/private-route';
+import Unauthorized from './pages/unauthorized';
+
+const queryClient = new QueryClient();
 
 function AppContent() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const { fetchUserId } = useUser();
+  const { userType } = useUser();
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const checkAuthentication = async () => {
+  const { data: isAuthenticated, isLoading } = useQuery({
+    queryKey: ['isAuthenticated'],
+    queryFn: async () => {
       try {
         const authenticated = await HttpService.isAuthenticated(fetchUserId);
-        setIsAuthenticated(authenticated);
+        console.log("[React Query] Authentication status: ", authenticated);
+        return authenticated;
       } catch (error) {
-        console.error("[AppContent] Error during authentication check:", error);
-        setIsAuthenticated(false);
+        console.error("[React Query] Error during authentication check:", error);
+        return false;
       }
-    };
+    },
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
-    checkAuthentication();
-  }, [fetchUserId]);
+  const handleLoginSuccess = () => {
+    queryClient.invalidateQueries({ queryKey: ['isAuthenticated'] });
+  };
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -43,16 +58,29 @@ function AppContent() {
       <div className="flex-grow">
         <ToastContainer />
         <Routes>
-          <Route path="/login" element={<Login onLoginSuccess={() => setIsAuthenticated(true)} />} />
+          <Route
+            path="/login"
+            element={<Login onLoginSuccess={handleLoginSuccess} />}
+          />
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/properties" element={<Properties />} />
           <Route path="/properties/:id" element={<Property />} />
           <Route path="/companies/:id" element={<Company />} />
           <Route path="/companies" element={<Companies />} />
-          <Route path="/edit-properties/:id" element={<EditProperties />} />
-          <Route path="/edit-property/:id" element={<EditProperty />} />
-          <Route path="/edit-company/:id" element={<EditCompany />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
+
+          {/* Protected Routes */}
+          <Route
+            element={<PrivateRoute isLoggedIn={isAuthenticated ?? false} allowedRoles={['b2b']} userRole={userType} />}
+          >
+            <Route path="/edit-properties/:id" element={<EditProperties />} />
+            <Route path="/edit-property/:id" element={<EditProperty />} />
+            <Route path="/edit-company/:id" element={<EditCompany />} />
+          </Route>
+
+          {/* Fallback Route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
       <Footer />
@@ -62,13 +90,15 @@ function AppContent() {
 
 function App() {
   return (
-    <UserProvider>
-      <CookiesProvider>
-        <Router>
-          <AppContent />
-        </Router>
-      </CookiesProvider>
-    </UserProvider>
+    <QueryClientProvider client={queryClient}>
+      <UserProvider>
+        <CookiesProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </CookiesProvider>
+      </UserProvider>
+    </QueryClientProvider>
   );
 }
 
