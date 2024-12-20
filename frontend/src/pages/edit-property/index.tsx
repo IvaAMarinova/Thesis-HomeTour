@@ -9,6 +9,7 @@ import { X, Trash } from "@mynaui/icons-react";
 import { toast } from "react-toastify";
 import { v4 } from "uuid";
 import { z } from "zod";
+import resizeFile from "@/services/image-service";
 import GoBackButton from "@/components/go-back-button";
 
 const propertySchema = z.object({
@@ -234,58 +235,59 @@ function EditProperty() {
                     toast.error("Моля, качете валидно изображение!");
                     return;
                 }
-    
+
+                const resizedImage = await resizeFile(file, type);
+
                 const response = await HttpService.get<Record<string, string>>(
                     `/get-presigned-url/to-upload?key=${imageKey}&contentType=${file.type}`
                 );
-        
-                if (response.url) {
+    
+                if (response.url) {    
                     const uploadResponse = await fetch(response.url, {
                         method: "PUT",
                         headers: {
                             "Content-Type": file.type,
                         },
-                        body: file,
+                        body: resizedImage,
                     });
     
                     if (uploadResponse.ok) {
                         toast.success("Снимката беше успешно качена!");
     
-                        if (type === "header") {
-                            const responseToView = await HttpService.get<{ url:string }>(`/get-presigned-url/to-view?key=${imageKey}`);
-                            const imageViewUrl = responseToView.url;
+                        const responseToView = await HttpService.get<{ url: string }>(
+                            `/get-presigned-url/to-view?key=${imageKey}`
+                        );
+                        const imageViewUrl = responseToView.url;
     
+                        if (type === "header") {
                             const updatedResources = {
                                 galleryImages: property.resources.galleryImages,
-                                headerImage: {key: imageKey, url: imageViewUrl},
-                                vizualizationFolder: property.resources.vizualizationFolder
+                                headerImage: { key: imageKey, url: imageViewUrl },
+                                vizualizationFolder: property.resources.vizualizationFolder,
                             };
-
+    
                             setProperty((prevState) => ({
                                 ...prevState,
                                 resources: updatedResources,
                             }));
                         } else {
-                            const responseToView = await HttpService.get<{ url:string }>(`/get-presigned-url/to-view?key=${imageKey}`);
-                            const imageViewUrl = responseToView.url;
-
                             const updatedGalleryImages = [
                                 ...(property.resources.galleryImages || []),
                                 { key: imageKey, url: imageViewUrl }
                             ];
-                            
+    
                             const updatedResources = {
                                 headerImage: property.resources.headerImage,
                                 galleryImages: updatedGalleryImages,
                                 vizualizationFolder: property.resources.vizualizationFolder,
                             };
-
+    
                             setProperty((prevState) => ({
                                 ...prevState,
                                 resources: updatedResources,
                             }));
                         }
-                            fileInput.value = "";
+                        fileInput.value = "";
                     } else {
                         throw new Error("Failed to upload the image.");
                     }
@@ -297,6 +299,7 @@ function EditProperty() {
             toast.error("Възникна грешка при качването на изображението. Опитайте отново!");
         }
     };
+    
     
     
     const handleDeleteImage = async (imageKey: string) => {
@@ -519,29 +522,29 @@ function EditProperty() {
                 </div>
             </div>
 
-        {showImageModal && (
-            <div
-                className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-                onClick={() => setShowImageModal(false)}
-            >
+            {showImageModal && (
                 <div
-                    className="bg-white p-10 rounded-lg shadow-lg max-w-4xl w-full relative"
-                    onClick={(e) => e.stopPropagation()}
+                    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+                    onClick={() => setShowImageModal(false)}
                 >
-                    <button
-                        className="absolute top-3 right-3 text-black text-lg font-bold"
-                        onClick={() => setShowImageModal(false)}
+                    <div
+                        className="bg-white p-10 rounded-lg shadow-lg max-w-4xl w-full relative"
+                        onClick={(e) => e.stopPropagation()}
                     >
-                        <X />
-                    </button>
-                    <img
-                        src={imageToShow}
-                        alt="Selected property image"
-                        className="w-full h-auto object-contain rounded-lg"
-                    />
+                        <button
+                            className="absolute top-3 right-3 text-black text-lg font-bold"
+                            onClick={() => setShowImageModal(false)}
+                        >
+                            <X />
+                        </button>
+                        <img
+                            src={imageToShow}
+                            alt="Selected property image"
+                            className="w-full h-auto object-contain rounded-lg"
+                        />
+                    </div>
                 </div>
-            </div>
-        )}
+            )}
         </div>
     );
 }
