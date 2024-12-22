@@ -124,7 +124,7 @@ function Filter({ companies, properties, setAppliedFilters }: FilterProps) {
             <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                 <PopoverTrigger asChild>
                     <Button
-                        className="px-8 py-6 text-lg bg-black transform transition-transform duration-300 hover:scale-105 hover:bg-black flex items-center"
+                        className="px-8 py-6 text-lg bg-black transform transition-transform duration-300 hover:scale-105 flex items-center"
                         onClick={() => setIsPopoverOpen((prev) => !prev)}
                     >
                         <FilterIcon className="w-6 h-6 mr-2" />
@@ -179,7 +179,7 @@ function Filter({ companies, properties, setAppliedFilters }: FilterProps) {
                                     id="liked-properties"
                                     checked={isLikedOnly}
                                     onCheckedChange={(checked) => setIsLikedOnly(checked === true)}
-                                    className="h-6 w-6 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    className="h-6 w-6 border-gray-300 rounded"
                                 />
                                 <label
                                     htmlFor="liked-properties"
@@ -192,13 +192,13 @@ function Filter({ companies, properties, setAppliedFilters }: FilterProps) {
                     </div>
                     <div className="flex justify-end gap-4 mt-6">
                         <Button
-                            className="px-3 py-2 text-base bg-white text-black border rounded-lg transform transition-transform duration-300 hover:scale-105 hover:bg-white"
+                            className="px-3 py-2 text-base bg-white text-black border rounded-lg transform transition-transform duration-300 hover:scale-105"
                             onClick={handleClearAll}
                         >
                             Изчисти
                         </Button>
                         <Button
-                            className="px-3 py-2 text-base bg-black transform transition-transform duration-300 hover:scale-105 hover:bg-black"
+                            className="px-3 py-2 text-base bg-black transform transition-transform duration-300 hover:scale-105"
                             onClick={handleApplyFilters}
                         >
                             Търси
