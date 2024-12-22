@@ -1,7 +1,7 @@
-import { Controller, Get, Query, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Query, NotFoundException, Delete } from '@nestjs/common';
 import { FileUploadService } from './upload.service';
 
-@Controller('get-presigned-url')
+@Controller('files')
 export class UploadController {
     constructor(private readonly fileUploadService: FileUploadService) { }
 
@@ -33,6 +33,19 @@ export class UploadController {
 
         try {
             const url = await this.fileUploadService.getPreSignedURLToViewObject(key);
+            return { url };
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    @Delete('delete')
+    async deleteObject(@Query('key') key: string) {
+        if (!key) {
+            throw new NotFoundException('Missing required query parameter: key');
+        }
+        try {
+            const url = await this.fileUploadService.DeleteObject(key);
             return { url };
         } catch (error) {
             throw error;

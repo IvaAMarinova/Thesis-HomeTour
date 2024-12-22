@@ -52,4 +52,25 @@ export class FileUploadService {
             throw error;
         }
     }
+
+    async DeleteObject(key: string) {
+        const region = process.env.AWS_BUCKET_REGION;
+        const accessKey = process.env.AWS_ACCESS_KEY;
+        const secretKey = process.env.AWS_SECRET_KEY;
+        try {
+            const s3 = new S3({
+                region: region,
+                accessKeyId: accessKey,
+                secretAccessKey: secretKey
+            });
+            let params = {
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: key,
+            };
+
+            await s3.deleteObject(params).promise();
+        } catch (error) {
+            throw error;
+        }
+    }
 }
