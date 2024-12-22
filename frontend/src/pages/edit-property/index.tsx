@@ -258,6 +258,11 @@ function EditProperty() {
                     .filter((key) => key !== "")
                     .map(async (key) => HttpService.delete(`/files/delete?key=${key}`))
             );
+            
+            if(isNewProperty) 
+            {
+                navigate(`/properties/${id}`);
+            }
         } catch (error) {
             setIsUploading(false);
             if (error instanceof z.ZodError) {

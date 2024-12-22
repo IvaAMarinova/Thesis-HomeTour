@@ -142,7 +142,7 @@ function Property() {
                                         {property.name}
                                     </h1>
 
-                                    <div className="whitespace-pre-line lg:mr-12">
+                                    <div className="max-w-96 overflow-hidden text-ellipsis">
                                         {property.description?.split("\n").map(
                                             (paragraph: string, index: string) => (
                                                 <p

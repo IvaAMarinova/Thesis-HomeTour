@@ -87,7 +87,7 @@ function Company() {
     if (companyQuery.isLoading || propertiesQuery.isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <LoadingSpinner size={48} />
+                <LoadingSpinner size={48} className="mt-20"/>
             </div>
         );
     }
@@ -126,7 +126,7 @@ function Company() {
                     )}
                 </div>
                 <div className="flex flex-col md:flex-row justify-between items-center w-full mt-4 border-t-2 border-gray-500 pt-4">
-                    <div className="text-base mt-12 text-gray-700 whitespace-pre-line md:w-1/2 md:pr-8 text-justify p-2 lg:ml-5 md:ml-5">
+                    <div className="text-base mt-12 text-gray-700 max-w-96 overflow-hidden whitespace-pre-line md:w-1/2 md:pr-8 text-justify p-2 lg:ml-5 md:ml-5">
                         {company.description ? (
                             company.description.split("\n").map((paragraph: string, index: number) => (
                                 <p key={index} className="mb-4" style={{ textIndent: "2em" }}>
