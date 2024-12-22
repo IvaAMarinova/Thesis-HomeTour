@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { HttpService } from "../../services/http-service";
 import { useUser } from "@/contexts/UserContext";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,9 @@ import { v4 } from "uuid";
 import { z } from "zod";
 import resizeFile from "@/services/image-service";
 import GoBackButton from "@/components/go-back-button";
+import { useQuery } from "@tanstack/react-query";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import ConfirmationPopup from "@/components/confirmation-popup";
 
 const propertySchema = z.object({
     floor: z
@@ -18,13 +21,13 @@ const propertySchema = z.object({
         .refine(
             (val) => val > 0 && Number.isInteger(val),
             { message: "Етажът трябва да бъде положително цяло число." }
-    ),
+        ),
     address: z.object({
         city: z.string().min(1, { message: "Градът не може да бъде празен." }),
         street: z.string().min(1, { message: "Улицата не може да бъде празна." }),
         neighborhood: z.string().min(1, { message: "Кварталът не може да бъде празен." }),
         zip: z.string().optional(),
-    }),  
+    }),
     phoneNumber: z
         .string()
         .regex(/^\+?\d[\d\s]{8,14}$/, {
@@ -44,20 +47,21 @@ const propertySchema = z.object({
         .max(2048, {
             message: "Описанието е прекалено дълго.",
         }),
-
     resources: z.object({
         headerImage: z
             .object({
                 key: z.string().min(1, {
                     message: "Ключът на заглавното изображение не може да бъде празен.",
-                })            })
+                }),
+            })
             .optional(),
         galleryImages: z
             .array(
                 z.object({
                     key: z.string().min(1, {
                         message: "Ключът на изображението в галерията не може да бъде празен.",
-                    })                })
+                    }),
+                })
             )
             .optional(),
         vizualizationFolder: z.string().optional(),
@@ -70,7 +74,7 @@ z.setErrorMap((issue, _ctx) => {
     } else {
         return { message: "Невалидни данни." };
     }
-    });
+});
 
 interface Property {
     floor: string;
@@ -80,7 +84,7 @@ interface Property {
     name: string;
     description: string;
     resources: {
-        headerImage?: {key: string, url: string};
+        headerImage?: { key: string; url: string };
         galleryImages?: Record<string, string>[];
         vizualizationFolder?: string;
     };
@@ -88,75 +92,86 @@ interface Property {
 
 function EditProperty() {
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
     const [showImageModal, setShowImageModal] = useState(false);
     const [imageToShow, setImageToShow] = useState<string>("");
     const isNewProperty = id === "0";
     const { userCompany } = useUser();
     const [property, setProperty] = useState<Property>({
         floor: "",
-        address: {city: "", street: "", neighborhood: ""},
+        address: { city: "", street: "", neighborhood: "" },
         phoneNumber: "",
         email: "",
         name: "",
         description: "",
         resources: {
-            headerImage: {key: "", url: ""}
+            headerImage: { key: "", url: "" },
         },
     });
+    const [propertySaved, setPropertySaved] = useState(true);
+    const [showConfirmation, setShowConfirmation] = useState(false);
 
-    useEffect(() => {
-        console.log("Is new property: ", isNewProperty);
-        if (!isNewProperty) {
-            fetchProperty();
-        }
-    }, [id, isNewProperty]);
 
-    const fetchProperty = async ()=> {
-        const mapResponseToProperty = (response: Record<string, any>): Property => {
-            return {
-                floor: response.floor,
-                address: response.address,
-                phoneNumber: response.phoneNumber,
-                email: response.email,
-                name: response.name,
-                description: response.description,
-                resources: {
-                    headerImage: response.resources.headerImage,
-                    galleryImages: response.resources.galleryImages?.map((img: Record<string, string>) => ({
-                        key: img.key,
-                        url: img.url,
-                    })),
-                    vizualizationFolder: response.resources.vizualizationFolder,
-                },
-            };
-        };
-        
-        const getProperty = async () => {
+
+    const { data: fetchedProperty, isLoading: isPropertyLoading, isError } = useQuery({
+        queryKey: ["property", id],
+        queryFn: async () => {
+            if (isNewProperty) return null;
             try {
-                const response = await HttpService.get<Record<string, string>>(
-                    `/properties/${id}`,
-                    undefined,
-                    true,
-                    false
-                );
-                const mappedProperty = mapResponseToProperty(response);
-                setProperty(mappedProperty);
-            } catch (error) {
-                toast.error("Има грешка! Пробвай отново по-късно.")
+                const response = await HttpService.get<Record<string, any>>(`/properties/${id}`);
+                return {
+                    floor: response.floor,
+                    address: response.address,
+                    phoneNumber: response.phoneNumber,
+                    email: response.email,
+                    name: response.name,
+                    description: response.description,
+                    resources: {
+                        headerImage: response.resources.headerImage,
+                        galleryImages: response.resources.galleryImages?.map((img: Record<string, string>) => ({
+                            key: img.key,
+                            url: img.url,
+                        })),
+                        vizualizationFolder: response.resources.vizualizationFolder,
+                    },
+                };
+            } catch (err) {
+                throw new Error("Failed to fetch property data.");
             }
-        };
-
-        getProperty();
-    }
-
+        },
+        enabled: !isNewProperty,
+    });
+    
+    useEffect(() => {
+        if (fetchedProperty) {
+            setPropertySaved(true);
+            setProperty(fetchedProperty);
+        }
+    }, [fetchedProperty]);
+    
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setProperty((prevState) => ({ ...prevState, [name]: value }));
+        setPropertySaved(false);
     };
 
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setProperty((prevState) => ({ ...prevState, [name]: value }));
+        setPropertySaved(false);
+    };
+
+    const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        const updatedAddress: Record<string, string> = { ...property.address };
+
+        updatedAddress[name] = value;
+
+        setProperty((prevState) => ({
+            ...prevState,
+            address: updatedAddress,
+        }));
+        setPropertySaved(false);
     };
 
     const handleUpdateProperty = async () => {
@@ -171,7 +186,7 @@ function EditProperty() {
                 { key: "email", value: property.email },
                 { key: "name", value: property.name },
                 { key: "description", value: property.description },
-                { key: "resources.headerImage", value: property.resources?.headerImage }            
+                { key: "resources.headerImage", value: property.resources?.headerImage }
             ];
             
             const missingFields = requiredFields.filter((field) => !field.value);
@@ -211,6 +226,7 @@ function EditProperty() {
             toast.success(
                 isNewProperty ? "Имотът беше успешно създаден!" : "Имотът беше успешно обновен!"
             );
+            setPropertySaved(true);
         } catch (error) {
             if (error instanceof z.ZodError) {
                 error.errors.forEach((err) => toast.error(err.message));
@@ -253,6 +269,7 @@ function EditProperty() {
     
                     if (uploadResponse.ok) {
                         toast.success("Снимката беше успешно качена!");
+                        setPropertySaved(false);
     
                         const responseToView = await HttpService.get<{ url: string }>(
                             `/get-presigned-url/to-view?key=${imageKey}`
@@ -300,8 +317,6 @@ function EditProperty() {
         }
     };
     
-    
-    
     const handleDeleteImage = async (imageKey: string) => {
         try {
             let updatedResources = { ...property.resources };
@@ -314,34 +329,62 @@ function EditProperty() {
                 );
                 updatedResources.galleryImages = updatedGalleryImages;
             }
-
-            toast.success("Изображението беше успешно изтрито!");
-
             setProperty((prevState) => ({
                 ...prevState,
                 resources: updatedResources,
             }));
+            toast.success("Изображението беше успешно изтрито!");
+            setPropertySaved(false);
         } catch (error) {
             toast.error("Възникна грешка при изтриване на изображението.");
         }
     };
 
-    const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {name, value} = e.target;
-        const updatedAddress: Record<string, string> = { ...property.address };
+    if (isPropertyLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-[200px]">
+                <LoadingSpinner size={48} className="mt-20"/>
+            </div>
+        );
+    }
+
+    if (isError || !fetchedProperty) {
+        return (
+            <div className="relative flex flex-col items-center justify-center min-h-screen px-4">
+                <GoBackButton onClick={() => navigate(-1)}/>
+                <div className="text-center space-y-4 mt-24 md:mt-32 px-6">
+                    <p className="text-lg md:text-xl font-bold break-words">
+                        В момента не можем да визуализираме този имот.
+                    </p>
+                    <p className="text-md">
+                        Пробвайте пак по-късно!
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    const handleConfirmExit = () => {
+        setShowConfirmation(false);
+        navigate(-1);
+    };
     
-        updatedAddress[name] = value;
-    
-        setProperty((prevState) => ({
-            ...prevState,
-            address: updatedAddress
-        }))
+    const handleCancelExit = () => {
+        setShowConfirmation(false);
+    };
+
+    const handleGoBack = () => {
+        if (!propertySaved) {
+            setShowConfirmation(true); 
+        } else {
+            navigate(-1);
+        }
     };
 
     return (
         <div className="pt-16 align-middle flex flex-col items-center">
             <div className="relative p-9 w-full max-w-6xl mx-auto rounded-lg lg:mt-14">
-                <GoBackButton />
+                <GoBackButton onClick={handleGoBack}/>
                 { isNewProperty ? (
                     <h2 className="text-3xl font-bold text-center mt-4">Създай нов имот</h2>
                 ) : (
@@ -544,6 +587,15 @@ function EditProperty() {
                         />
                     </div>
                 </div>
+            )}
+            {showConfirmation && (
+                <ConfirmationPopup
+                    title="Сигурен ли си, че искаш да прекратиш редактирането на този имот?"
+                    description="Ще загубиш всички промени, които не си запазил."
+                    open={showConfirmation}
+                    onConfirm={handleConfirmExit}
+                    onCancel={handleCancelExit}
+                />
             )}
         </div>
     );

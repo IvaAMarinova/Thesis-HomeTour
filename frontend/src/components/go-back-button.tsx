@@ -1,19 +1,15 @@
 import { ArrowLeft } from "@mynaui/icons-react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
 
-function GoBackButton() {
-    const navigate = useNavigate();
-
+function GoBackButton({ onClick }: { onClick?: () => void }) {
     return (
-        <div className="w-full max-w-6xl mx-auto px-4 mt-6 flex justify-start">
-            <button
-                onClick={() => navigate(-1)}
-                className="px-6 py-3 text-black border rounded-lg shadow transition duration-300 flex items-center hover:scale-105"
-            >
-                <ArrowLeft className="mr-2" />
-                Върни се
-            </button>
-        </div>
+        <button
+            onClick={onClick}
+            className="px-6 py-3 text-black border rounded-lg shadow transition duration-300 flex items-center hover:scale-105"
+        >
+            <ArrowLeft className="mr-2" />
+            Върни се
+        </button>
     );
 }
 

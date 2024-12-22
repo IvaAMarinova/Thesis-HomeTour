@@ -20,6 +20,8 @@ import EditProperty from './pages/edit-property';
 import EditCompany from './pages/edit-company';
 import { PrivateRoute } from './pages/unauthorized/private-route';
 import Unauthorized from './pages/unauthorized';
+import { useLocation } from 'react-router-dom';
+import { LoadingSpinner } from './components/ui/loading-spinner';
 
 const queryClient = new QueryClient();
 
@@ -27,6 +29,7 @@ function AppContent() {
   const { fetchUserId } = useUser();
   const { userType } = useUser();
   const queryClient = useQueryClient();
+  const location = useLocation();
 
   const { data: isAuthenticated, isLoading } = useQuery({
     queryKey: ['isAuthenticated'],
@@ -48,8 +51,12 @@ function AppContent() {
     queryClient.invalidateQueries({ queryKey: ['isAuthenticated'] });
   };
 
-  if (isLoading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  if (isLoading && location.pathname !== '/') {
+    return (
+        <div className="absolute inset-0 flex items-center justify-center">
+            <LoadingSpinner size={96} className="text-gray-500" />
+        </div>
+    );
   }
 
   return (
@@ -70,7 +77,6 @@ function AppContent() {
           <Route path="/companies" element={<Companies />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
-          {/* Protected Routes */}
           <Route
             element={<PrivateRoute isLoggedIn={isAuthenticated ?? false} allowedRoles={['b2b']} userRole={userType} />}
           >
@@ -79,7 +85,6 @@ function AppContent() {
             <Route path="/edit-company/:id" element={<EditCompany />} />
           </Route>
 
-          {/* Fallback Route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

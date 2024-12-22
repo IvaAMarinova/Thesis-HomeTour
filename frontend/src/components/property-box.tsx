@@ -20,9 +20,9 @@ function PropertyBox({
         name: string;
         description: string;
         companyName: string;
-        resources?: {
-            headerImage?: { key: string; url: string };
-            visualizationFolder?: string | null;
+        resources: {
+            headerImage: { key: string; url: string };
+            visualizationFolder?: string;
         };
     };
     initialLiked: boolean;

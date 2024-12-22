@@ -14,10 +14,9 @@ function CompanyBox({
 }) {
     return (
         <div
-            className="relative border rounded-xl shadow-lg p-6 cursor-pointer w-full h-full flex flex-col justify-between hover:shadow-2xl transition-shadow"
+            className="relative border rounded-xl shadow-lg p-6 cursor-pointer max-w-96 h-full flex flex-col justify-between hover:shadow-2xl transition-shadow"
             onClick={whenClicked}
         >
-            {/* Logo */}
             <div className="flex items-center justify-center mb-4">
                 {company.resources?.logoImage.url ? (
                     <img
@@ -32,12 +31,10 @@ function CompanyBox({
                 )}
             </div>
 
-            {/* Name */}
             <h1 className="text-xl font-semibold text-gray-900 text-center mb-3">
                 {company.name}
             </h1>
 
-            {/* Description */}
             <div className="flex-grow">
                 <p className="text-sm text-gray-600 text-center line-clamp-3">
                     {company.description}

@@ -5,6 +5,8 @@ import { HttpService } from "../../services/http-service";
 import { useNavigate, useLocation } from "react-router-dom";
 import GoUpButton from "@/components/go-up-button";
 import { useUser } from "@/contexts/UserContext";
+import { useQuery } from "@tanstack/react-query";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 type Property = {
     id: string;
@@ -13,8 +15,9 @@ type Property = {
     company: string;
     address: Record<string, string>;
     floor: number;
-    resources?: { 
-        headerImage?: {key: string, url: string}
+    resources: { 
+        headerImage: { key: string; url: string },
+        visualizationFolder?: string;
     };
 };
 
@@ -32,9 +35,7 @@ function Properties() {
     const { userId } = useUser();
     const [companies, setCompanies] = useState<string[]>([]);
     const [companyDictionary, setCompanyDictionary] = useState<Record<string, string>>({});
-    const [properties, setProperties] = useState<Property[]>([]);
     const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
-    const [likedProperties, setLikedProperties] = useState<{ property: { id: string } }[]>([]);
     const [appliedFilters, setAppliedFilters] = useState<Filters>({
         city: [],
         company: [],
@@ -42,6 +43,7 @@ function Properties() {
         floor: [],
         isLikedOnly: false,
     });
+    const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -52,62 +54,69 @@ function Properties() {
         }));
     }, [location.search]);
 
-    const fetchLikedProperties = async () => {
-        if (!userId) return;
-        try {
-            const response = await HttpService.get<{ property: { id: string } }[]>(
-                `/user-properties/user-id-liked/${userId}`,
-                undefined,
-                true,
-                false
+    const { data: likedProperties = [], refetch: refetchLikedProperties } = useQuery({
+        queryKey: ["likedProperties", userId],
+        queryFn: async () => {
+            if (!userId) return [];
+            const response = await HttpService.get<{ propertyId: string }[]>(
+                `/user-properties/user-id-liked/${userId}`
             );
-            setLikedProperties(response);
-        } catch (error) {
-            // console.error("Error fetching liked properties:", error);
+            return response;
+        },
+        enabled: !!userId,
+    });
+
+    const {
+        data: properties = [],
+        isLoading: isPropertiesLoading,
+    } = useQuery({
+        queryKey: ["properties"],
+        queryFn: async () => await HttpService.get<Property[]>("/properties"),
+    });
+
+    const { data: companiesResponse = [] } = useQuery({
+        queryKey: ["companies"],
+        queryFn: async () => {
+            const response = await HttpService.get<{ id: string; name: string }[]>("/companies");
+            return response;
+        },
+    });
+
+    useEffect(() => {
+        if (!isInitialLoadComplete && !isPropertiesLoading && properties.length > 0) {
+            setIsInitialLoadComplete(true);
         }
-    };
-
+    }, [isPropertiesLoading, properties, isInitialLoadComplete]);
+    
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [propertiesResponse, companiesResponse] = await Promise.all([
-                    HttpService.get<Property[]>("/properties"),
-                    HttpService.get<{ id: string; name: string }[]>("/companies"),
-                ]);
-
-                const companyIdToNameMap = Object.fromEntries(
-                    companiesResponse.map(({ id, name }) => [id, name])
-                );
-
-                setProperties(propertiesResponse);
-                setFilteredProperties(propertiesResponse);
-                setCompanies(companiesResponse.map((company) => company.name));
-                setCompanyDictionary(companyIdToNameMap);
-            } catch (error) {
-                setProperties([]);
-                // console.error("Error fetching data:", error);
-            }
-        };
-
-        fetchData();
-        fetchLikedProperties();
-    }, [userId]);
-
+        const companyIdToNameMap = Object.fromEntries(
+            companiesResponse.map(({ id, name }) => [id, name])
+        );
+        setCompanies((prev) => {
+            const newCompanies = companiesResponse.map((company) => company.name);
+            return JSON.stringify(prev) === JSON.stringify(newCompanies) ? prev : newCompanies;
+        });
+        setCompanyDictionary((prev) => {
+            return JSON.stringify(prev) === JSON.stringify(companyIdToNameMap) ? prev : companyIdToNameMap;
+        });
+    }, [companiesResponse]);
+    
     useEffect(() => {
-        const filterProperties = () => {
-            setFilteredProperties(
-                properties.filter(({ address, company, floor, id }) =>
-                    (appliedFilters.city.length === 0 || appliedFilters.city.includes(address.city)) &&
-                    (appliedFilters.company.length === 0 || appliedFilters.company.includes(companyDictionary[company])) &&
-                    (appliedFilters.neighborhood.length === 0 || appliedFilters.neighborhood.includes(address.neighborhood)) &&
-                    (appliedFilters.floor.length === 0 || appliedFilters.floor.includes(String(floor))) &&
-                    (!appliedFilters.isLikedOnly || likedProperties.some((liked) => liked.property?.id === id))
-                )
-            );
-        };
-
-        filterProperties();
-    }, [appliedFilters, properties, companyDictionary, likedProperties]);
+        if (isPropertiesLoading) return;
+    
+        const newFilteredProperties = properties.filter(({ address, company, floor, id }) =>
+            (appliedFilters.city.length === 0 || appliedFilters.city.includes(address.city)) &&
+            (appliedFilters.company.length === 0 || appliedFilters.company.includes(companyDictionary[company])) &&
+            (appliedFilters.neighborhood.length === 0 || appliedFilters.neighborhood.includes(address.neighborhood)) &&
+            (appliedFilters.floor.length === 0 || appliedFilters.floor.includes(String(floor))) &&
+            (!appliedFilters.isLikedOnly || likedProperties.some((liked) => liked.propertyId === id))
+        );
+    
+        setFilteredProperties((prev) =>
+            JSON.stringify(prev) === JSON.stringify(newFilteredProperties) ? prev : newFilteredProperties
+        );
+    }, [appliedFilters, properties, companyDictionary, likedProperties, isPropertiesLoading]);
+    
 
     return (
         <div className="pt-16">
@@ -119,34 +128,44 @@ function Properties() {
                         setAppliedFilters={setAppliedFilters}
                     />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {filteredProperties.length > 0 ? (
-                        filteredProperties.map((property) => {
-                            const isLiked = likedProperties.some((liked) => liked.property?.id === property.id);
+                {!isInitialLoadComplete ? (
+                    <div className="flex items-center justify-center min-h-[200px]">
+                        <LoadingSpinner size={48} className="mt-20"/>
+                    </div>
+                
+                ) : filteredProperties.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {filteredProperties.map((property) => {
+                            const isLiked = likedProperties.some(
+                                (liked) => liked.propertyId === property.id
+                            );
+                    
+                            const normalizedProperty = {
+                                ...property,
+                                companyName: companyDictionary[property.company]
+                            };
+                    
                             return (
                                 <div
                                     key={property.id}
                                     className="transform transition-transform duration-300 hover:scale-105 h-[420px]"
                                 >
                                     <PropertyBox
-                                        property={{
-                                            ...property,
-                                            companyName: companyDictionary[property.company],
-                                        }}
+                                        property={normalizedProperty}
                                         initialLiked={isLiked}
                                         whenClicked={() => navigate(`/properties/${property.id}`)}
-                                        onLikeUpdate={fetchLikedProperties}
+                                        onLikeUpdate={() => refetchLikedProperties()}
                                     />
                                 </div>
                             );
-                        })
-                    ) : (
-                        <div className="col-span-full justify-center text-center text-xl font-semibold text-gray-800">
-                            Няма намерени имоти
-                        </div>
-                    )}
-                </div>
-
+                        })}
+                    </div>
+                
+                ) : (
+                    <div className="col-span-full justify-center text-center text-xl font-semibold text-gray-800">
+                        Няма намерени имоти
+                    </div>
+                )}
                 <GoUpButton />
             </div>
         </div>

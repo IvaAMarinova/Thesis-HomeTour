@@ -187,7 +187,7 @@ export class HttpService {
 
     if (!response.ok) {
       console.error('[HttpService] Failed to refresh access token. Logging out.');
-      this.logout(); // Clear cookies and log out
+      this.logout();
       throw new Error('Failed to refresh access token');
     }
 
@@ -209,11 +209,8 @@ export class HttpService {
     console.log('[HttpService] Tokens refreshed successfully');
   } catch (error) {
     console.error('[HttpService] Refresh token failed:', error);
-    this.logout(); // Ensure the user is logged out on failure
+    this.logout();
     throw new Error('Session expired. Please log in again');
   }
-}
-
-  
-  
+} 
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { HttpService } from "../../services/http-service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,8 @@ import { toast } from "react-toastify";
 import { v4 } from "uuid";
 import { z } from "zod";
 import GoBackButton from "@/components/go-back-button";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import ConfirmationPopup from "@/components/confirmation-popup";
 
 interface Company {
     name: string;
@@ -17,12 +20,12 @@ interface Company {
     phoneNumber: string;
     website: string;
     resources: {
-        logoImage?: {key: string, url: string};
-        galleryImage?: {key: string, url: string};
+        logoImage?: { key: string; url: string };
+        galleryImage?: { key: string; url: string };
     };
 }
 
-const companySchema = z.object({ 
+const companySchema = z.object({
     phoneNumber: z
         .string()
         .regex(/^\+?\d[\d\s]{8,14}$/, {
@@ -44,7 +47,7 @@ const companySchema = z.object({
         })
         .max(2048, {
             message: "Описанието е прекалено дълго.",
-    }),
+        }),
     resources: z.object({
         logoImage: z
             .object({
@@ -65,20 +68,14 @@ const companySchema = z.object({
                     message: "URL адресът на заглавното изображение трябва да бъде валиден.",
                 }),
             })
-            .optional()
-        }),
+            .optional(),
+    }),
 });
-
-z.setErrorMap((issue, _ctx) => {
-    if (issue.message) {
-        return { message: issue.message };
-    } else {
-        return { message: "Невалидни данни." };
-    }
-    });
 
 function EditCompany() {
     const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
+    const [showConfirmation, setShowConfirmation] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
     const [imageToShow, setImageToShow] = useState<string>("");
     const [company, setCompany] = useState<Company>({
@@ -88,109 +85,91 @@ function EditCompany() {
         phoneNumber: "",
         website: "",
         resources: {
-            logoImage: {key: "", url:  ""},
-        }
+            logoImage: { key: "", url: "" },
+        },
+    });
+    const [companySaved, setCompanySaved] = useState(true);
+
+    const handleConfirmExit = () => {
+        setShowConfirmation(false);
+        navigate(-1);
+    };
+    
+    const handleCancelExit = () => {
+        setShowConfirmation(false);
+    };
+
+    const { data: fetchedCompany, isLoading, isError } = useQuery({
+        queryKey: ["company", id],
+        queryFn: async (): Promise<Company> => {
+            const response = await HttpService.get<Company & { id: string }>(`/companies/${id}`);
+            const { id: _, ...sanitizedResponse } = response;
+            return sanitizedResponse;
+        },
     });
 
-    const fetchCompany = async ()=> {
-        const getCompany = async () => {
-            try {
-                const response = await HttpService.get<Company>(
-                    `/companies/${id}`,
-                    undefined,
-                    false
-                );
-                console.log("Response: ", response);
-                setCompany(response);
-            } catch (error) {
-                toast.error("Има грешка! Пробвай отново по-късно.")
-            }
-        };
-
-        getCompany();
-    }
-
     useEffect(() => {
-        fetchCompany();
-    }, []);
+        if (fetchedCompany) {
+            setCompany(fetchedCompany);
+            setCompanySaved(true);
+        }
+    }, [fetchedCompany]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setCompany((prevState) => ({ ...prevState, [name]: value }));
+        setCompanySaved(false);
     };
 
     const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setCompany((prevState) => ({ ...prevState, [name]: value }));
+        setCompanySaved(false);
     };
 
     const handleUpdateCompany = async () => {
         try {
-            console.log("Company: ", company);
-            const requiredFields = [
-                { key: "name", value: company.name },
-                { key: "phoneNumber", value: company.phoneNumber },
-                { key: "email", value: company.email },
-                { key: "website", value: company.website },
-                { key: "description", value: company.description },
-                { key: "resources.logoImage", value: company.resources?.logoImage },
-                { key: "resources.galleryImage", value: company.resources?.galleryImage },
-            ];
-            
-            const missingFields = requiredFields.filter((field) => !field.value);
-            
-            if (missingFields.length > 0) {
-                toast.error(`Всички полета трябва да бъдат попълнени и да има поне по една снимка качена.`);
-                throw new Error("Validation failed due to missing required fields.");
-            }
-
             companySchema.parse(company);
 
             const updatedResources = {
                 logoImage: company.resources.logoImage?.key,
-                galleryImage: company.resources.galleryImage?.key
+                galleryImage: company.resources.galleryImage?.key,
             };
 
             const updatedCompany = {
                 ...company,
-                resources: updatedResources            
+                resources: updatedResources,
             };
-            
-            const url = `/companies/${id}`;
-            const method = "put";
 
-            await HttpService[method](url, updatedCompany, undefined, true, false);
-
+            await HttpService.put(`/companies/${id}`, updatedCompany, undefined, true, false);
             toast.success("Компанията беше успешно обновенa!");
+            setCompanySaved(true);
         } catch (error) {
             if (error instanceof z.ZodError) {
                 error.errors.forEach((err) => toast.error(err.message));
-                error.errors.forEach((err) => console.log(err));
             } else {
                 toast.error("Възникна грешка. Опитайте отново!");
             }
         }
-        
     };
-    
+
     const handleUploadImage = async (type: "logo" | "gallery") => {
         try {
             const imageKey = v4();
             const fileInputId = type === "logo" ? "logoImageInput" : "galleryImageInput";
             const fileInput = document.getElementById(fileInputId) as HTMLInputElement;
-    
+
             if (fileInput?.files?.[0]) {
                 const file = fileInput.files[0];
-    
                 if (!file.type.startsWith("image/")) {
                     toast.error("Моля, качете валидно изображение!");
                     return;
                 }
-    
-                const response = await HttpService.get<Record<string, string>>(
+
+                const response = await HttpService.get<{ url: string }>(
                     `/get-presigned-url/to-upload?key=${imageKey}&contentType=${file.type}`
                 );
-        
+
                 if (response.url) {
                     const uploadResponse = await fetch(response.url, {
                         method: "PUT",
@@ -199,40 +178,23 @@ function EditCompany() {
                         },
                         body: file,
                     });
-    
+
                     if (uploadResponse.ok) {
+                        const responseToView = await HttpService.get<{ url: string }>(
+                            `/get-presigned-url/to-view?key=${imageKey}`
+                        );
+
+                        const updatedResources =
+                            type === "logo"
+                                ? { ...company.resources, logoImage: { key: imageKey, url: responseToView.url } }
+                                : { ...company.resources, galleryImage: { key: imageKey, url: responseToView.url } };
+
+                        setCompany((prevState) => ({
+                            ...prevState,
+                            resources: updatedResources,
+                        }));
                         toast.success("Снимката беше успешно качена!");
-    
-                        if (type === "logo") {
-                            const responseToView = await HttpService.get<{ url:string }>(`/get-presigned-url/to-view?key=${imageKey}`);
-                            const imageViewUrl = responseToView.url;
-    
-                            const updatedResources = {
-                                galleryImage: company.resources.galleryImage,
-                                logoImage: {key: imageKey, url: imageViewUrl},
-                            };
-
-                            setCompany((prevState) => ({
-                                ...prevState,
-                                resources: updatedResources,
-                            }));
-                        } else {
-                            const responseToView = await HttpService.get<{ url:string }>(`/get-presigned-url/to-view?key=${imageKey}`);
-                            const imageViewUrl = responseToView.url;
-                            
-                            const updatedResources = {
-                                logoImage: company.resources.logoImage,
-                                galleryImage: { key: imageKey, url: imageViewUrl }
-                            };
-
-                            setCompany((prevState) => ({
-                                ...prevState,
-                                resources: updatedResources,
-                            }));
-                        }
-                            fileInput.value = "";
-                    } else {
-                        throw new Error("Failed to upload the image.");
+                        setCompanySaved(false);
                     }
                 }
             } else {
@@ -242,33 +204,56 @@ function EditCompany() {
             toast.error("Възникна грешка при качването на изображението. Опитайте отново!");
         }
     };
-    
-    
-    const handleDeleteImage = async (imageKey: string) => {
-        try {
-            let updatedResources = { ...company.resources };
 
-            if (company.resources.logoImage?.key === imageKey) {
-                updatedResources.logoImage = undefined;
-            } else if (company.resources.galleryImage) {
-                updatedResources.galleryImage = undefined;
-            }
+    const handleDeleteImage = (imageKey: string) => {
+        const updatedResources = {
+            ...company.resources,
+            logoImage: company.resources.logoImage?.key === imageKey ? undefined : company.resources.logoImage,
+            galleryImage: company.resources.galleryImage?.key === imageKey ? undefined : company.resources.galleryImage,
+        };
 
-            toast.success("Изображението беше успешно изтрито!");
+        setCompany((prevState) => ({
+            ...prevState,
+            resources: updatedResources,
+        }));
+        setCompanySaved(false);
+        toast.success("Изображението беше успешно изтрито!");
+    };
 
-            setCompany((prevState) => ({
-                ...prevState,
-                resources: updatedResources,
-            }));
-        } catch (error) {
-            toast.error("Възникна грешка при изтриване на изображението.");
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <LoadingSpinner size={48} className="mt-20"/>
+            </div>
+        );
+    }
+
+    const handleGoBack = () => {
+        if (!companySaved) {
+            setShowConfirmation(true); 
+        } else {
+            navigate(-1);
         }
     };
+
+    if (isError || !fetchedCompany) {
+        return (
+            <div className="relative flex flex-col items-center justify-center min-h-screen px-4">
+                <div className="top-10 mb-10">
+                    <GoBackButton onClick={handleGoBack} />
+                </div>
+                <div className="text-center space-y-4">
+                    <p className="text-xl font-bold">В момента не можем да визуализираме тази компания.</p>
+                    <p className="text-md">Пробвайте пак по-късно!</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="pt-16 align-middle flex flex-col items-center">
             <div className="relative p-9 w-full max-w-6xl mx-auto lg:border rounded-lg lg:mt-14">
-                <GoBackButton />
+                <GoBackButton onClick={handleGoBack} />
                 <h2 className="text-3xl font-bold text-center mt-4">Редактирай тази компания</h2>
                 <div className="space-y-6 mt-12">
                     <div className="flex flex-col md:flex-row justify-start md:space-x-12 space-y-6 md:space-y-0">
@@ -436,6 +421,15 @@ function EditCompany() {
 
                 </div>
             </div>
+        )}
+        {showConfirmation && (
+            <ConfirmationPopup
+                title="Сигурен ли си, че искаш да прекратиш редактирането на тази компания?"
+                description="Ще загубиш всички промени, които не си запазил."
+                open={showConfirmation}
+                onConfirm={handleConfirmExit}
+                onCancel={handleCancelExit}
+            />
         )}
         </div>
     );
