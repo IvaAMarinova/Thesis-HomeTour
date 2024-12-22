@@ -46,7 +46,7 @@ function ContactCompanyBox({ company, onClick }: { company: string; onClick: () 
                         <p className="text-xl font-semibold text-gray-800">
                             {companyData.name}
                         </p>
-                        <p className="text-base text-gray-700 mt-1">
+                        <p className="overflow-hidden text-base text-gray-700 mt-1">
                             {truncateDescription(companyData.description)}
                         </p>
                     </div>

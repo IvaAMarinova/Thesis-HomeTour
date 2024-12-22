@@ -42,13 +42,13 @@ export class PropertyController {
 
   @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async updateProperty(@Param('id') id: string, @Body() body: PropertyInputDto): Promise<{ message: string }> {
-    try {
-      await this.propertyService.update(id, body);
-      return { message: 'Property updated successfully' };
-    } catch (error) {
-      throw error;
-    }
+  async updateProperty(@Param('id') id: string, @Body() body: PropertyInputDto): Promise<TransformedPropertyDto> {
+      try {
+          const property = await this.propertyService.update(id, body);
+          return this.mapPresignedUrlsToProperty(property);
+      } catch (error) {
+          throw error;
+      }
   }
 
   @UseGuards(JwtAuthGuard)

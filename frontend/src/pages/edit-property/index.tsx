@@ -245,7 +245,7 @@ function EditProperty() {
             const url = isNewProperty ? "/properties" : `/properties/${id}`;
             const method = isNewProperty ? "post" : "put";
 
-            await HttpService[method](url, updatedProperty, undefined, true, false);
+            const response = await HttpService[method]<{ id: string }>(url, updatedProperty, undefined, true, false);
             setIsUploading(false);
             toast.success(
                 isNewProperty ? "Имотът беше успешно създаден!" : "Имотът беше успешно обновен!"
@@ -261,7 +261,7 @@ function EditProperty() {
             
             if(isNewProperty) 
             {
-                navigate(`/properties/${id}`);
+                navigate(`/properties/${response.id}`);
             }
         } catch (error) {
             setIsUploading(false);
