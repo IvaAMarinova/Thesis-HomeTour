@@ -348,7 +348,7 @@ function EditProperty() {
         );
     }
 
-    if (isError || !fetchedProperty) {
+    if ((isError || !fetchedProperty) && !isNewProperty) {
         return (
             <div className="relative flex flex-col items-center justify-center min-h-screen px-4">
                 <GoBackButton onClick={() => navigate(-1)}/>
