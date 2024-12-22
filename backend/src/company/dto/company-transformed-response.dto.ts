@@ -1,4 +1,5 @@
 export class TransformedCompanyDto {
+    id: string;
     name: string;
     description: string;
     phoneNumber: string;
@@ -10,6 +11,7 @@ export class TransformedCompanyDto {
     };
 
     constructor(company: {
+        id: string;
         name: string;
         description: string;
         phoneNumber: string;
@@ -20,6 +22,7 @@ export class TransformedCompanyDto {
             galleryImage: { key: string; url: string };
         };
         }) {
+        this.id = company.id;
         this.name = company.name;
         this.description = company.description;
         this.phoneNumber = company.phoneNumber;

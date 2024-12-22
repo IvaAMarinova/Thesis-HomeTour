@@ -86,6 +86,7 @@ export class CompanyController {
     };
   
     return new TransformedCompanyDto({
+      id: company.id,
       name: company.name,
       description: company.description,
       phoneNumber: company.phoneNumber,
