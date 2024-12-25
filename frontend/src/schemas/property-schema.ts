@@ -10,8 +10,7 @@ const propertySchema = z.object({
     address: z.object({
         city: z.string().min(1, { message: "Градът не може да бъде празен." }),
         street: z.string().min(1, { message: "Улицата не може да бъде празна." }),
-        neighborhood: z.string().min(1, { message: "Кварталът не може да бъде празен." }),
-        zip: z.string().optional(),
+        neighborhood: z.string().min(1, { message: "Кварталът не може да бъде празен." })
     }),
     phoneNumber: z
         .string()

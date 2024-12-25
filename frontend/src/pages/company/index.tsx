@@ -107,7 +107,7 @@ function Company() {
     }
 
     const company = companyQuery.data;
-    const properties = propertiesQuery.data || [];
+    const properties = propertiesQuery.isError ? [] : propertiesQuery.data || [];
 
     return (
         <div className="pt-16 align-middle flex flex-col items-center">
@@ -174,28 +174,30 @@ function Company() {
                     </div>
                 </div>
 
-                <div className="flex flex-col border-t-2 border-gray-500 pt-4 mt-12">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 -mx-2">
-                        {properties.map((property) => {
-                            const isLiked = likedProperties.some(
-                                (liked) => liked.propertyId === property.id
-                            );
-                            return (
-                                <div
-                                    key={property.id}
-                                    className="px-2 mb-4 mt-2 transform transition-transform duration-300 hover:scale-105"
-                                >
-                                    <PropertyBox
-                                        property={property}
-                                        initialLiked={isLiked}
-                                        whenClicked={() => navigate(`/properties/${property.id}`)}
-                                        onLikeUpdate={() => fetchLikedProperties()}
-                                    />
-                                </div>
-                            );
-                        })}
+                {properties.length > 0 && (
+                    <div className="flex flex-col border-t-2 border-gray-500 pt-4 mt-12">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 -mx-2">
+                            {properties.map((property) => {
+                                const isLiked = likedProperties.some(
+                                    (liked) => liked.propertyId === property.id
+                                );
+                                return (
+                                    <div
+                                        key={property.id}
+                                        className="px-2 mb-4 mt-2 transform transition-transform duration-300 hover:scale-105"
+                                    >
+                                        <PropertyBox
+                                            property={property}
+                                            initialLiked={isLiked}
+                                            whenClicked={() => navigate(`/properties/${property.id}`)}
+                                            onLikeUpdate={() => fetchLikedProperties()}
+                                        />
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
+                )}
                 <GoUpButton />
             </div>
         </div>

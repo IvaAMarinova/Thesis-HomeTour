@@ -134,8 +134,15 @@ function EditProperty() {
                 vizualizationFolder: property.resources.vizualizationFolder,
             };
 
+            const updatedAddress = {
+                city: property.address.city,
+                street: property.address.street,
+                neighborhood: property.address.neighborhood,
+            };
+
             const updatedProperty = {
                 ...property,
+                address: updatedAddress,
                 resources: updatedResources,
                 company: userCompany
             };
