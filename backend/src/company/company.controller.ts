@@ -127,7 +127,6 @@ export class CompanyController {
       phoneNumber: property.phoneNumber,
       email: property.email,
       company: property.company.id,
-      building: property.building?.id || null,
       resources: transformedResources,
     });
   }

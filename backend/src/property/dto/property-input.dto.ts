@@ -73,8 +73,4 @@ export class PropertyInputDto {
     @ValidateNested()
     @Type(() => AddressDto)
     address!: AddressDto;
-
-    @IsOptional()
-    @IsString({ message: 'Building ID must be a string' })
-    buildingId?: string;
 }

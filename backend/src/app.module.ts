@@ -5,7 +5,6 @@ import { AppService } from './app.service';
 import config from 'mikro-orm.config';
 import { UserModule } from './user/user.module';
 import { CompanyModule } from './company/company.module';
-import { BuildingModule } from './building/building.module';
 import { PropertyModule } from './property/property.module';
 import { UserPropertyModule } from './user-property/user-property.module';
 import { AuthModule } from './auth/auth.module';
@@ -16,7 +15,6 @@ import { ConfigModule } from '@nestjs/config';
     MikroOrmModule.forRoot(config),
     UserModule,
     CompanyModule,
-    BuildingModule,
     PropertyModule,
     UserPropertyModule,
     AuthModule,

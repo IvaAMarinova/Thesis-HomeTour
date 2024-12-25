@@ -24,8 +24,7 @@ export class PropertyController {
       body.name,
       body.description,
       body.floor,
-      body.resources,
-      body.buildingId,
+      body.resources    
     );
     return this.mapPresignedUrlsToProperty(property);
   }
@@ -130,7 +129,6 @@ export class PropertyController {
       email: property.email,
       company: property.company.id,
       resources: transformedResources,
-      building: property.building?.id || undefined,
     });
   }
   

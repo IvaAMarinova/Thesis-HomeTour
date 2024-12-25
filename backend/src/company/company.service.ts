@@ -2,7 +2,6 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { Company } from './company.entity';
-import { Building } from '../building/building.entity';
 import { PropertyEntity } from '../property/property.entity';
 import { isUUID } from 'class-validator';
 
@@ -68,10 +67,6 @@ export class CompanyService {
         throw new NotFoundException(`Company with id ${id} not found`);
       }
 
-      const buildings = await this.em.find(Building, { company: company });
-      for (const building of buildings) {
-        building.company = null;
-      }
       await this.em.flush();
 
       await this.em.removeAndFlush(company);

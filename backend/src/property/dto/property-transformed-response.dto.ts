@@ -12,7 +12,6 @@ export class TransformedPropertyDto {
         galleryImages: { key: string; url: string }[];
         visualizationFolder?: string | null;
     };
-    building?: string;
 
     constructor(property: {
         id: string;
@@ -27,8 +26,7 @@ export class TransformedPropertyDto {
             headerImage: { key: string; url: string } | null;
             galleryImages: { key: string; url: string }[];
             visualizationFolder?: string | null;
-        };
-        building?: string;
+        }    
     }) {
         this.id = property.id;
         this.name = property.name;
@@ -39,6 +37,5 @@ export class TransformedPropertyDto {
         this.email = property.email;
         this.company = property.company;
         this.resources = property.resources;
-        this.building = property.building;
     }
 }

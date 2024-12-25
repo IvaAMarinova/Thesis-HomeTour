@@ -3,7 +3,6 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { PropertyEntity } from './property.entity';
 import { Company } from '../company/company.entity';
-import { Building } from '../building/building.entity';
 import { UserProperty } from '../user-property/user-property.entity';
 import { isUUID } from 'class-validator';
 import { FileUploadService } from 'src/upload/upload.service';
@@ -15,8 +14,6 @@ export class PropertyService {
     private readonly propertyRepository: EntityRepository<PropertyEntity>,
     @InjectRepository(Company)
     private readonly companyRepository: EntityRepository<Company>,
-    @InjectRepository(Building)
-    private readonly buildingRepository: EntityRepository<Building>,
     private readonly em: EntityManager,
     private readonly fileUploadService: FileUploadService
   ) {}
@@ -37,8 +34,7 @@ export class PropertyService {
       headerImage: string | null;
       galleryImages: string[];
       visualizationFolder?: string | null;
-    },
-    buildingId?: string,
+    }
   ): Promise<PropertyEntity> {
     try {
       if (!isUUID(companyId)) {
@@ -59,17 +55,6 @@ export class PropertyService {
       property.company = companyObject;
       property.name = name;
       property.description = description;
-
-      if (buildingId) {
-        if (!isUUID(buildingId)) {
-          throw new BadRequestException(`Invalid UUID format for buildingId: ${buildingId}`);
-        }
-        const building = await this.buildingRepository.findOne({ id: buildingId });
-        if (!building) {
-          throw new NotFoundException(`Building with id ${buildingId} not found`);
-        }
-        property.building = building;
-      }
 
       await this.em.persistAndFlush(property);
       return property;
