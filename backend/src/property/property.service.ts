@@ -6,6 +6,7 @@ import { Company } from '../company/company.entity';
 import { Building } from '../building/building.entity';
 import { UserProperty } from '../user-property/user-property.entity';
 import { isUUID } from 'class-validator';
+import { FileUploadService } from 'src/upload/upload.service';
 
 @Injectable()
 export class PropertyService {
@@ -17,6 +18,7 @@ export class PropertyService {
     @InjectRepository(Building)
     private readonly buildingRepository: EntityRepository<Building>,
     private readonly em: EntityManager,
+    private readonly fileUploadService: FileUploadService
   ) {}
 
   async create(
@@ -110,6 +112,11 @@ export class PropertyService {
       if (userProperties.length > 0) {
         await this.em.removeAndFlush(userProperties);
       }
+      await this.fileUploadService.DeleteObject(property.resources.headerImage);
+
+      for(const image of property.resources.galleryImages) {
+        await this.fileUploadService.DeleteObject(image);
+      }
 
       await this.em.removeAndFlush(property);
     } catch (error) {
@@ -154,8 +161,8 @@ export class PropertyService {
     try {
       const properties = await this.propertyRepository.findAll();
       return properties
-        .map((property) => property.floor)
-        .filter((floor) => floor !== undefined);
+        .filter((floor) => floor !== undefined)
+        .map((property) => property.floor);
     } catch (error) {
       this.handleUnexpectedError(error);
     }

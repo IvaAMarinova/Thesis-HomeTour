@@ -33,7 +33,7 @@ function EditProperties() {
     const navigate = useNavigate();
     const { userCompany } = useUser();
     const queryClient = useQueryClient();
-
+    const [deleteConfirmed, setDeleteConfirmed] = useState(false);
     const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
     const [showConfirmation, setShowConfirmation] = useState(false);
 
@@ -50,7 +50,7 @@ function EditProperties() {
     });
 
     useEffect(() => {
-        if (selectedPropertyId) {
+        if (selectedPropertyId && deleteConfirmed) {
             const deleteProperty = async () => {
                 try {
                     await HttpService.delete(
@@ -74,11 +74,11 @@ function EditProperties() {
 
             deleteProperty();
         }
-    }, [selectedPropertyId, queryClient, userCompany]);
+    }, [deleteConfirmed]);
 
     const handleDeleteClick = (propertyId: string) => {
-        setSelectedPropertyId(propertyId);
         setShowConfirmation(true);
+        setSelectedPropertyId(propertyId);
     };
 
     const handleCancelDelete = () => {
@@ -87,6 +87,7 @@ function EditProperties() {
     };
 
     const handleConfirmDelete = () => {
+        setDeleteConfirmed(true);
         setShowConfirmation(false);
     };
 
