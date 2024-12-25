@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { S3 } from 'aws-sdk';
 
 @Injectable()
@@ -6,10 +7,10 @@ export class FileUploadService {
     private readonly s3: S3;
     private readonly bucketName: string;
 
-    constructor() {
-        const region = process.env.AWS_BUCKET_REGION;
-        const accessKey = process.env.AWS_ACCESS_KEY;
-        const secretKey = process.env.AWS_SECRET_KEY;
+    constructor(private readonly configService: ConfigService) {
+        const region = configService.get('AWS_BUCKET_REGION');
+        const accessKey = configService.get('AWS_ACCESS_KEY');
+        const secretKey = configService.get('AWS_SECRET_KEY');
 
         if (!region || !accessKey || !secretKey) {
             throw new Error('AWS configuration is missing in environment variables.');
@@ -21,7 +22,7 @@ export class FileUploadService {
             secretAccessKey: secretKey,
         });
 
-        this.bucketName = process.env.AWS_BUCKET_NAME;
+        this.bucketName = configService.get('AWS_BUCKET_NAME');
 
         if (!this.bucketName) {
             throw new Error('AWS bucket name is missing in environment variables.');

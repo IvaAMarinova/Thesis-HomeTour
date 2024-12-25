@@ -1,24 +1,15 @@
 import { Options, PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
-import * as dotenv from 'dotenv';
 
-dotenv.config();
-
-const config: Options = {
+export const getMikroOrmConfig = (configService): Options => ({
   driver: PostgreSqlDriver,
-
-  dbName: process.env.POSTGRES_DB,
-  host: process.env.POSTGRES_HOST,
-  port: Number(process.env.POSTGRES_PORT),
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
-
+  dbName: configService.get('POSTGRES_DB'),
+  host: configService.get('POSTGRES_HOST'),
+  port: Number(configService.get('POSTGRES_PORT')),
+  user: configService.get('POSTGRES_USER'),
+  password: configService.get('POSTGRES_PASSWORD'),
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
-
   metadataProvider: TsMorphMetadataProvider,
-  
   debug: true,
-};
-
-export default config;
+});
