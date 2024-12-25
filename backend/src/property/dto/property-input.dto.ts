@@ -67,7 +67,7 @@ export class PropertyInputDto {
     resources!: ResourcesDto;
 
     @IsString({ message: 'Company ID must be a string' })
-    companyId!: string;
+    company!: string;
 
     @IsDefined()
     @ValidateNested()

@@ -5,6 +5,8 @@ import { UserProperty } from './user-property.entity';
 import { User } from '../user/user.entity';
 import { PropertyEntity } from '../property/property.entity';
 import { isUUID } from 'class-validator';
+import { UserPropertyInputDto } from './dto/user-property-input.dto';
+import { UserPropertyPartialInputDto } from './dto/user-property-partial-input.dto';
 
 @Injectable()
 export class UserPropertyService {
@@ -18,40 +20,41 @@ export class UserPropertyService {
     private readonly em: EntityManager,
   ) {}
 
-  async create(userId: string, propertyId: string, liked: boolean): Promise<UserProperty> {
+  async create(body: UserPropertyInputDto): Promise<UserProperty> {
     try {
-      if (!userId || !propertyId) {
+      if (!body.user || !body.property) {
         throw new BadRequestException('User ID and Property ID must be provided');
       }
-      if (!isUUID(userId) || !isUUID(propertyId)) {
+      if (!isUUID(body.user) || !isUUID(body.property)) {
         throw new BadRequestException('Invalid UUID format for User ID or Property ID');
       }
 
-      const user = await this.userRepository.findOne({ id: userId });
-      if (!user) {
-        throw new NotFoundException(`User with ID ${userId} not found`);
+      const existingUser = await this.userRepository.findOne({ id: body.user });
+      if (!existingUser) {
+        throw new NotFoundException(`User with ID ${body.user} not found`);
       }
 
-      const property = await this.propertyRepository.findOne({ id: propertyId });
-      if (!property) {
-        throw new NotFoundException(`Property with ID ${propertyId} not found`);
+      const existingProperty = await this.propertyRepository.findOne({ id: body.property });
+      if (!existingProperty) {
+        throw new NotFoundException(`Property with ID ${body.property} not found`);
       }
 
       const existingUserProperty = await this.userPropertyRepository.findOne({
-        user,
-        property,
+        user: existingUser,
+        property: existingProperty,
       });
       if (existingUserProperty) {
         throw new BadRequestException(
-          `UserProperty already exists for User ID ${userId} and Property ID ${propertyId}`,
+          `UserProperty already exists for User ID ${body.user} and Property ID ${body.property}`,
         );
       }
 
-      const userProperty = new UserProperty();
-      userProperty.user = user;
-      userProperty.property = property;
-      userProperty.liked = liked;
-
+      const userProperty = this.em.create(UserProperty, {
+        ...body,
+        existingUser,
+        existingProperty,
+      });
+  
       await this.em.transactional(async (em) => {
         await em.persistAndFlush(userProperty);
       });
@@ -62,7 +65,7 @@ export class UserPropertyService {
     }
   }
 
-  async update(userPropertyId: string, liked: boolean): Promise<UserProperty> {
+  async update(userPropertyId: string, body: Partial<UserPropertyPartialInputDto>): Promise<UserProperty> {
     try {
       if (!isUUID(userPropertyId)) {
         throw new BadRequestException(`Invalid UUID format for ID: ${userPropertyId}`);
@@ -73,11 +76,8 @@ export class UserPropertyService {
         throw new NotFoundException(`UserProperty with ID ${userPropertyId} not found`);
       }
 
-      userProperty.liked = liked;
-
+      this.em.assign(userProperty, body);
       await this.em.flush();
-
-      console.log('[SERVICE] Updated user property to state:', userProperty.liked);
       return userProperty;
     } catch (error) {
       this.handleUnexpectedError(error);
@@ -127,29 +127,8 @@ export class UserPropertyService {
     }
   }
 
-  async getPropertyUsers(propertyId: string): Promise<UserProperty[]> {
-    try {
-      if (!propertyId) {
-        throw new BadRequestException('Property ID must be provided');
-      }
-      if (!isUUID(propertyId)) {
-        throw new BadRequestException(`Invalid UUID format for Property ID: ${propertyId}`);
-      }
-
-      return this.userPropertyRepository.find(
-        { property: { id: propertyId } },
-        { populate: ['user'] },
-      );
-    } catch (error) {
-      this.handleUnexpectedError(error);
-    }
-  }
-
   async getByIds(userId: string, propertyId: string): Promise<UserProperty> {
     try {
-      console.log('[UserPropertyService] Getting user property by user ID:', userId);
-      console.log('[UserPropertyService] Getting user property by property ID:', propertyId);
-
       if (!userId || !propertyId) {
         throw new BadRequestException('User ID and Property ID must be provided');
       }
@@ -163,7 +142,7 @@ export class UserPropertyService {
       });
 
       if (!userProperty) {
-        console.log('[UserPropertyService] User property not found');
+        return null;
       }
       return userProperty;
     } catch (error) {
@@ -185,14 +164,6 @@ export class UserPropertyService {
         { populate: ['property'] },
       );
 
-      likedProperties.forEach((userProperty, index) => {
-        console.log(`[SERVICE] Liked Property ${index + 1}:`, {
-          propertyId: userProperty.property.id,
-          liked: userProperty.liked,
-          propertyName: userProperty.property.name,
-        });
-      });
-
       return likedProperties;
     } catch (error) {
       this.handleUnexpectedError(error);
@@ -201,7 +172,7 @@ export class UserPropertyService {
 
   private handleUnexpectedError(error: any): never {
     if (error instanceof BadRequestException || error instanceof NotFoundException) {
-      throw error; // Re-throw known exceptions
+      throw error;
     }
 
     console.error('Unexpected error occurred:', error);

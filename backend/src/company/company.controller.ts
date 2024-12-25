@@ -19,7 +19,7 @@ export class CompanyController {
   @Post()
   async createCompany(
     @Body() body: CompanyInputDto ): Promise<TransformedCompanyDto> {
-    const user = await this.companyService.create(body.name, body.description, body.email, body.phoneNumber, body.website, body.resources);
+    const user = await this.companyService.create(body);
     return this.mapPresignedUrlsToCompany(user);
   }
 

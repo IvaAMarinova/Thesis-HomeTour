@@ -137,7 +137,7 @@ function EditProperty() {
             const updatedProperty = {
                 ...property,
                 resources: updatedResources,
-                companyId: userCompany
+                company: userCompany
             };
 
             propertySchema.parse(updatedProperty);

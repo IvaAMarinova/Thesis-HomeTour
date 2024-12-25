@@ -3,6 +3,7 @@ import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nes
 import { UserPropertyService } from './user-property.service';
 import { UserPropertyInputDto } from './dto/user-property-input.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { UserPropertyPartialInputDto } from './dto/user-property-partial-input.dto';
 
 @Controller('user-properties')
 export class UserPropertyController {
@@ -11,7 +12,7 @@ export class UserPropertyController {
     @UseGuards(JwtAuthGuard)
     @Post()
     async createUserProperty(@Body() body: UserPropertyInputDto): Promise<UserPropertyResponseDto> {
-        const userProperty = await this.userPropertyService.create(body.userId, body.propertyId, body.liked);
+        const userProperty = await this.userPropertyService.create(body);
         return new UserPropertyResponseDto(userProperty);
     }
 
@@ -23,8 +24,8 @@ export class UserPropertyController {
 
     @UseGuards(JwtAuthGuard)
     @Put(':id')
-    async updateUserProperty(@Param('id') id: string, @Body() body: { liked: boolean }): Promise<{ message: string }> {
-        await this.userPropertyService.update(id, body.liked);
+    async updateUserProperty(@Param('id') id: string, @Body() body: Partial<UserPropertyPartialInputDto>): Promise<{ message: string }> {
+        await this.userPropertyService.update(id, body);
         return { message: 'User property updated successfully' };
     }
 
@@ -42,9 +43,9 @@ export class UserPropertyController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Get('/property-id/:propertyId')
-    async getPropertyUsers(@Param('propertyId') propertyId: string): Promise<UserPropertyResponseDto[]> {
-        const userProperties = await this.userPropertyService.getPropertyUsers(propertyId);
+    @Get('/property-id/:property')
+    async getPropertyUsers(@Param('property') property: string): Promise<UserPropertyResponseDto[]> {
+        const userProperties = await this.userPropertyService.getPropertyUsers(property);
         return userProperties.map(userProperty => new UserPropertyResponseDto(userProperty));
     }
 
@@ -52,15 +53,14 @@ export class UserPropertyController {
     @Put('/user-id/:userId')
     async updateUserPropertyByUserId(
         @Param('userId') userId: string,
-        @Body() body: { propertyId: string; liked: boolean }
+        @Body() body: UserPropertyInputDto
     ): Promise<{ message: string }> {
-        const existingUserProperty = await this.userPropertyService.getByIds(userId, body.propertyId);
-
+        const existingUserProperty = await this.userPropertyService.getByIds(userId, body.property);
         if (!existingUserProperty) {
-            await this.userPropertyService.create(userId, body.propertyId, body.liked);
+            await this.userPropertyService.create(body);
             return { message: 'User property created successfully' };
         } else {
-            await this.userPropertyService.update(existingUserProperty.id, body.liked);
+            await this.userPropertyService.update(existingUserProperty.id, body);
             return { message: 'User property updated successfully' };
         }
     }

@@ -1,9 +1,9 @@
 import { Injectable, UnauthorizedException, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { IUser } from '../user/user.inteface';
-import { UserType } from '../user/user.entity';
+import { User } from '../user/user.entity';
 import { v4 } from 'uuid';
+import { UserInputDto } from 'src/user/dto/user-input.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +22,7 @@ export class AuthService {
     }
   }
 
-  async login(user: IUser) {
+  async login(user: User): Promise<{ accessToken: string; refreshToken: string }> {
     const payload = { email: user.email, sub: user.id };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '1d' });
     const refreshToken = v4();
@@ -35,43 +35,26 @@ export class AuthService {
     };
   }
 
-  async register(email: string, password: string, fullName: string, companyId: string, type: string) {
-    const existingUser = await this.userService.findByEmail(email);
+  async register(userData: UserInputDto): Promise<{ accessToken: string; refreshToken: string }> {
+    const existingUser = await this.userService.findByEmail(userData.email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
-    }
-  
-    const userType = this.validateAndConvertUserType(type);
-  
+    }  
     try {
-      const user = await this.userService.create(fullName, email, password, userType, companyId);
+      const user = await this.userService.create(userData);
       return this.login(user);
     } catch (error) {
       throw new BadRequestException(`Failed to register user: ${error.message}`);
     }
   }
-  
-  private validateAndConvertUserType(type: string): UserType {
-    const upperCaseType = type.toUpperCase();
-    if (upperCaseType in UserType) {
-      return UserType[upperCaseType as keyof typeof UserType];
-    }
-    throw new BadRequestException(`Invalid user type: ${type}`);
-  }
 
-  async getMe(userId: string): Promise<IUser> {
-    console.log("[AuthService.getMe] Fetching user with ID:", userId);
-  
+  async getMe(userId: string): Promise<User> {  
     try {
       const user = await this.userService.getUserById(userId);
   
       if (!user) {
-        console.error(`[AuthService.getMe] User with id ${userId} not found in database`);
         throw new NotFoundException(`User with id ${userId} not found`);
-      }
-  
-      console.log("[AuthService.getMe] Retrieved user:", user);
-      
+      }      
 
       return user;
     } catch (error) {
@@ -79,24 +62,15 @@ export class AuthService {
       throw new Error("An unexpected error occurred while retrieving the user");
     }
   }
-  
 
-  async refreshToken(
-    accessToken: string,
-    refreshToken: string
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  async refreshToken(accessToken: string, refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
     try {
-      // Decode and validate the accessToken
       const decoded = this.jwtService.decode(accessToken) as { sub: string; email: string };
   
       if (!decoded || !decoded.sub) {
         console.log("Invalid access token");
         throw new UnauthorizedException('Invalid access token');
-      }
-  
-      console.log("[Refresh Token] Decoded AccessToken Subject (UserID):", decoded.sub);
-  
-      // Find the user by ID from the accessToken
+      }  
       const user = await this.userService.getUserById(decoded.sub);
   
       if (!user) {
@@ -104,22 +78,16 @@ export class AuthService {
         throw new UnauthorizedException('User not found');
       }
   
-      console.log("[Refresh Token] User Found:", user);
-  
-      // Validate the refreshToken matches the one stored in the database
+
       if (user.refreshToken !== refreshToken) {
         console.log("Refresh token does not match");
         throw new UnauthorizedException('Invalid or expired refresh token');
       }
-  
-      console.log("[Refresh Token] Tokens match. Generating new tokens...");
-  
-      // Generate new tokens
+    
       const payload = { email: user.email, sub: user.id };
       const newAccessToken = this.jwtService.sign(payload);
-      const newRefreshToken = v4(); // Generate a new UUID as the refreshToken
+      const newRefreshToken = v4();
   
-      // Save the new tokens in the database
       await this.userService.saveTokens(user.id, newAccessToken, newRefreshToken);
   
       return {
@@ -127,9 +95,7 @@ export class AuthService {
         refreshToken: newRefreshToken,
       };
     } catch (error) {
-      console.error("[Refresh Token] Error:", error.message);
       throw new UnauthorizedException('Invalid or expired tokens');
     }
-  }
-  
+  } 
 }

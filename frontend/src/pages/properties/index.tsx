@@ -91,7 +91,7 @@ function Properties() {
     }, [isPropertiesLoading, properties, isInitialLoadComplete]);
 
     useEffect(() => {
-        const companyIdToNameMap = Object.fromEntries(
+        const companyToNameMap = Object.fromEntries(
             companiesResponse.map(({ id, name }) => [id, name])
         );
         setCompanies((prev) => {
@@ -99,7 +99,7 @@ function Properties() {
             return JSON.stringify(prev) === JSON.stringify(newCompanies) ? prev : newCompanies;
         });
         setCompanyDictionary((prev) => {
-            return JSON.stringify(prev) === JSON.stringify(companyIdToNameMap) ? prev : companyIdToNameMap;
+            return JSON.stringify(prev) === JSON.stringify(companyToNameMap) ? prev : companyToNameMap;
         });
     }, [companiesResponse]);
 

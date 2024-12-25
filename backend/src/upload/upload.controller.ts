@@ -45,7 +45,7 @@ export class UploadController {
             throw new NotFoundException('Missing required query parameter: key');
         }
         try {
-            const url = await this.fileUploadService.DeleteObject(key);
+            const url = await this.fileUploadService.deleteObject(key);
             return { url };
         } catch (error) {
             throw error;

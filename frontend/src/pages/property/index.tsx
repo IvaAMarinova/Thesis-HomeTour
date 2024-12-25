@@ -72,7 +72,8 @@ function Property() {
                 `/user-properties/user-id/${userId}`,
                 {
                     liked: newLikedState,
-                    propertyId: id,
+                    property: id,
+                    user: userId,
                 },
                 undefined,
                 true,

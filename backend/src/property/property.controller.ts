@@ -16,17 +16,8 @@ export class PropertyController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async createProperty(@Body() body: PropertyInputDto): Promise<TransformedPropertyDto> {
-    const property = await this.propertyService.create(
-      body.address,
-      body.phoneNumber,
-      body.email,
-      body.companyId,
-      body.name,
-      body.description,
-      body.floor,
-      body.resources    
-    );
-    return this.mapPresignedUrlsToProperty(property);
+    const property = await this.propertyService.create(body);
+    return await this.mapPresignedUrlsToProperty(property);
   }
 
   @Get('addresses')
@@ -70,12 +61,6 @@ export class PropertyController {
     );
 
     return mappedProperties;
-  }
-
-  @Get('ids')
-  async getAllPropertyIds(): Promise<{ id: string }[]> {
-      const ids = await this.propertyService.getAllPropertyIds();
-      return ids;
   }
 
   @Get(':id')

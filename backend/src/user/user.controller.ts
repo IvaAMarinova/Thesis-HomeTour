@@ -3,7 +3,6 @@ import { UserService } from './user.service';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UserInputDto } from './dto/user-input.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { UserPartialInputDto } from './dto/user-partial-input.dto';
 
 @Controller('users')
 export class UserController {
@@ -12,13 +11,8 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async createUser(@Body() userData: UserInputDto): Promise<UserResponseDto> {
-    const user = await this.userService.create(
-      userData.fullName,
-      userData.email,
-      userData.password,
-      userData.type,
-      userData.companyId
-    );
+    const user = await this.userService.create(userData
+  );
     return new UserResponseDto(user);
   }
 
@@ -34,14 +28,14 @@ export class UserController {
     return new UserResponseDto(user);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async updateUser(@Param('id') id: string, @Body() userData: UserPartialInputDto): Promise<UserResponseDto> {
+  async updateUser(@Param('id') id: string, @Body() userData: Partial<UserInputDto>): Promise<UserResponseDto> {
     const user = await this.userService.update(id, userData);
     return new UserResponseDto(user);
   }
 
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async deleteUser(@Param('id') id: string): Promise<void> {
     await this.userService.delete(id);

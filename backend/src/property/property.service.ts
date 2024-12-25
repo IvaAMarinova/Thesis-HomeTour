@@ -6,6 +6,7 @@ import { Company } from '../company/company.entity';
 import { UserProperty } from '../user-property/user-property.entity';
 import { isUUID } from 'class-validator';
 import { FileUploadService } from 'src/upload/upload.service';
+import { PropertyInputDto } from './dto/property-input.dto';
 
 @Injectable()
 export class PropertyService {
@@ -18,43 +19,18 @@ export class PropertyService {
     private readonly fileUploadService: FileUploadService
   ) {}
 
-  async create(
-    address: {
-      street: string;
-      city: string;
-      neighborhood: string;
-    },
-    phoneNumber: string,
-    email: string,
-    companyId: string,
-    name: string,
-    description: string,
-    floor: number,
-    resources: {
-      headerImage: string | null;
-      galleryImages: string[];
-      visualizationFolder?: string | null;
-    }
-  ): Promise<PropertyEntity> {
+  async create(propertyData: PropertyInputDto): Promise<PropertyEntity> {
     try {
-      if (!isUUID(companyId)) {
-        throw new BadRequestException(`Invalid UUID format for companyId: ${companyId}`);
+      if (!isUUID(propertyData.company)) {
+        throw new BadRequestException(`Invalid UUID format for company: ${propertyData.company}`);
       }
 
-      const companyObject = await this.companyRepository.findOne({ id: companyId });
+      const companyObject = await this.companyRepository.findOne({ id: propertyData.company });
       if (!companyObject) {
-        throw new NotFoundException(`Company with id ${companyId} not found`);
+        throw new NotFoundException(`Company with id ${propertyData.company} not found`);
       }
 
-      const property = new PropertyEntity();
-      property.floor = floor;
-      property.address = address;
-      property.phoneNumber = phoneNumber;
-      property.email = email;
-      property.resources = resources;
-      property.company = companyObject;
-      property.name = name;
-      property.description = description;
+      const property = this.em.create(PropertyEntity, propertyData);
 
       await this.em.persistAndFlush(property);
       return property;
@@ -63,7 +39,7 @@ export class PropertyService {
     }
   }
 
-  async update(id: string, propertyData: Partial<PropertyEntity>): Promise<PropertyEntity> {
+  async update(id: string, propertyData: Partial<PropertyInputDto>): Promise<PropertyEntity> {
     try {
       if (!isUUID(id)) {
         throw new BadRequestException(`Invalid UUID format for id: ${id}`);
@@ -97,10 +73,10 @@ export class PropertyService {
       if (userProperties.length > 0) {
         await this.em.removeAndFlush(userProperties);
       }
-      await this.fileUploadService.DeleteObject(property.resources.headerImage);
+      await this.fileUploadService.deleteObject(property.resources.headerImage);
 
       for(const image of property.resources.galleryImages) {
-        await this.fileUploadService.DeleteObject(image);
+        await this.fileUploadService.deleteObject(image);
       }
 
       await this.em.removeAndFlush(property);
@@ -148,17 +124,6 @@ export class PropertyService {
       return properties
         .filter((floor) => floor !== undefined)
         .map((property) => property.floor);
-    } catch (error) {
-      this.handleUnexpectedError(error);
-    }
-  }
-
-  async getAllPropertyIds(): Promise<{ id: string }[]> {
-    try {
-      const properties = await this.propertyRepository.findAll({
-        fields: ['id'],
-      });
-      return properties.map((property) => ({ id: property.id }));
     } catch (error) {
       this.handleUnexpectedError(error);
     }

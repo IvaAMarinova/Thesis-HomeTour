@@ -1,21 +1,21 @@
 import { Exclude } from 'class-transformer';
-import { IUser } from './../user.inteface';
+import { User } from '../user.entity';
 
 export class UserResponseDto {
   id: string;
   fullName: string;
   email: string;
-  type: IUser['type'];
-  companyId?: string;
+  type: User['type'];
+  company?: string;
 
   @Exclude()
   password: string;
 
-  constructor(user: Partial<IUser>) {
+  constructor(user: Partial<User>) {
     this.id = user.id;
     this.fullName = user.fullName;
     this.email = user.email;
     this.type = user.type;
-    this.companyId = user.company?.id;
+    this.company = user.company?.id;
   }
 }

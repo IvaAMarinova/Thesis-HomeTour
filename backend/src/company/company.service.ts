@@ -4,6 +4,7 @@ import { EntityManager, EntityRepository } from '@mikro-orm/core';
 import { Company } from './company.entity';
 import { PropertyEntity } from '../property/property.entity';
 import { isUUID } from 'class-validator';
+import { CompanyInputDto } from './dto/company-input.dto';
 
 @Injectable()
 export class CompanyService {
@@ -13,21 +14,8 @@ export class CompanyService {
     private readonly em: EntityManager,
   ) {}
 
-  async create(
-    name: string,
-    description: string,
-    email: string,
-    phoneNumber: string,
-    website: string,
-    resources: { logoImage: string | null; galleryImage: string },
-  ): Promise<Company> {
-    const company = new Company();
-    company.name = name;
-    company.description = description;
-    company.email = email;
-    company.phoneNumber = phoneNumber;
-    company.website = website;
-    company.resources = resources;
+  async create(companyData: CompanyInputDto): Promise<Company> {
+    const company = this.em.create(Company, companyData);
 
     try {
       await this.em.persistAndFlush(company);
@@ -37,7 +25,7 @@ export class CompanyService {
     }
   }
 
-  async update(id: string, companyData: Partial<Company>): Promise<Company> {
+  async update(id: string, companyData: Partial<CompanyInputDto>): Promise<Company> {
     try {
       if (!isUUID(id)) {
         throw new BadRequestException(`Invalid UUID format for id: ${id}`);

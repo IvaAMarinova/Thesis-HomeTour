@@ -26,13 +26,13 @@ function Profile() {
     const [user, setUser] = useState<Record<string, string>>({
         fullName: "",
         email: "",
-        companyId: "",
+        company: "",
         type: "",
     });
     const [initialUser, setInitialUser] = useState<Record<string, string>>({
         fullName: "",
         email: "",
-        companyId: "",
+        company: "",
         type: "",
     });
     const [company, setCompany] = useState<Record<string, string>>({});
@@ -51,25 +51,25 @@ function Profile() {
     });
 
     const { data: companyData, isLoading: isCompanyLoading } = useQuery({
-        queryKey: ["companyProfile", user?.companyId],
+        queryKey: ["companyProfile", user?.company],
         queryFn: async () => {
-            if (user.companyId) {
+            if (user.company) {
                 return await HttpService.get<Record<string, string>>(
-                    `/companies/${user.companyId}`,
+                    `/companies/${user.company}`,
                     undefined,
                     true
                 );
             }
             return null;
         },
-        enabled: !!user.companyId,
+        enabled: !!user.company,
     });
 
     useEffect(() => {
         if (userData) {
-            const { fullName, email, companyId, type } = userData;
-            setUser({ fullName, email, companyId, type });
-            setInitialUser({ fullName, email, companyId, type });
+            const { fullName, email, company, type } = userData;
+            setUser({ fullName, email, company, type });
+            setInitialUser({ fullName, email, company, type });
         }
     }, [userData]);
 
@@ -167,7 +167,7 @@ function Profile() {
                         <Label className="mb-2 block">Имейл адрес</Label>
                         <p className="text-italic text-sm text-gray-500">{user.email}</p>
                     </div>
-                    {user.companyId && (
+                    {user.company && (
                         <div>
                             <Label className="mb-2 block">Компания</Label>
                             <p className="text-italic text-sm text-gray-500">{company.name}</p>

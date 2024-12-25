@@ -49,7 +49,8 @@ function PropertyBox({
         try {
             await HttpService.put(`user-properties/user-id/${userId}`, {
                 liked: newLikedState,
-                propertyId: property.id,
+                property: property.id,
+                user: userId,
             }, 
             undefined,
             true,

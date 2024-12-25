@@ -3,9 +3,9 @@ import { InjectRepository } from '@mikro-orm/nestjs';
 import { EntityManager, EntityRepository, UniqueConstraintViolationException } from '@mikro-orm/core';
 import { User } from './user.entity';
 import { CompanyService } from '../company/company.service';
-import { UserType } from './user.entity';
-import { hash, compare } from 'bcrypt';
+import { compare } from 'bcrypt';
 import { isUUID } from 'class-validator';
+import { UserInputDto } from './dto/user-input.dto';
 
 @Injectable()
 export class UserService {
@@ -16,24 +16,20 @@ export class UserService {
     private readonly em: EntityManager,
   ) {}
 
-  async create(fullName: string, email: string, password: string, type: UserType, companyId?: string): Promise<User> {
+  async create(userData: UserInputDto): Promise<User> {
     try {
-      const existingUser = await this.findByEmail(email);
+      const existingUser = await this.findByEmail(userData.email);
       if (existingUser) {
-        throw new ConflictException(`User with email ${email} already exists`);
+        throw new ConflictException(`User with email ${userData.email} already exists`);
       }
 
-      const user = new User();
-      user.fullName = fullName;
-      user.email = email;
-      user.password = await hash(password, 10);
-      user.type = type;
+      const user = this.em.create(User, userData);
 
-      if (companyId) {
-        const company = await this.companyService.getCompanyById(companyId);
+      if (userData.company) {
+        const company = await this.companyService.getCompanyById(userData.company);
         if (!company) {
           console.log("Company with this id not found");
-          throw new NotFoundException(`Company with id ${companyId} not found`);
+          throw new NotFoundException(`Company with id ${userData.company} not found`);
         }
         user.company = company;
       }
@@ -42,13 +38,13 @@ export class UserService {
       return user;
     } catch (error) {
       if (error instanceof UniqueConstraintViolationException) {
-        throw new ConflictException(`User with email ${email} already exists`);
+        throw new ConflictException(`User with email ${userData.email} already exists`);
       }
       this.handleUnexpectedError(error);
     }
   }
 
-  async update(id: string, userData: { fullName: string; email: string; type: UserType; companyId?: string }): Promise<User> {
+  async update(id: string, userData: Partial<UserInputDto>): Promise<User> {
     try {
       if (!isUUID(id)) {
         throw new BadRequestException(`Invalid ID format for id: ${id}`);
@@ -58,17 +54,16 @@ export class UserService {
         throw new NotFoundException(`User with id ${id} not found`);
       }
 
-      if (userData.companyId) {
-        const company = await this.companyService.getCompanyById(userData.companyId);
+      if (userData.company) {
+        const company = await this.companyService.getCompanyById(userData.company);
         if (!company) {
-          throw new NotFoundException(`Company with id ${userData.companyId} not found`);
+          throw new NotFoundException(`Company with id ${userData.company} not found`);
         }
         existingUser.company = company;
       }
 
-      const { companyId, ...otherUserData } = userData;
-      Object.assign(existingUser, otherUserData);
-
+      const { company, ...otherUserData } = userData;
+      this.em.assign(existingUser, otherUserData);
       await this.em.flush();
       return existingUser;
     } catch (error) {
@@ -117,18 +112,17 @@ export class UserService {
   async validateUser(email: string, password: string): Promise<User> {
     try {
       const user = await this.userRepository.findOne({ email });
-      if (!user) {
-        throw new NotFoundException(`User with email ${email} not found`);
+      
+      if (!user || !(await this.validatePassword(user, password))) {
+        throw new UnauthorizedException(`Invalid user or password.`);
       }
-      const isPasswordValid = await this.validatePassword(user, password);
-      if (!isPasswordValid) {
-        throw new UnauthorizedException(`Invalid password for user ${email}`);
-      }
+  
       return user;
     } catch (error) {
       this.handleUnexpectedError(error);
     }
   }
+  
 
   async saveTokens(id: string, accessToken: string, refreshToken: string): Promise<User> {
     try {
@@ -151,7 +145,6 @@ export class UserService {
     try {
       return this.userRepository.findOne({ email });
     } catch (error) {
-      console.error(`[UserService] Error finding user by email: ${error.message}`);
       throw new BadRequestException(`Failed to find user by email: ${error.message}`);
     }
   }
@@ -171,5 +164,4 @@ export class UserService {
     console.error("Unexpected error occurred:", error);
     throw new BadRequestException(`An unexpected error occurred: ${error.message}`);
   }
-  
 }

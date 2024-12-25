@@ -26,7 +26,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         const response = await HttpService.get<Record<string, any>>('/auth/me/', undefined, true, false);
         console.log("[UserContext] Response: ", response);
         setUserId(response.id);
-        setUserCompany(response.companyId);
+        setUserCompany(response.company);
         setUserType(response.type);
       });
 
