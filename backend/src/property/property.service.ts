@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager, EntityRepository } from '@mikro-orm/core';
+import { EntityManager } from '@mikro-orm/core';
 import { PropertyEntity } from './property.entity';
 import { Company } from '../company/company.entity';
 import { UserProperty } from '../user-property/user-property.entity';
@@ -11,10 +10,6 @@ import { PropertyInputDto } from './dto/property-input.dto';
 @Injectable()
 export class PropertyService {
   constructor(
-    @InjectRepository(PropertyEntity)
-    private readonly propertyRepository: EntityRepository<PropertyEntity>,
-    @InjectRepository(Company)
-    private readonly companyRepository: EntityRepository<Company>,
     private readonly em: EntityManager,
     private readonly fileUploadService: FileUploadService
   ) {}
@@ -25,7 +20,7 @@ export class PropertyService {
         throw new BadRequestException(`Invalid UUID format for company: ${propertyData.company}`);
       }
 
-      const companyObject = await this.companyRepository.findOne({ id: propertyData.company });
+      const companyObject = await this.em.findOne(Company, { id: propertyData.company });
       if (!companyObject) {
         throw new NotFoundException(`Company with id ${propertyData.company} not found`);
       }
@@ -45,7 +40,7 @@ export class PropertyService {
         throw new BadRequestException(`Invalid UUID format for id: ${id}`);
       }
 
-      const existingProperty = await this.propertyRepository.findOne({ id });
+      const existingProperty = await this.em.findOne(PropertyEntity, { id });
       if (!existingProperty) {
         throw new NotFoundException(`Property with id ${id} not found`);
       }
@@ -64,7 +59,7 @@ export class PropertyService {
         throw new BadRequestException(`Invalid UUID format for id: ${id}`);
       }
 
-      const property = await this.propertyRepository.findOne({ id });
+      const property = await this.em.findOne(PropertyEntity, { id });
       if (!property) {
         throw new NotFoundException(`Property with id ${id} not found`);
       }
@@ -87,7 +82,7 @@ export class PropertyService {
 
   async getAllProperties(): Promise<PropertyEntity[]> {
     try {
-      return this.propertyRepository.findAll();
+      return this.em.findAll(PropertyEntity);
     } catch (error) {
       this.handleUnexpectedError(error);
     }
@@ -99,7 +94,7 @@ export class PropertyService {
         throw new BadRequestException(`Invalid UUID format for id: ${id}`);
       }
 
-      const property = await this.propertyRepository.findOne({ id });
+      const property = await this.em.findOne(PropertyEntity, { id });
       if (!property) {
         throw new NotFoundException(`Property with id ${id} not found`);
       }
@@ -111,7 +106,7 @@ export class PropertyService {
 
   async getAllAddresses(): Promise<Record<string, string>[]> {
     try {
-      const properties = await this.propertyRepository.findAll();
+      const properties = await this.em.findAll(PropertyEntity);
       return properties.map((property) => property.address);
     } catch (error) {
       this.handleUnexpectedError(error);
@@ -120,7 +115,7 @@ export class PropertyService {
 
   async getAllFloors(): Promise<number[]> {
     try {
-      const properties = await this.propertyRepository.findAll();
+      const properties = await this.em.findAll(PropertyEntity);
       return properties
         .filter((floor) => floor !== undefined)
         .map((property) => property.floor);
@@ -131,7 +126,7 @@ export class PropertyService {
 
   async deleteAllProperties(): Promise<void> {
     try {
-      const properties = await this.propertyRepository.findAll();
+      const properties = await await this.em.findAll(PropertyEntity);
       if (properties.length === 0) {
         return;
       }

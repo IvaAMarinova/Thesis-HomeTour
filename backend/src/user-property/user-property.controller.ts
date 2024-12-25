@@ -43,13 +43,6 @@ export class UserPropertyController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Get('/property-id/:property')
-    async getPropertyUsers(@Param('property') property: string): Promise<UserPropertyResponseDto[]> {
-        const userProperties = await this.userPropertyService.getPropertyUsers(property);
-        return userProperties.map(userProperty => new UserPropertyResponseDto(userProperty));
-    }
-
-    @UseGuards(JwtAuthGuard)
     @Put('/user-id/:userId')
     async updateUserPropertyByUserId(
         @Param('userId') userId: string,

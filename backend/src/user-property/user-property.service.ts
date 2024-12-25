@@ -11,12 +11,6 @@ import { UserPropertyPartialInputDto } from './dto/user-property-partial-input.d
 @Injectable()
 export class UserPropertyService {
   constructor(
-    @InjectRepository(UserProperty)
-    private readonly userPropertyRepository: EntityRepository<UserProperty>,
-    @InjectRepository(User)
-    private readonly userRepository: EntityRepository<User>,
-    @InjectRepository(PropertyEntity)
-    private readonly propertyRepository: EntityRepository<PropertyEntity>,
     private readonly em: EntityManager,
   ) {}
 
@@ -29,19 +23,19 @@ export class UserPropertyService {
         throw new BadRequestException('Invalid UUID format for User ID or Property ID');
       }
 
-      const existingUser = await this.userRepository.findOne({ id: body.user });
+      const existingUser = await this.em.findOne(User, { id: body.user });
       if (!existingUser) {
         throw new NotFoundException(`User with ID ${body.user} not found`);
       }
 
-      const existingProperty = await this.propertyRepository.findOne({ id: body.property });
+      const existingProperty = await this.em.findOne(PropertyEntity, { id: body.property });
       if (!existingProperty) {
         throw new NotFoundException(`Property with ID ${body.property} not found`);
       }
 
-      const existingUserProperty = await this.userPropertyRepository.findOne({
-        user: existingUser,
-        property: existingProperty,
+      const existingUserProperty = await this.em.findOne(UserProperty, {
+        user: body.user,
+        property: body.property,
       });
       if (existingUserProperty) {
         throw new BadRequestException(
@@ -71,7 +65,7 @@ export class UserPropertyService {
         throw new BadRequestException(`Invalid UUID format for ID: ${userPropertyId}`);
       }
 
-      const userProperty = await this.userPropertyRepository.findOne({ id: userPropertyId });
+      const userProperty = await this.em.findOne(UserProperty, { id: userPropertyId });
       if (!userProperty) {
         throw new NotFoundException(`UserProperty with ID ${userPropertyId} not found`);
       }
@@ -90,7 +84,7 @@ export class UserPropertyService {
         throw new BadRequestException(`Invalid UUID format for ID: ${id}`);
       }
 
-      const userProperty = await this.userPropertyRepository.findOne({ id });
+      const userProperty = await this.em.findOne(UserProperty, { id });
       if (!userProperty) {
         throw new NotFoundException(`UserProperty with ID ${id} not found`);
       }
@@ -101,27 +95,9 @@ export class UserPropertyService {
     }
   }
 
-  async getUserProperties(userId: string): Promise<UserProperty[]> {
-    try {
-      if (!userId) {
-        throw new BadRequestException('User ID must be provided');
-      }
-      if (!isUUID(userId)) {
-        throw new BadRequestException(`Invalid UUID format for User ID: ${userId}`);
-      }
-
-      return this.userPropertyRepository.find(
-        { user: { id: userId } },
-        { populate: ['property'] },
-      );
-    } catch (error) {
-      this.handleUnexpectedError(error);
-    }
-  }
-
   async getAllUserProperties(): Promise<UserProperty[]> {
     try {
-      return this.userPropertyRepository.findAll({ populate: ['user', 'property'] });
+      return this.em.find(UserProperty, {});
     } catch (error) {
       this.handleUnexpectedError(error);
     }
@@ -136,9 +112,9 @@ export class UserPropertyService {
         throw new BadRequestException('Invalid UUID format for User ID or Property ID');
       }
 
-      const userProperty = await this.userPropertyRepository.findOne({
-        user: { id: userId },
-        property: { id: propertyId },
+      const userProperty = await this.em.findOne(UserProperty, {
+        user: userId,
+        property: propertyId,
       });
 
       if (!userProperty) {
@@ -159,10 +135,7 @@ export class UserPropertyService {
         throw new BadRequestException(`Invalid UUID format for User ID: ${userId}`);
       }
 
-      const likedProperties = await this.userPropertyRepository.find(
-        { user: { id: userId }, liked: true },
-        { populate: ['property'] },
-      );
+      const likedProperties = await this.em.find(UserProperty, { user: userId, liked: true });
 
       return likedProperties;
     } catch (error) {

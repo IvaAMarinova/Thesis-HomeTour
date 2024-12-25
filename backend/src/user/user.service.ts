@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager, EntityRepository, UniqueConstraintViolationException } from '@mikro-orm/core';
+import { EntityManager, UniqueConstraintViolationException } from '@mikro-orm/core';
 import { User } from './user.entity';
 import { CompanyService } from '../company/company.service';
 import { compare } from 'bcrypt';
@@ -10,15 +9,13 @@ import { UserInputDto } from './dto/user-input.dto';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: EntityRepository<User>,
     private readonly companyService: CompanyService,
     private readonly em: EntityManager,
   ) {}
 
   async create(userData: UserInputDto): Promise<User> {
     try {
-      const existingUser = await this.findByEmail(userData.email);
+      const existingUser = await this.em.findOne(User, { email: userData.email });
       if (existingUser) {
         throw new ConflictException(`User with email ${userData.email} already exists`);
       }
@@ -49,7 +46,7 @@ export class UserService {
       if (!isUUID(id)) {
         throw new BadRequestException(`Invalid ID format for id: ${id}`);
       }
-      const existingUser = await this.userRepository.findOne({ id });
+      const existingUser = await this.em.findOne(User, { id });
       if (!existingUser) {
         throw new NotFoundException(`User with id ${id} not found`);
       }
@@ -76,7 +73,7 @@ export class UserService {
       if (!isUUID(id)) {
         throw new BadRequestException(`Invalid ID format for id: ${id}`);
       }
-      const user = await this.userRepository.findOne({ id });
+      const user = await this.em.findOne(User, { id });
       if (!user) {
         throw new NotFoundException(`User with id ${id} not found`);
       }
@@ -88,7 +85,7 @@ export class UserService {
 
   async getAllUsers(): Promise<User[]> {
     try {
-      return this.userRepository.findAll();
+      return this.em.findAll(User, {});
     } catch (error) {
       this.handleUnexpectedError(error);
     }
@@ -99,7 +96,7 @@ export class UserService {
       if (!isUUID(id)) {
         throw new BadRequestException(`Invalid ID format for id: ${id}`);
       }
-      const user = await this.userRepository.findOne({ id });
+      const user = await this.em.findOne(User, { id });
       if (!user) {
         throw new NotFoundException(`User with id ${id} not found`);
       }
@@ -111,7 +108,7 @@ export class UserService {
 
   async validateUser(email: string, password: string): Promise<User> {
     try {
-      const user = await this.userRepository.findOne({ email });
+      const user = await this.em.findOne(User, { email });
       
       if (!user || !(await this.validatePassword(user, password))) {
         throw new UnauthorizedException(`Invalid user or password.`);
@@ -126,7 +123,7 @@ export class UserService {
 
   async saveTokens(id: string, accessToken: string, refreshToken: string): Promise<User> {
     try {
-      const user = await this.userRepository.findOne({ id });
+      const user = await this.em.findOne(User, { id });
       if (!user) {
         throw new NotFoundException(`User with id ${id} not found`);
       }
@@ -143,7 +140,7 @@ export class UserService {
 
   async findByEmail(email: string): Promise<User | null> {
     try {
-      return this.userRepository.findOne({ email });
+      return this.em.findOne(User, { email });
     } catch (error) {
       throw new BadRequestException(`Failed to find user by email: ${error.message}`);
     }

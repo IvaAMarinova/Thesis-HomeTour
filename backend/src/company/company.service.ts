@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager, EntityRepository } from '@mikro-orm/core';
+import { EntityManager } from '@mikro-orm/core';
 import { Company } from './company.entity';
 import { PropertyEntity } from '../property/property.entity';
 import { isUUID } from 'class-validator';
@@ -9,9 +8,7 @@ import { CompanyInputDto } from './dto/company-input.dto';
 @Injectable()
 export class CompanyService {
   constructor(
-    @InjectRepository(Company)
-    private readonly companyRepository: EntityRepository<Company>,
-    private readonly em: EntityManager,
+    private readonly em: EntityManager
   ) {}
 
   async create(companyData: CompanyInputDto): Promise<Company> {
@@ -31,7 +28,7 @@ export class CompanyService {
         throw new BadRequestException(`Invalid UUID format for id: ${id}`);
       }
 
-      const existingCompany = await this.companyRepository.findOne({ id });
+      const existingCompany = await this.em.findOne(Company, { id });
       if (!existingCompany) {
         throw new NotFoundException(`Company with id ${id} not found`);
       }
@@ -50,7 +47,7 @@ export class CompanyService {
         throw new BadRequestException(`Invalid UUID format for id: ${id}`);
       }
 
-      const company = await this.companyRepository.findOne({ id });
+      const company = await this.em.findOne(Company, { id });
       if (!company) {
         throw new NotFoundException(`Company with id ${id} not found`);
       }
@@ -65,7 +62,7 @@ export class CompanyService {
 
   async getAllCompanies(): Promise<Company[]> {
     try {
-      return this.companyRepository.findAll();
+      return this.em.findAll(Company, {});
     } catch (error) {
       this.handleUnexpectedError(error);
     }
@@ -77,7 +74,9 @@ export class CompanyService {
         throw new BadRequestException(`Invalid UUID format for id: ${id}`);
       }
 
-      const company = await this.companyRepository.findOne({ id });
+      console.log("[SERVICE] getCompanyById called with id:", id);
+
+      const company = await this.em.findOne(Company, { id: id });
       if (!company) {
         throw new NotFoundException(`Company with id ${id} not found`);
       }
@@ -92,17 +91,14 @@ export class CompanyService {
       if (!isUUID(id)) {
         throw new BadRequestException(`Invalid UUID format for id: ${id}`);
       }
-
-      const company = await this.companyRepository.findOne({ id });
-      if (!company) {
-        throw new NotFoundException(`Company with id ${id} not found`);
-      }
-
-      return this.em.find(PropertyEntity, { company });
+  
+      const properties = await this.em.find(PropertyEntity, { company_id: id });
+      return properties;
     } catch (error) {
       this.handleUnexpectedError(error);
     }
   }
+  
 
   private handleUnexpectedError(error: any): never {
     if (error instanceof BadRequestException || error instanceof NotFoundException) {
