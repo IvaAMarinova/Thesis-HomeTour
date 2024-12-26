@@ -5,6 +5,7 @@ import { CompanyService } from '../company/company.service';
 import { compare } from 'bcrypt';
 import { isUUID } from 'class-validator';
 import { UserInputDto } from './dto/user-input.dto';
+import { Tokens } from '../auth/tokens.entity';
 
 @Injectable()
 export class UserService {
@@ -121,18 +122,37 @@ export class UserService {
   }
   
 
-  async saveTokens(id: string, accessToken: string, refreshToken: string): Promise<User> {
+  async saveTokens(id: string, accessToken: string, refreshToken: string): Promise<Tokens> {
     try {
       const user = await this.em.findOne(User, { id });
       if (!user) {
         throw new NotFoundException(`User with id ${id} not found`);
       }
 
-      user.accessToken = accessToken;
-      user.refreshToken = refreshToken;
+      const tokens = this.em.create(Tokens, { user: user, accessToken, refreshToken });
 
-      await this.em.flush();
-      return user;
+      await this.em.persistAndFlush(tokens);
+      return tokens;
+    } catch (error) {
+      this.handleUnexpectedError(error);
+    }
+  }
+  
+  async getTokensByUserId(userId: string): Promise<Tokens | null> {
+    try {
+      return this.em.findOne(Tokens, { user_id: userId });
+    } catch (error) {
+      this.handleUnexpectedError(error);
+    }
+  }
+
+  async getUserByTokens(accessToken: string, refreshToken: string): Promise<User | null> {
+    try {
+      const tokens = await this.em.findOne(Tokens, { accessToken, refreshToken });
+      if (!tokens) {
+        return null;
+      }
+      return await this.em.findOne(User, { id: tokens.user });
     } catch (error) {
       this.handleUnexpectedError(error);
     }

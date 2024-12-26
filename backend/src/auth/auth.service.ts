@@ -65,23 +65,11 @@ export class AuthService {
 
   async refreshToken(accessToken: string, refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
     try {
-      const decoded = this.jwtService.decode(accessToken) as { sub: string; email: string };
-  
-      if (!decoded || !decoded.sub) {
-        console.log("Invalid access token");
-        throw new UnauthorizedException('Invalid access token');
-      }  
-      const user = await this.userService.getUserById(decoded.sub);
-  
-      if (!user) {
-        console.log("User not found");
-        throw new UnauthorizedException('User not found');
-      }
-  
+      const user = await this.userService.getUserByTokens(accessToken, refreshToken);
 
-      if (user.refreshToken !== refreshToken) {
-        console.log("Refresh token does not match");
-        throw new UnauthorizedException('Invalid or expired refresh token');
+      if(!user) {
+        console.log("User not found, invalid or expired tokens");
+        throw new UnauthorizedException('Invalid or expired tokens');
       }
     
       const payload = { email: user.email, sub: user.id };

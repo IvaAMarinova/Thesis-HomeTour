@@ -3,36 +3,30 @@ import { Company } from '../company/company.entity';
 import { v4 } from 'uuid';
 
 export enum UserType {
-  B2B = 'b2b',
-  B2C = 'b2c'
+    B2B = 'b2b',
+    B2C = 'b2c'
 }
 
 @Entity()
 export class User {
-  @PrimaryKey({
-    columnType: 'uuid',
-    type: 'uuid',
-  })
-  id = v4();
+    @PrimaryKey({
+        columnType: 'uuid',
+        type: 'uuid',
+    })
+    id = v4();
 
-  @Property({ nullable: true })
-  accessToken?: string;
+    @Property()
+    fullName!: string;
 
-  @Property({ nullable: true })
-  refreshToken?: string;
+    @Property({ unique: true })
+    email!: string;
 
-  @Property()
-  fullName!: string;
+    @Property()
+    password!: string;
 
-  @Property({ unique: true })
-  email!: string;
+    @Enum(() => UserType)
+    type!: UserType;
 
-  @Property()
-  password!: string;
-
-  @Enum(() => UserType)
-  type!: UserType;
-
-  @ManyToOne(() => Company, { nullable: true })
-  company?: Company;
+    @ManyToOne(() => Company, { nullable: true })
+    company?: Company;
 }
