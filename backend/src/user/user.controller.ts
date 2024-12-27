@@ -45,7 +45,12 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async deleteUser(@Param('id') id: string): Promise<void> {
-    await this.userService.delete(id);
+  async deleteUser(@Param('id') id: string): Promise<{ message: string }> {
+    try {
+      await this.userService.delete(id);
+      return { message: `User with id ${id} deleted successfully` };
+    } catch (error) {
+      throw new Error(`Failed to delete user with id ${id}: ${error.message}`);
+    }
   }
 }

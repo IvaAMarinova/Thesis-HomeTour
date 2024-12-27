@@ -17,12 +17,12 @@
         },
         "name": {
           "name": "name",
-          "type": "varchar(255)",
+          "type": "varchar(100)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
+          "length": 100,
           "mappedType": "string"
         },
         "description": {
@@ -46,12 +46,12 @@
         },
         "phone_number": {
           "name": "phone_number",
-          "type": "varchar(255)",
+          "type": "varchar(15)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
+          "length": 15,
           "mappedType": "string"
         },
         "website": {
@@ -77,6 +77,16 @@
       "name": "company",
       "schema": "public",
       "indexes": [
+        {
+          "columnNames": [
+            "email"
+          ],
+          "composite": false,
+          "keyName": "company_email_unique",
+          "constraint": true,
+          "primary": false,
+          "unique": true
+        },
         {
           "keyName": "company_pkey",
           "columnNames": [
@@ -105,12 +115,12 @@
         },
         "name": {
           "name": "name",
-          "type": "varchar(255)",
+          "type": "varchar(100)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
+          "length": 100,
           "mappedType": "string"
         },
         "description": {

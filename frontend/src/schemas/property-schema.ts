@@ -14,7 +14,7 @@ const propertySchema = z.object({
     }),
     phoneNumber: z
         .string()
-        .regex(/^\+?\d[\d\s]{8,14}$/, {
+        .regex(/^\+?\d[\d\s]{8,15}$/, {
             message: "Телефонният номер трябва да бъде валиден номер.",
         }),
     email: z.string().email({

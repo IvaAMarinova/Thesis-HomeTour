@@ -1,4 +1,4 @@
-import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne, BeforeCreate, BeforeUpdate, } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { User } from '../user/user.entity';
 import { PropertyEntity } from '../property/property.entity';
@@ -19,4 +19,20 @@ export class UserProperty {
 
   @Property({ nullable: true })
   liked: boolean;
+
+  @BeforeCreate()
+  @BeforeUpdate()
+  validate() {
+    if (!(this.user && typeof this.user === 'object')) {
+      throw new Error('User must be a valid object');
+    }
+
+    if (!(this.property && typeof this.property === 'object')) {
+      throw new Error('Property must be a valid object');
+    }
+
+    if (this.liked !== undefined && typeof this.liked !== 'boolean') {
+      throw new Error('Liked must be a boolean');
+    }
+  }
 }

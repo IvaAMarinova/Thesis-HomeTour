@@ -3,7 +3,7 @@ import { z } from "zod";
 const companySchema = z.object({
     phoneNumber: z
         .string()
-        .regex(/^\+?\d[\d\s]{8,14}$/, {
+        .regex(/^\+?\d[\d\s]{8,15}$/, {
             message: "Телефонният номер трябва да бъде валиден номер.",
         }),
     email: z.string().email({
@@ -11,6 +11,8 @@ const companySchema = z.object({
     }),
     name: z.string().min(1, {
         message: "Името не може да бъде празно.",
+    }).max(100, {
+        message: "Името е прекалено дълго.",
     }),
     website: z.string().url({
         message: "Моля, въведете валиден уеб адрес.",

@@ -31,8 +31,13 @@ export class CompanyController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async deleteCompany(@Param('id') id: string): Promise<void> {
-    await this.companyService.delete(id);
+  async deleteCompany(@Param('id') id: string): Promise<{ message: string }> {
+    try {
+      await this.companyService.delete(id);
+      return { message: 'Company deleted successfully' };
+    } catch (error) {
+      throw new NotFoundException('Company not found');
+    }
   }
 
   @Get()

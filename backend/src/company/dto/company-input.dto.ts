@@ -11,13 +11,14 @@ class ResourcesDto {
 
 export class CompanyInputDto {
     @IsString({ message: 'Property name must be a string' })
+    @MaxLength(100, { message: 'Property name must be at most 100 characters long' })
     name!: string;
 
     @IsEmail({}, { message: 'Invalid email address' })
     email!: string;
 
     @IsString()
-    @Matches(/^\+?\d[\d\s]{8,14}$/, {
+    @Matches(/^\+?\d[\d\s]{8,15}$/, {
         message: 'Invalid phone number.',
     })
     phoneNumber!: string;
@@ -34,5 +35,5 @@ export class CompanyInputDto {
     @IsDefined()
     @ValidateNested()
     @Type(() => ResourcesDto)
-    resources!: ResourcesDto;// validate(): void { //     if (!this.resources) {
+    resources!: ResourcesDto;
 }

@@ -1,5 +1,5 @@
 import { UserPropertyResponseDto } from './dto/user-property-response.dto';
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, NotFoundException } from '@nestjs/common';
 import { UserPropertyService } from './user-property.service';
 import { UserPropertyInputDto } from './dto/user-property-input.dto';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
@@ -32,8 +32,12 @@ export class UserPropertyController {
     @UseGuards(JwtAuthGuard)
     @Delete(':id')
     async deleteUserProperty(@Param('id') id: string): Promise<{ message: string }> {
-        await this.userPropertyService.delete(id);
-        return { message: 'User property deleted successfully' };
+        try {
+            await this.userPropertyService.delete(id);
+            return { message: 'User property deleted successfully' };
+        } catch (error) {
+            throw new NotFoundException('User property not found');
+        }
     }
 
     @Get('/user-id-liked/:userId')
