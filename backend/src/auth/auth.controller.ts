@@ -4,8 +4,8 @@ import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { UserResponseDto } from 'src/user/dto/user-response.dto';
-import { UserInputDto } from 'src/user/dto/user-input.dto';
+import { UserResponseDto } from './../user/dto/user-response.dto';
+import { UserInputDto } from '../user/dto/user-input.dto';
 
 @Controller('auth')
 export class AuthController {

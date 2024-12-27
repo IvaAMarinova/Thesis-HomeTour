@@ -2,7 +2,7 @@ import { UserPropertyResponseDto } from './dto/user-property-response.dto';
 import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
 import { UserPropertyService } from './user-property.service';
 import { UserPropertyInputDto } from './dto/user-property-input.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { UserPropertyPartialInputDto } from './dto/user-property-partial-input.dto';
 
 @Controller('user-properties')

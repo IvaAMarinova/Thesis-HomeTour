@@ -1,8 +1,17 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UserInputDto } from './dto/user-input.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 
 @Controller('users')
 export class UserController {
@@ -11,15 +20,14 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Post()
   async createUser(@Body() userData: UserInputDto): Promise<UserResponseDto> {
-    const user = await this.userService.create(userData
-  );
+    const user = await this.userService.create(userData);
     return new UserResponseDto(user);
   }
 
   @Get()
   async getAllUsers(): Promise<UserResponseDto[]> {
     const users = await this.userService.getAllUsers();
-    return users.map(user => new UserResponseDto(user));
+    return users.map((user) => new UserResponseDto(user));
   }
 
   @Get(':id')

@@ -4,7 +4,7 @@ import { PropertyEntity } from './property.entity';
 import { FileUploadService } from '../upload/upload.service';
 import { TransformedPropertyDto } from './dto/property-transformed-response.dto';
 import { PropertyInputDto } from './dto/property-input.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'; 
+import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard'; 
 
 @Controller('properties')
 export class PropertyController {

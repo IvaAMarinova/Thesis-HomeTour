@@ -5,7 +5,7 @@ import { PropertyService } from './property.service';
 import { PropertyController } from './property.controller';
 import { Company } from '../company/company.entity';
 import { CompanyModule } from '../company/company.module';
-import { FileUploadService } from 'src/upload/upload.service';
+import { FileUploadService } from './../upload/upload.service';
 
 @Module({
   imports: [
