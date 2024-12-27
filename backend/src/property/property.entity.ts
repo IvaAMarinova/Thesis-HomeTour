@@ -1,6 +1,15 @@
-import { Entity, PrimaryKey, Property, JsonType, BeforeCreate, ManyToOne} from '@mikro-orm/core';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  JsonType,
+  Cascade,
+  ManyToOne,
+  OneToMany,
+} from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { Company } from '../company/company.entity';
+import { UserProperty } from '../user-property/user-property.entity';
 
 @Entity()
 export class PropertyEntity {
@@ -24,7 +33,7 @@ export class PropertyEntity {
     street: string;
     city: string;
     neighborhood: string;
-  }
+  };
 
   @Property()
   phoneNumber!: string;
@@ -41,4 +50,10 @@ export class PropertyEntity {
 
   @ManyToOne(() => Company)
   company!: Company;
+
+  @OneToMany(() => UserProperty, (userProperty) => userProperty.property, {
+    orphanRemoval: true,
+    cascade: [Cascade.REMOVE],
+  })
+  userProperties!: UserProperty[];
 }

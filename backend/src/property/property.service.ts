@@ -2,9 +2,8 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { EntityManager } from '@mikro-orm/core';
 import { PropertyEntity } from './property.entity';
 import { Company } from '../company/company.entity';
-import { UserProperty } from '../user-property/user-property.entity';
 import { isUUID } from 'class-validator';
-import { FileUploadService } from 'src/upload/upload.service';
+import { FileUploadService } from '../upload/upload.service';
 import { PropertyInputDto } from './dto/property-input.dto';
 
 @Injectable()
@@ -64,10 +63,6 @@ export class PropertyService {
         throw new NotFoundException(`Property with id ${id} not found`);
       }
 
-      const userProperties = await this.em.find(UserProperty, { property: property });
-      if (userProperties.length > 0) {
-        await this.em.removeAndFlush(userProperties);
-      }
       await this.fileUploadService.deleteObject(property.resources.headerImage);
 
       for(const image of property.resources.galleryImages) {
