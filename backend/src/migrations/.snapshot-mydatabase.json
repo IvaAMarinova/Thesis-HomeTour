@@ -78,16 +78,6 @@
       "schema": "public",
       "indexes": [
         {
-          "columnNames": [
-            "email"
-          ],
-          "composite": false,
-          "keyName": "company_email_unique",
-          "constraint": true,
-          "primary": false,
-          "unique": true
-        },
-        {
           "keyName": "company_pkey",
           "columnNames": [
             "id"
@@ -192,6 +182,16 @@
       "name": "property_entity",
       "schema": "public",
       "indexes": [
+        {
+          "columnNames": [
+            "company_id"
+          ],
+          "composite": false,
+          "keyName": "property_entity_company_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
         {
           "keyName": "property_entity_pkey",
           "columnNames": [
@@ -298,6 +298,16 @@
           "unique": true
         },
         {
+          "columnNames": [
+            "company_id"
+          ],
+          "composite": false,
+          "keyName": "user_company_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
           "keyName": "user_pkey",
           "columnNames": [
             "id"
@@ -371,6 +381,16 @@
       "schema": "public",
       "indexes": [
         {
+          "columnNames": [
+            "user_id"
+          ],
+          "composite": false,
+          "keyName": "tokens_user_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
           "keyName": "tokens_pkey",
           "columnNames": [
             "id"
@@ -440,6 +460,26 @@
       "name": "user_property",
       "schema": "public",
       "indexes": [
+        {
+          "columnNames": [
+            "user_id"
+          ],
+          "composite": false,
+          "keyName": "user_property_user_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": [
+            "property_id"
+          ],
+          "composite": false,
+          "keyName": "user_property_property_id_index",
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
         {
           "keyName": "user_property_pkey",
           "columnNames": [

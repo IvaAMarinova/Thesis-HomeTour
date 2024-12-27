@@ -8,6 +8,7 @@ import {
   OneToMany,
   BeforeCreate,
   BeforeUpdate,
+  Index,
 } from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { Company } from '../company/company.entity';
@@ -51,6 +52,7 @@ export class PropertyEntity {
   };
 
   @ManyToOne(() => Company)
+  @Index()
   company!: Company;
 
   @OneToMany(() => UserProperty, (userProperty) => userProperty.property, {

@@ -6,6 +6,7 @@ import {
   Enum,
   BeforeCreate,
   BeforeUpdate,
+  Index,
 } from '@mikro-orm/core';
 import { Company } from '../company/company.entity';
 import { v4 } from 'uuid';
@@ -36,6 +37,7 @@ export class User {
   type!: UserType;
 
   @ManyToOne(() => Company, { nullable: true })
+  @Index()
   company?: Company;
 
   @BeforeCreate()

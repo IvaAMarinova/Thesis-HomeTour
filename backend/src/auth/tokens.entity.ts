@@ -1,5 +1,5 @@
 
-import { Entity, ManyToOne, PrimaryKey, Property} from '@mikro-orm/core';
+import { Entity, Index, ManyToOne, PrimaryKey, Property} from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { User } from '../user/user.entity';
 
@@ -18,5 +18,6 @@ export class Tokens {
     refreshToken!: string;
 
     @ManyToOne(() => User)
+    @Index()
     user!: User;
 }
