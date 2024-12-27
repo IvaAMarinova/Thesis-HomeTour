@@ -7,9 +7,13 @@ import {
   BeforeCreate,
   BeforeUpdate,
   Index,
+  OneToMany,
+  Cascade,
 } from '@mikro-orm/core';
 import { Company } from '../company/company.entity';
 import { v4 } from 'uuid';
+import { UserProperty } from '../user-property/user-property.entity';
+import { Tokens } from '../auth/tokens.entity';
 
 export enum UserType {
   B2B = 'b2b',
@@ -39,6 +43,18 @@ export class User {
   @ManyToOne(() => Company, { nullable: true })
   @Index()
   company?: Company;
+
+  @OneToMany(() => UserProperty, (userProperty) => userProperty.user, {
+      orphanRemoval: true,
+      cascade: [Cascade.REMOVE],
+    })
+  userProperties!: UserProperty[];
+
+  @OneToMany(() => Tokens, (Tokens) => Tokens.user, {
+    orphanRemoval: true,
+    cascade: [Cascade.REMOVE],
+  })
+  tokens!: Tokens[];
 
   @BeforeCreate()
   @BeforeUpdate()
