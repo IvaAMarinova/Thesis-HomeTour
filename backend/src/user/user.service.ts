@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, UnauthorizedException, ConflictException
 import { EntityManager, UniqueConstraintViolationException } from '@mikro-orm/core';
 import { User } from './user.entity';
 import { CompanyService } from '../company/company.service';
-import { compare } from 'bcrypt';
+import { hash, compare } from 'bcrypt';
 import { isUUID } from 'class-validator';
 import { UserInputDto } from './dto/user-input.dto';
 import { Tokens } from '../auth/tokens.entity';
@@ -21,6 +21,7 @@ export class UserService {
         throw new ConflictException(`User with email ${userData.email} already exists`);
       }
 
+      userData.password = await hash(userData.password, 10);
       const user = this.em.create(User, userData);
 
       if (userData.company) {
@@ -109,8 +110,7 @@ export class UserService {
 
   async validateUser(email: string, password: string): Promise<User> {
     try {
-      const user = await this.em.findOne(User, { email });
-      
+      const user = await this.em.findOne(User, { email })
       if (!user || !(await this.validatePassword(user, password))) {
         throw new UnauthorizedException(`Invalid user or password.`);
       }
@@ -120,7 +120,6 @@ export class UserService {
       this.handleUnexpectedError(error);
     }
   }
-  
 
   async saveTokens(id: string, accessToken: string, refreshToken: string): Promise<Tokens> {
     try {
