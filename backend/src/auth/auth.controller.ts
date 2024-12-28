@@ -12,7 +12,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   private getCookieExpirationTime(days: number): Date {
-    return new Date(Date.now() + days * 24 * 60 * 60 * 1000); // 1 day
+    return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
   }
 
   private setAuthCookies(res: Response, accessToken: string, refreshToken: string): void {
@@ -51,17 +51,17 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req, @Res({ passthrough: true }) res: Response) {
+  async login(@Request() req, @Res() res: Response) {
     const { accessToken, refreshToken } = await this.authService.login(req.user);
     this.setAuthCookies(res, accessToken, refreshToken);
-    return { accessToken, refreshToken };
+    res.json({ accessToken, refreshToken });
   }
 
   @Post('register')
-  async register(@Body() registerData: UserInputDto, @Res({ passthrough: true }) res: Response) {
+  async register(@Body() registerData: UserInputDto, @Res() res: Response) {
     const { accessToken, refreshToken } = await this.authService.register(registerData);
     this.setAuthCookies(res, accessToken, refreshToken);
-    return { accessToken, refreshToken };
+    res.json({ accessToken, refreshToken });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -81,11 +81,11 @@ export class AuthController {
   }
 
   @Post('refresh-token')
-  async refreshToken(@Body() body: { refreshToken: string; accessToken: string }, @Res({ passthrough: true }) res: Response) {
+  async refreshToken(@Body() body: { refreshToken: string; accessToken: string }, @Res() res: Response) {
     try {
       const { accessToken, refreshToken } = await this.authService.refreshToken(body.accessToken, body.refreshToken);
       this.setAuthCookies(res, accessToken, refreshToken);
-      return { message: 'Tokens refreshed successfully' };
+      res.json({ message: 'Tokens refreshed successfully' });
     } catch (error) {
       res.status(401).json({ message: 'Invalid or expired tokens' });
     }
@@ -93,8 +93,8 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@Res({ passthrough: true }) res: Response) {
+  async logout(@Res() res: Response) {
     this.clearAuthCookies(res);
-    return { message: 'Logged out successfully' };
+    res.json({ message: 'Logged out successfully' });
   }
 }

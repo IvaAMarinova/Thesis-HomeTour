@@ -9,12 +9,12 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
-  const allowedOrigin =
-    configService.get<string>('NODE_ENV') === 'production'
-      ? configService.get<string>('PROD_FRONTEND_URL')
-      : configService.get<string>('DEV_FRONTEND_URL');
+  const allowedOrigins = [
+    configService.get<string>('PROD_FRONTEND_URL'),
+    configService.get<string>('DEV_FRONTEND_URL'),
+  ];
 
-    app.useGlobalPipes(
+  app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
@@ -24,13 +24,13 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: allowedOrigin,
+    origin: allowedOrigins,
     credentials: true
   });
 
   const cookieSecret = configService.get<string>('COOKIE_SECRET');
   app.use(cookieParser(cookieSecret));
 
-  await app.listen(3000, '0.0.0.0');
+  await app.listen(3000);
 }
 bootstrap();
