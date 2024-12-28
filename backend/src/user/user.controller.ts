@@ -68,6 +68,8 @@ export class UserController {
     }
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @Put('/make-admin/:id')
   async makeUserAdmin(@Param('id') id: string): Promise<UserResponseDto> {
     const user = await this.userService.makeUserAdmin(id);
