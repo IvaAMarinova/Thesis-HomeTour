@@ -282,6 +282,20 @@
           "primary": false,
           "nullable": true,
           "mappedType": "uuid"
+        },
+        "roles": {
+          "name": "roles",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'{user}'",
+          "enumItems": [
+            "admin",
+            "user"
+          ],
+          "mappedType": "array"
         }
       },
       "name": "user",

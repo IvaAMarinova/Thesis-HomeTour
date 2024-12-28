@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { User } from '../user.entity';
+import { User, UserRole } from '../user.entity';
 
 export class UserResponseDto {
   id: string;
@@ -7,6 +7,7 @@ export class UserResponseDto {
   email: string;
   type: User['type'];
   company?: string;
+  roles: UserRole[];
 
   @Exclude()
   password: string;
@@ -17,5 +18,6 @@ export class UserResponseDto {
     this.email = user.email;
     this.type = user.type;
     this.company = user.company?.id;
+    this.roles = user.roles;
   }
 }

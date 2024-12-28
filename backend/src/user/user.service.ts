@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
 import { EntityManager, UniqueConstraintViolationException } from '@mikro-orm/core';
-import { User } from './user.entity';
+import { User, UserRole, UserType } from './user.entity';
 import { CompanyService } from '../company/company.service';
 import { hash, compare } from 'bcrypt';
 import { isUUID } from 'class-validator';
 import { UserInputDto } from './dto/user-input.dto';
 import { Tokens } from '../auth/tokens.entity';
+import { PartialUserInputDto } from './dto/user-partial-input.dtp';
 
 @Injectable()
 export class UserService {
@@ -43,7 +44,25 @@ export class UserService {
     }
   }
 
-  async update(id: string, userData: Partial<UserInputDto>): Promise<User> {
+  async update(id: string, userData: PartialUserInputDto): Promise<User> {
+    try {
+      if (!isUUID(id)) {
+        throw new BadRequestException(`Invalid ID format for id`);
+      }
+      const existingUser = await this.em.findOne(User, { id });
+      if (!existingUser) {
+        throw new NotFoundException(`User with id not found`);
+      }
+
+      this.em.assign(existingUser, userData);
+      await this.em.flush();
+      return existingUser;
+    } catch (error) {
+      this.handleUnexpectedError(error);
+    }
+  }
+
+  async updateAdmin(id: string, userData: Partial<UserInputDto>): Promise<User> {
     try {
       if (!isUUID(id)) {
         throw new BadRequestException(`Invalid ID format for id`);
@@ -167,6 +186,25 @@ export class UserService {
 
   async validatePassword(user: User, password: string): Promise<boolean> {
     return await compare(password, user.password);
+  }
+
+  async makeUserAdmin(id: string): Promise<User> {
+    try {
+      const user = await this.em.findOne(User, { id });
+      if (!user) {
+        throw new NotFoundException(`User not found`);
+      }
+
+      if (!user.roles.includes(UserRole.ADMIN)) {
+        user.roles.push(UserRole.ADMIN);
+      }
+
+      await this.em.persistAndFlush(user);
+
+      return user;
+    } catch (error) {
+      this.handleUnexpectedError(error);
+    }
   }
 
   private handleUnexpectedError(error: any): never {

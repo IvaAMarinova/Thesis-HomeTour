@@ -83,7 +83,11 @@ function Profile() {
         try {
             profileSchema.parse(user);
 
-            await HttpService.put(`/users/${userId}`, user, undefined, true);
+            const requestUser = {
+                fullName: user.fullName,
+            };
+
+            await HttpService.put(`/users/${userId}`, requestUser, undefined, true);
             toast.success("Успешно обновихте акаунта си!");
             setInitialUser(user);
             queryClient.invalidateQueries({ queryKey: ["userProfile"] });

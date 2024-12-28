@@ -20,6 +20,11 @@ export enum UserType {
   B2C = 'b2c',
 }
 
+export enum UserRole {
+  ADMIN = 'admin',
+  USER = 'user',
+}
+
 @Entity()
 export class User {
   @PrimaryKey({
@@ -43,6 +48,9 @@ export class User {
   @ManyToOne(() => Company, { nullable: true })
   @Index()
   company?: Company;
+
+  @Enum({ items: () => UserRole, array: true, default: [UserRole.USER] })
+  roles!: UserRole[];
 
   @OneToMany(() => UserProperty, (userProperty) => userProperty.user, {
       orphanRemoval: true,

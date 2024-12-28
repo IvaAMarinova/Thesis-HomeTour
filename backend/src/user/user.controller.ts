@@ -12,6 +12,9 @@ import { UserService } from './user.service';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UserInputDto } from './dto/user-input.dto';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
+import { Roles } from '../decorators/roles.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { PartialUserInputDto } from './dto/user-partial-input.dtp';
 
 @Controller('users')
 export class UserController {
@@ -24,6 +27,8 @@ export class UserController {
     return new UserResponseDto(user);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @Get()
   async getAllUsers(): Promise<UserResponseDto[]> {
     const users = await this.userService.getAllUsers();
@@ -38,12 +43,21 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async updateUser(@Param('id') id: string, @Body() userData: Partial<UserInputDto>): Promise<UserResponseDto> {
+  async updateUser(@Param('id') id: string, @Body() userData: PartialUserInputDto): Promise<UserResponseDto> {
     const user = await this.userService.update(id, userData);
     return new UserResponseDto(user);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Put('/admin/:id')
+  async updateUserAdmin(@Param('id') id: string, @Body() userData: Partial<UserInputDto>): Promise<UserResponseDto> {
+    const user = await this.userService.updateAdmin(id, userData);
+    return new UserResponseDto(user);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @Delete(':id')
   async deleteUser(@Param('id') id: string): Promise<{ message: string }> {
     try {
@@ -52,5 +66,11 @@ export class UserController {
     } catch (error) {
       throw new Error(`Failed to delete user with id ${id}: ${error.message}`);
     }
+  }
+
+  @Put('/make-admin/:id')
+  async makeUserAdmin(@Param('id') id: string): Promise<UserResponseDto> {
+    const user = await this.userService.makeUserAdmin(id);
+    return new UserResponseDto(user);
   }
 }
