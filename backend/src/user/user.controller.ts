@@ -13,7 +13,7 @@ import { UserResponseDto } from './dto/user-response.dto';
 import { UserInputDto } from './dto/user-input.dto';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { Roles } from '../decorators/roles.decorator';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { PartialUserInputDto } from './dto/user-partial-input.dtp';
 
 @Controller('users')

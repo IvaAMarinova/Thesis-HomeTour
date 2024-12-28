@@ -6,7 +6,7 @@ import { TransformedPropertyDto } from './dto/property-transformed-response.dto'
 import { PropertyInputDto } from './dto/property-input.dto';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard'; 
 import { Roles } from '../decorators/roles.decorator';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @Controller('properties')
 export class PropertyController {
