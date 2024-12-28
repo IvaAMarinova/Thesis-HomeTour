@@ -69,8 +69,10 @@ export function Login({ onLoginSuccess }: LoginProps) {
 
   async function onLogin(values: z.infer<typeof loginSchema>) {
     try {
-      await HttpService.post('/auth/login', values, undefined, true, true);
+      const response = await HttpService.post<{accessToken: string, refreshToken: string}>('/auth/login', values, undefined, true, true);
       
+      HttpService.setAccessToken(response.accessToken);
+      HttpService.setRefreshToken(response.refreshToken);
       onLoginSuccess();
       await fetchUserId();
       navigate('/');
@@ -93,10 +95,10 @@ export function Login({ onLoginSuccess }: LoginProps) {
         ...values,
         type: "b2c",
       };
-      console.log("Register data: ", registerData);
-      const response = await HttpService.post('/auth/register', registerData, undefined, true, true);
-      console.log("[Register] Response: ", response);
+      const response = await HttpService.post<{accessToken: string, refreshToken: string}>('/auth/register', registerData, undefined, true, true);
       await new Promise((resolve) => setTimeout(resolve, 100));
+      HttpService.setAccessToken(response.accessToken);
+      HttpService.setRefreshToken(response.refreshToken);
       onLoginSuccess();
       await fetchUserId();
       navigate('/');

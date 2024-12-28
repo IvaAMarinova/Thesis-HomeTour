@@ -1,5 +1,4 @@
 import { Cookies } from 'react-cookie';
-import { useUser } from "../contexts/UserContext";
 const cookies = new Cookies();
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -11,15 +10,22 @@ export interface RequestParams {
 }
 
 export class HttpService {
-  private static accessToken: string | null = null;
-  private static refreshToken: string | null = null;
+  private static accessToken: string | null;
+  private static refreshToken: string | null;
 
-  private static loadTokensFromCookies() {
-
+  static loadTokensFromCookies() {
     this.accessToken = cookies.get('accessToken') || null;
     this.refreshToken = cookies.get('refreshToken') || null;
   }
-  
+
+  static setAccessToken(token: string) {
+    console.log('Setting accessToken:', token);
+    this.accessToken = token;
+  }
+  static setRefreshToken(token: string) {
+    console.log('Setting refreshToken:', token);
+    this.refreshToken = token;
+  }
   static async get<T>(url: string, params?: RequestParams, authRequired = false, isLoginAttempt = false): Promise<T> {
     return await HttpService.request<T>(url, 'GET', params, authRequired, isLoginAttempt);
   }
@@ -48,7 +54,9 @@ export class HttpService {
     isLoginAttempt = false
   ): Promise<T> {
     try {
-      this.loadTokensFromCookies();
+      if(!this.accessToken && !isLoginAttempt) {
+        this.loadTokensFromCookies();
+      }
   
       const requestUrl = new URL(url, API_BASE_URL);
   
@@ -63,6 +71,11 @@ export class HttpService {
         ...params?.headers,
         ...(this.accessToken && authRequired ? { Authorization: `Bearer ${this.accessToken}` } : {}),
       };
+
+      console.log('[HttpService] Request URL:', requestUrl.toString());
+      console.log('[HttpService] Request Headers:', headers);
+      console.log('[HttpService] this.accessToken:', this.accessToken);
+      console.log('[HttpService] authRequired:', authRequired);
   
       const response = await fetch(requestUrl.toString(), {
         method,
@@ -126,7 +139,9 @@ export class HttpService {
   }
 
   public static async isAuthenticated(fetchUserId: () => Promise<void>): Promise<boolean> {
-    this.loadTokensFromCookies();
+    if(!this.accessToken && !this.refreshToken) {
+      this.loadTokensFromCookies();
+    }
     
     try {
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
@@ -161,56 +176,58 @@ export class HttpService {
     }
   }
   
-  
   private static async refreshAccessToken(): Promise<void> {
-  this.loadTokensFromCookies();
-
-  if (!this.refreshToken) {
-    console.error('[HttpService] No refresh token found. Logging out.');
-    this.logout();
-    throw new Error('No refresh token available');
-  }
-
-  console.log('[HttpService] Refreshing access token');
-  try {
-    const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        refreshToken: this.refreshToken,
-        accessToken: this.accessToken,
-      }),
-      credentials: 'include',
-    });
-
-    if (!response.ok) {
-      console.error('[HttpService] Failed to refresh access token. Logging out.');
-      this.logout();
-      throw new Error('Failed to refresh access token');
+    if(!this.refreshToken) {
+      this.loadTokensFromCookies();
     }
 
-    const data = await response.json();
-    cookies.set('accessToken', data.accessToken, {
-      path: '/',
-      httpOnly: false,
-      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-    });
-    cookies.set('refreshToken', data.refreshToken, {
-      path: '/',
-      httpOnly: false,
-      maxAge: 30 * 24 * 60 * 60,
-    });
+    if (!this.refreshToken) {
+      console.error('[HttpService] No refresh token found. Logging out.');
+      this.logout();
+      throw new Error('No refresh token available');
+    }
 
-    this.accessToken = data.accessToken;
-    this.refreshToken = data.refreshToken;
+    console.log('[HttpService] Refreshing access token');
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          refreshToken: this.refreshToken,
+          accessToken: this.accessToken,
+        }),
+        credentials: 'include',
+      });
 
-    console.log('[HttpService] Tokens refreshed successfully');
-  } catch (error) {
-    console.error('[HttpService] Refresh token failed:', error);
-    this.logout();
-    throw new Error('Session expired. Please log in again');
-  }
-} 
+      if (!response.ok) {
+        console.error('[HttpService] Failed to refresh access token. Logging out.');
+        this.logout();
+        throw new Error('Failed to refresh access token');
+      }
+
+      const data = await response.json();
+      cookies.set('accessToken', data.accessToken, {
+        path: '/',
+        httpOnly: false,
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      });
+      cookies.set('refreshToken', data.refreshToken, {
+        path: '/',
+        httpOnly: false,
+        maxAge: 30 * 24 * 60 * 60,
+      });
+
+      this.accessToken = data.accessToken;
+      this.refreshToken = data.refreshToken;
+
+      console.log('[HttpService] Tokens refreshed successfully');
+    } catch (error) {
+      console.error('[HttpService] Refresh token failed:', error);
+      this.logout();
+      throw new Error('Session expired. Please log in again');
+    }
+  } 
+
 }

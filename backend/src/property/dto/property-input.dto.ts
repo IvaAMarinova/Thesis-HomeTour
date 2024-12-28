@@ -55,7 +55,7 @@ export class PropertyInputDto {
     floor!: number;
 
     @IsString()
-    @Matches(/^\+?\d[\d\s]{8,14}$/, { message: 'Invalid phone number.'})
+    @Matches(/^\+?\d[\d\s]{8,15}$/, { message: 'Invalid phone number.'})
     phoneNumber!: string;
 
     @IsEmail({}, { message: 'Invalid email address' })

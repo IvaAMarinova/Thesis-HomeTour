@@ -11,12 +11,16 @@ import { UserInputDto } from '../user/dto/user-input.dto';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  private getCookieExpirationTime(days: number): Date {
+    return new Date(Date.now() + days * 24 * 60 * 60 * 1000); // 1 day
+  }
+
   private setAuthCookies(res: Response, accessToken: string, refreshToken: string): void {
     const accessTokenOptions: CookieOptions = {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 1 day
+      expires: this.getCookieExpirationTime(1),
       path: '/',
     };
 
@@ -24,7 +28,7 @@ export class AuthController {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      expires: this.getCookieExpirationTime(30),
       path: '/',
     };
 
@@ -50,14 +54,14 @@ export class AuthController {
   async login(@Request() req, @Res({ passthrough: true }) res: Response) {
     const { accessToken, refreshToken } = await this.authService.login(req.user);
     this.setAuthCookies(res, accessToken, refreshToken);
-    return { message: 'Logged in successfully' };
+    return { accessToken, refreshToken };
   }
 
   @Post('register')
   async register(@Body() registerData: UserInputDto, @Res({ passthrough: true }) res: Response) {
     const { accessToken, refreshToken } = await this.authService.register(registerData);
     this.setAuthCookies(res, accessToken, refreshToken);
-    return { message: 'Registered successfully' };
+    return { accessToken, refreshToken };
   }
 
   @UseGuards(JwtAuthGuard)
