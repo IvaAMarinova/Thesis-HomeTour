@@ -18,7 +18,7 @@ export class UserService {
     try {
       const existingUser = await this.em.findOne(User, { email: userData.email });
       if (existingUser) {
-        throw new ConflictException(`User with email ${userData.email} already exists`);
+        throw new ConflictException(`User with this email already exists`);
       }
 
       userData.password = await hash(userData.password, 10);
@@ -28,7 +28,7 @@ export class UserService {
         const company = await this.companyService.getCompanyById(userData.company);
         if (!company) {
           console.log("Company with this id not found");
-          throw new NotFoundException(`Company with id ${userData.company} not found`);
+          throw new NotFoundException(`Company not found`);
         }
         user.company = company;
       }
@@ -37,7 +37,7 @@ export class UserService {
       return user;
     } catch (error) {
       if (error instanceof UniqueConstraintViolationException) {
-        throw new ConflictException(`User with email ${userData.email} already exists`);
+        throw new ConflictException(`User with this email already exists`);
       }
       this.handleUnexpectedError(error);
     }
@@ -46,17 +46,17 @@ export class UserService {
   async update(id: string, userData: Partial<UserInputDto>): Promise<User> {
     try {
       if (!isUUID(id)) {
-        throw new BadRequestException(`Invalid ID format for id: ${id}`);
+        throw new BadRequestException(`Invalid ID format for id`);
       }
       const existingUser = await this.em.findOne(User, { id });
       if (!existingUser) {
-        throw new NotFoundException(`User with id ${id} not found`);
+        throw new NotFoundException(`User with id not found`);
       }
 
       if (userData.company) {
         const company = await this.companyService.getCompanyById(userData.company);
         if (!company) {
-          throw new NotFoundException(`Company with id ${userData.company} not found`);
+          throw new NotFoundException(`Company not found`);
         }
         existingUser.company = company;
       }
@@ -73,11 +73,11 @@ export class UserService {
   async delete(id: string): Promise<void> {
     try {
       if (!isUUID(id)) {
-        throw new BadRequestException(`Invalid ID format for id: ${id}`);
+        throw new BadRequestException(`Invalid ID format for id`);
       }
       const user = await this.em.findOne(User, { id });
       if (!user) {
-        throw new NotFoundException(`User with id ${id} not found`);
+        throw new NotFoundException(`User not found`);
       }
       await this.em.removeAndFlush(user);
     } catch (error) {
@@ -96,11 +96,11 @@ export class UserService {
   async getUserById(id: string): Promise<User> {
     try {
       if (!isUUID(id)) {
-        throw new BadRequestException(`Invalid ID format for id: ${id}`);
+        throw new BadRequestException(`Invalid ID format for id`);
       }
       const user = await this.em.findOne(User, { id });
       if (!user) {
-        throw new NotFoundException(`User with id ${id} not found`);
+        throw new NotFoundException(`User with id not found`);
       }
       return user;
     } catch (error) {
@@ -125,7 +125,7 @@ export class UserService {
     try {
       const user = await this.em.findOne(User, { id });
       if (!user) {
-        throw new NotFoundException(`User with id ${id} not found`);
+        throw new NotFoundException(`User with id not found`);
       }
 
       const tokens = this.em.create(Tokens, { user: user, accessToken, refreshToken });
@@ -161,7 +161,7 @@ export class UserService {
     try {
       return this.em.findOne(User, { email });
     } catch (error) {
-      throw new BadRequestException(`Failed to find user by email: ${error.message}`);
+      throw new BadRequestException(`Failed to find user by email`);
     }
   }
 

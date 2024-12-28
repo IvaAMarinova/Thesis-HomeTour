@@ -25,12 +25,12 @@ export class CompanyService {
   async update(id: string, companyData: Partial<CompanyInputDto>): Promise<Company> {
     try {
       if (!isUUID(id)) {
-        throw new BadRequestException(`Invalid UUID format for id: ${id}`);
+        throw new BadRequestException(`Invalid UUID format for id`);
       }
 
       const existingCompany = await this.em.findOne(Company, { id });
       if (!existingCompany) {
-        throw new NotFoundException(`Company with id ${id} not found`);
+        throw new NotFoundException(`Company not found`);
       }
 
       this.em.assign(existingCompany, companyData);
@@ -44,12 +44,12 @@ export class CompanyService {
   async delete(id: string): Promise<void> {
     try {
       if (!isUUID(id)) {
-        throw new BadRequestException(`Invalid UUID format for id: ${id}`);
+        throw new BadRequestException(`Invalid UUID format for id`);
       }
 
       const company = await this.em.findOne(Company, { id });
       if (!company) {
-        throw new NotFoundException(`Company with id ${id} not found`);
+        throw new NotFoundException(`Company not found`);
       }
 
       await this.em.flush();
@@ -71,14 +71,14 @@ export class CompanyService {
   async getCompanyById(id: string): Promise<Company> {
     try {
       if (!isUUID(id)) {
-        throw new BadRequestException(`Invalid UUID format for id: ${id}`);
+        throw new BadRequestException(`Invalid UUID format for id`);
       }
 
       console.log("[SERVICE] getCompanyById called with id:", id);
 
       const company = await this.em.findOne(Company, { id: id });
       if (!company) {
-        throw new NotFoundException(`Company with id ${id} not found`);
+        throw new NotFoundException(`Company not found`);
       }
       return company;
     } catch (error) {
@@ -89,7 +89,7 @@ export class CompanyService {
   async getallPropertiesByCompany(id: string): Promise<PropertyEntity[]> {
     try {
       if (!isUUID(id)) {
-        throw new BadRequestException(`Invalid UUID format for id: ${id}`);
+        throw new BadRequestException(`Invalid UUID format for id`);
       }
   
       const properties = await this.em.find(PropertyEntity, { company_id: id });

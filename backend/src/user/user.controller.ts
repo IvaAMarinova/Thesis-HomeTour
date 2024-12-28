@@ -48,7 +48,7 @@ export class UserController {
   async deleteUser(@Param('id') id: string): Promise<{ message: string }> {
     try {
       await this.userService.delete(id);
-      return { message: `User with id ${id} deleted successfully` };
+      return { message: `User deleted successfully` };
     } catch (error) {
       throw new Error(`Failed to delete user with id ${id}: ${error.message}`);
     }

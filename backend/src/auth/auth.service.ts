@@ -53,12 +53,11 @@ export class AuthService {
       const user = await this.userService.getUserById(userId);
   
       if (!user) {
-        throw new NotFoundException(`User with id ${userId} not found`);
+        throw new NotFoundException(`User not found`);
       }      
 
       return user;
     } catch (error) {
-      console.error(`[AuthService.getMe] Error retrieving user with id ${userId}:`, error.message);
       throw new Error("An unexpected error occurred while retrieving the user");
     }
   }
@@ -68,7 +67,6 @@ export class AuthService {
       const user = await this.userService.getUserByTokens(accessToken, refreshToken);
 
       if(!user) {
-        console.log("User not found, invalid or expired tokens");
         throw new UnauthorizedException('Invalid or expired tokens');
       }
     

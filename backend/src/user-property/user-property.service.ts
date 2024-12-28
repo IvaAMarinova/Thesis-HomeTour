@@ -25,12 +25,12 @@ export class UserPropertyService {
 
       const existingUser = await this.em.findOne(User, { id: body.user });
       if (!existingUser) {
-        throw new NotFoundException(`User with ID ${body.user} not found`);
+        throw new NotFoundException(`User with ID not found`);
       }
 
       const existingProperty = await this.em.findOne(PropertyEntity, { id: body.property });
       if (!existingProperty) {
-        throw new NotFoundException(`Property with ID ${body.property} not found`);
+        throw new NotFoundException(`Property with ID not found`);
       }
 
       const existingUserProperty = await this.em.findOne(UserProperty, {
@@ -39,7 +39,7 @@ export class UserPropertyService {
       });
       if (existingUserProperty) {
         throw new BadRequestException(
-          `UserProperty already exists for User ID ${body.user} and Property ID ${body.property}`,
+          `UserProperty already exists for User ID and Property ID`,
         );
       }
 
@@ -62,12 +62,12 @@ export class UserPropertyService {
   async update(userPropertyId: string, body: Partial<UserPropertyPartialInputDto>): Promise<UserProperty> {
     try {
       if (!isUUID(userPropertyId)) {
-        throw new BadRequestException(`Invalid UUID format for ID: ${userPropertyId}`);
+        throw new BadRequestException(`Invalid UUID format for ID`);
       }
 
       const userProperty = await this.em.findOne(UserProperty, { id: userPropertyId });
       if (!userProperty) {
-        throw new NotFoundException(`UserProperty with ID ${userPropertyId} not found`);
+        throw new NotFoundException(`UserProperty not found`);
       }
 
       this.em.assign(userProperty, body);
@@ -81,12 +81,12 @@ export class UserPropertyService {
   async delete(id: string): Promise<void> {
     try {
       if (!isUUID(id)) {
-        throw new BadRequestException(`Invalid UUID format for ID: ${id}`);
+        throw new BadRequestException(`Invalid UUID format for ID`);
       }
 
       const userProperty = await this.em.findOne(UserProperty, { id });
       if (!userProperty) {
-        throw new NotFoundException(`UserProperty with ID ${id} not found`);
+        throw new NotFoundException(`UserProperty not found`);
       }
 
       await this.em.removeAndFlush(userProperty);
@@ -132,7 +132,7 @@ export class UserPropertyService {
         throw new BadRequestException('User ID must be provided');
       }
       if (!isUUID(userId)) {
-        throw new BadRequestException(`Invalid UUID format for User ID: ${userId}`);
+        throw new BadRequestException(`Invalid UUID format for User ID`);
       }
 
       const likedProperties = await this.em.find(UserProperty, { user: userId, liked: true });

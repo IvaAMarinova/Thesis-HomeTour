@@ -16,12 +16,12 @@ export class PropertyService {
   async create(propertyData: PropertyInputDto): Promise<PropertyEntity> {
     try {
       if (!isUUID(propertyData.company)) {
-        throw new BadRequestException(`Invalid UUID format for company: ${propertyData.company}`);
+        throw new BadRequestException(`Invalid UUID format for company id`);
       }
 
       const companyObject = await this.em.findOne(Company, { id: propertyData.company });
       if (!companyObject) {
-        throw new NotFoundException(`Company with id ${propertyData.company} not found`);
+        throw new NotFoundException(`Company not found`);
       }
 
       const property = this.em.create(PropertyEntity, propertyData);
@@ -36,12 +36,12 @@ export class PropertyService {
   async update(id: string, propertyData: Partial<PropertyInputDto>): Promise<PropertyEntity> {
     try {
       if (!isUUID(id)) {
-        throw new BadRequestException(`Invalid UUID format for id: ${id}`);
+        throw new BadRequestException(`Invalid UUID format for id`);
       }
 
       const existingProperty = await this.em.findOne(PropertyEntity, { id });
       if (!existingProperty) {
-        throw new NotFoundException(`Property with id ${id} not found`);
+        throw new NotFoundException(`Property not found`);
       }
 
       this.em.assign(existingProperty, propertyData);
@@ -55,12 +55,12 @@ export class PropertyService {
   async delete(id: string): Promise<void> {
     try {
       if (!isUUID(id)) {
-        throw new BadRequestException(`Invalid UUID format for id: ${id}`);
+        throw new BadRequestException(`Invalid UUID format for id`);
       }
 
       const property = await this.em.findOne(PropertyEntity, { id });
       if (!property) {
-        throw new NotFoundException(`Property with id ${id} not found`);
+        throw new NotFoundException(`Property not found`);
       }
 
       await this.fileUploadService.deleteObject(property.resources.headerImage);
@@ -86,12 +86,12 @@ export class PropertyService {
   async getPropertyById(id: string): Promise<PropertyEntity> {
     try {
       if (!isUUID(id)) {
-        throw new BadRequestException(`Invalid UUID format for id: ${id}`);
+        throw new BadRequestException(`Invalid UUID format for id`);
       }
 
       const property = await this.em.findOne(PropertyEntity, { id });
       if (!property) {
-        throw new NotFoundException(`Property with id ${id} not found`);
+        throw new NotFoundException(`Property not found`);
       }
       return property;
     } catch (error) {
