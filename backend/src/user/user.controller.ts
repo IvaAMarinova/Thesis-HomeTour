@@ -41,6 +41,14 @@ export class UserController {
     return new UserResponseDto(user);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Put('/make-b2b/:id')
+  async makeUserB2B(@Param('id') userId: string, @Body() body: any): Promise<UserResponseDto> {
+    const user = await this.userService.makeUserB2B(userId, body.companyId);
+    return new UserResponseDto(user);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Put(':id')
   async updateUser(@Param('id') id: string, @Body() userData: PartialUserInputDto): Promise<UserResponseDto> {
@@ -74,5 +82,5 @@ export class UserController {
   async makeUserAdmin(@Param('id') id: string): Promise<UserResponseDto> {
     const user = await this.userService.makeUserAdmin(id);
     return new UserResponseDto(user);
-  }
+  }  
 }

@@ -11,10 +11,10 @@ export class Tokens {
     })
     id = v4();
 
-    @Property()
+    @Property({ columnType: 'text' })
     accessToken!: string;
-
-    @Property()
+    
+    @Property({ columnType: 'text' })
     refreshToken!: string;
 
     @ManyToOne(() => User)

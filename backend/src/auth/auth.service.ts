@@ -23,7 +23,7 @@ export class AuthService {
   }
 
   async login(user: User): Promise<{ accessToken: string; refreshToken: string }> {
-    const payload = { email: user.email, sub: user.id };
+    const payload = { email: user.email, sub: user.id, roles: user.roles };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '1d' });
     const refreshToken = v4();
 
@@ -70,7 +70,7 @@ export class AuthService {
         throw new UnauthorizedException('Invalid or expired tokens');
       }
     
-      const payload = { email: user.email, sub: user.id };
+      const payload = { email: user.email, sub: user.id, roles: user.roles };
       const newAccessToken = this.jwtService.sign(payload);
       const newRefreshToken = v4();
   

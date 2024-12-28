@@ -21,6 +21,6 @@ export class RolesStrategy extends PassportStrategy(Strategy, 'roles') {
             return done(null, true);
         }
 
-        return done(new UnauthorizedException('User does not have the required role'), false);
+        return done(new UnauthorizedException('User does not have the required role. User roles: ', user.roles), false);
     }
 }
