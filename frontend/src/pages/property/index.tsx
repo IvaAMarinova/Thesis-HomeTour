@@ -166,6 +166,10 @@ function Property() {
                                                 .filter(Boolean)
                                                 .join(", ")}
                                         </p>
+                                        <h2 className="text-md font-semibold mt-4">
+                                            Етаж
+                                        </h2>
+                                        <p>{property.floor}</p>
                                     </div>
 
                                     <div className="mt-4">

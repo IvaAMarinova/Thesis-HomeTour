@@ -106,12 +106,5 @@ export class PropertyEntity {
     if (!this.resources.galleryImages.every((img) => typeof img === 'string')) {
       throw new Error('Each gallery image must be a string');
     }
-
-    if (
-      typeof this.resources.visualizationFolder !== 'string' &&
-      this.resources.visualizationFolder !== null
-    ) {
-      throw new Error('Visualization folder must be a string or null');
-    }
   }
 }

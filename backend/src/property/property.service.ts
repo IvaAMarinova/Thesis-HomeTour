@@ -99,26 +99,6 @@ export class PropertyService {
     }
   }
 
-  async getAllAddresses(): Promise<Record<string, string>[]> {
-    try {
-      const properties = await this.em.findAll(PropertyEntity);
-      return properties.map((property) => property.address);
-    } catch (error) {
-      this.handleUnexpectedError(error);
-    }
-  }
-
-  async getAllFloors(): Promise<number[]> {
-    try {
-      const properties = await this.em.findAll(PropertyEntity);
-      return properties
-        .filter((floor) => floor !== undefined)
-        .map((property) => property.floor);
-    } catch (error) {
-      this.handleUnexpectedError(error);
-    }
-  }
-
   async deleteAllProperties(): Promise<void> {
     try {
       const properties = await await this.em.findAll(PropertyEntity);

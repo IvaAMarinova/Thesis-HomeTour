@@ -6,29 +6,33 @@ import {
 import { Button } from "../ui/button";
 import { SearchSelectDropdown } from "./search-select-dropdown";
 import { useState, useEffect } from "react";
-import { HttpService } from "@/services/http-service";
 import { Filter as FilterIcon } from "@mynaui/icons-react";
-import { useUser } from "@/contexts/UserContext";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLocation } from "react-router-dom";
 
-type FilterProps = {
-    companies: string[];
-    properties: Record<string, any>[];
-    setAppliedFilters: React.Dispatch<
-        React.SetStateAction<{
-            city: string[];
-            company: string[];
-            neighborhood: string[];
-            floor: string[];
-            isLikedOnly: boolean;
-        }>
-    >;
+type Property = {
+    id: string;
+    name: string;
+    description: string;
+    company: string;
+    address: Record<string, string>;
+    floor: number;
+    resources: {
+        headerImage: { key: string; url: string };
+        visualizationFolder?: string;
+    };
 };
 
-function Filter({ companies, properties, setAppliedFilters }: FilterProps) {
+type FilterProps = {
+    companies: string[];
+    properties: Property[];
+    setFilteredProperties: React.Dispatch<React.SetStateAction<Property[]>>;
+};
+
+const predefinedFloors = ["<0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", ">15"];
+
+function Filter({ companies, properties, setFilteredProperties }: FilterProps) {
     const [cities, setCities] = useState<string[]>([]);
-    const [floors, setFloors] = useState<string[]>([]);
     const [selectedCities, setSelectedCities] = useState<string[]>([]);
     const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
     const [selectedNeighborhoods, setSelectedNeighborhoods] = useState<string[]>([]);
@@ -36,7 +40,6 @@ function Filter({ companies, properties, setAppliedFilters }: FilterProps) {
     const [availableNeighborhoods, setAvailableNeighborhoods] = useState<string[]>([]);
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isLikedOnly, setIsLikedOnly] = useState(false);
-    const { userId } = useUser();
     const location = useLocation();
 
     useEffect(() => {
@@ -46,44 +49,10 @@ function Filter({ companies, properties, setAppliedFilters }: FilterProps) {
     }, [location.search]);
 
     useEffect(() => {
-        const fetchAddresses = async () => {
-            try {
-                const response = await HttpService.get<Record<string, string>[]>(
-                    `/properties/addresses`,
-                    undefined,
-                    false
-                );
-                setCities([...new Set(response.map((address) => address.city))].sort());
-                const uniqueNeighborhoods = [
-                    ...new Set(response.map((address) => address.neighborhood)),
-                ].sort();
-                setAvailableNeighborhoods(uniqueNeighborhoods);
-            } catch (error) {
-                console.error("Error fetching addresses:", error);
-            }
-        };
-        fetchAddresses();
-    }, [userId]);
-
-    useEffect(() => {
-        const fetchFloors = async () => {
-            try {
-                const response = await HttpService.get<number[]>(
-                    "/properties/floors",
-                    undefined,
-                    false
-                );
-                setFloors(
-                    [...new Set(response)]
-                        .sort((a, b) => a - b)
-                        .map((floor) => floor.toString())
-                );
-            } catch (error) {
-                console.error("Error fetching floors:", error);
-            }
-        };
-        fetchFloors();
-    }, []);
+        setCities(
+            [...new Set(properties.map((property) => property.address.city))].sort()
+        );
+    }, [properties]);
 
     useEffect(() => {
         const updateAvailableNeighborhoods = () => {
@@ -99,17 +68,40 @@ function Filter({ companies, properties, setAppliedFilters }: FilterProps) {
     }, [selectedCities, properties]);
 
     const handleApplyFilters = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        setAppliedFilters({
-            city: selectedCities,
-            company: selectedCompanies,
-            neighborhood: selectedNeighborhoods,
-            floor: selectedFloors,
-            isLikedOnly: isLikedOnly,
+        e.stopPropagation();   
+        const filtered = properties.filter((property) => {
+            const floor = property.floor;
+    
+            const matchesCity =
+                selectedCities.length === 0 || selectedCities.includes(property.address.city);
+    
+            const matchesCompany =
+                selectedCompanies.length === 0 || selectedCompanies.includes(property.company);
+    
+            const matchesNeighborhood =
+                selectedNeighborhoods.length === 0 ||
+                selectedNeighborhoods.includes(property.address.neighborhood);
+    
+            const matchesFloor =
+                selectedFloors.length === 0 ||
+                selectedFloors.includes(floor.toString()) ||
+                (selectedFloors.includes("<0") && floor < 0) ||
+                (selectedFloors.includes(">15") && floor > 15);
+    
+            return matchesCity && matchesCompany && matchesNeighborhood && matchesFloor;
         });
+
+        console.log("Filtered properties:", filtered);
+        if(filtered.length === 0) {
+            e.stopPropagation();
+            setIsPopoverOpen(false);
+            return;
+        }
+    
+        setFilteredProperties(filtered);
         setIsPopoverOpen(false);
     };
-
+    
     const handleClearAll = (e: React.MouseEvent) => {
         e.stopPropagation();
         setSelectedCities([]);
@@ -117,6 +109,7 @@ function Filter({ companies, properties, setAppliedFilters }: FilterProps) {
         setSelectedNeighborhoods([]);
         setSelectedFloors([]);
         setIsLikedOnly(false);
+        setFilteredProperties(properties);
     };
 
     return (
@@ -156,7 +149,7 @@ function Filter({ companies, properties, setAppliedFilters }: FilterProps) {
                             <div className="flex flex-col gap-2 w-full">
                                 <label className="text-sm text-gray-600">Избери етаж</label>
                                 <SearchSelectDropdown
-                                    options={floors}
+                                    options={predefinedFloors}
                                     placeholder="Избери етаж"
                                     onSelectionChange={setSelectedFloors}
                                     initialSelection={selectedFloors}

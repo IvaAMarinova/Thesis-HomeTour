@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Filter from "../../components/properties/filter";
 import PropertyBox from "../../components/property-box";
 import { HttpService } from "../../services/http-service";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import GoUpButton from "@/components/go-up-button";
 import { useUser } from "@/contexts/UserContext";
 import { useQuery } from "@tanstack/react-query";
@@ -22,43 +22,20 @@ type Property = {
     };
 };
 
-type Filters = {
-    city: string[];
-    company: string[];
-    neighborhood: string[];
-    floor: string[];
-    isLikedOnly: boolean;
-};
-
 function Properties() {
     const navigate = useNavigate();
-    const location = useLocation();
     const { userId } = useUser();
-    const [searchQuery, setSearchQuery] = useState<string>(""); // Track search query
+    const [searchQuery, setSearchQuery] = useState<string>("");
     const [companies, setCompanies] = useState<string[]>([]);
     const [companyDictionary, setCompanyDictionary] = useState<Record<string, string>>({});
     const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
-    const [appliedFilters, setAppliedFilters] = useState<Filters>({
-        city: [],
-        company: [],
-        neighborhood: [],
-        floor: [],
-        isLikedOnly: false,
-    });
-    const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
 
-    useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        const isLikedOnlyParam = params.get("isLikedOnly");
-        setAppliedFilters((prev) => ({
-            ...prev,
-            isLikedOnly: isLikedOnlyParam === "true",
-        }));
-    }, [location.search]);
+    const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
 
     const { data: likedProperties = [], refetch: refetchLikedProperties } = useQuery({
         queryKey: ["likedProperties", userId],
         queryFn: async () => {
+            console.log("Fetching liked properties for user:", userId);
             if (!userId) return [];
             const response = await HttpService.get<{ propertyId: string }[]>(
                 `/user-properties/user-id-liked/${userId}`
@@ -73,12 +50,17 @@ function Properties() {
         isLoading: isPropertiesLoading,
     } = useQuery({
         queryKey: ["properties"],
-        queryFn: async () => await HttpService.get<Property[]>("/properties"),
+        queryFn: async () => {
+            console.log("Fetching all properties...");
+            const response = await HttpService.get<Property[]>("/properties");
+            return response;
+        },
     });
 
     const { data: companiesResponse = [] } = useQuery({
         queryKey: ["companies"],
         queryFn: async () => {
+            console.log("Fetching companies...");
             const response = await HttpService.get<{ id: string; name: string }[]>("/companies");
             return response;
         },
@@ -103,25 +85,17 @@ function Properties() {
         });
     }, [companiesResponse]);
 
-    useEffect(() => {
-        if (isPropertiesLoading) return;
-
-        const newFilteredProperties = properties.filter(({ address, company, floor, id }) =>
-            (appliedFilters.city.length === 0 || appliedFilters.city.includes(address.city)) &&
-            (appliedFilters.company.length === 0 || appliedFilters.company.includes(companyDictionary[company])) &&
-            (appliedFilters.neighborhood.length === 0 || appliedFilters.neighborhood.includes(address.neighborhood)) &&
-            (appliedFilters.floor.length === 0 || appliedFilters.floor.includes(String(floor))) &&
-            (!appliedFilters.isLikedOnly || likedProperties.some((liked) => liked.propertyId === id))
-        );
-
-        setFilteredProperties((prev) =>
-            JSON.stringify(prev) === JSON.stringify(newFilteredProperties) ? prev : newFilteredProperties
-        );
-    }, [appliedFilters, properties, companyDictionary, likedProperties, isPropertiesLoading]);
-
+    
     const filteredBySearch = filteredProperties.filter((property) =>
         property.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    
+    useEffect(() => {
+        if (!isInitialLoadComplete && !isPropertiesLoading && properties.length > 0) {
+            setFilteredProperties(properties);
+            setIsInitialLoadComplete(true);
+        }
+    }, [isPropertiesLoading, properties, isInitialLoadComplete]);
 
     return (
         <div className="pt-16">
@@ -130,7 +104,7 @@ function Properties() {
                     <Filter
                         companies={companies}
                         properties={properties}
-                        setAppliedFilters={setAppliedFilters}
+                        setFilteredProperties={setFilteredProperties}
                     />
                     <Input
                         id="search"

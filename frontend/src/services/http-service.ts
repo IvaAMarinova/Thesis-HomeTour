@@ -19,11 +19,9 @@ export class HttpService {
   }
 
   static setAccessToken(token: string) {
-    console.log('Setting accessToken:', token);
     this.accessToken = token;
   }
   static setRefreshToken(token: string) {
-    console.log('Setting refreshToken:', token);
     this.refreshToken = token;
   }
   static async get<T>(url: string, params?: RequestParams, authRequired = false, isLoginAttempt = false): Promise<T> {
@@ -71,11 +69,6 @@ export class HttpService {
         ...params?.headers,
         ...(this.accessToken && authRequired ? { Authorization: `Bearer ${this.accessToken}` } : {}),
       };
-
-      console.log('[HttpService] Request URL:', requestUrl.toString());
-      console.log('[HttpService] Request Headers:', headers);
-      console.log('[HttpService] this.accessToken:', this.accessToken);
-      console.log('[HttpService] authRequired:', authRequired);
   
       const response = await fetch(requestUrl.toString(), {
         method,
@@ -91,12 +84,10 @@ export class HttpService {
   
       if (!response.ok) {
         if (response.status === 401 && authRequired && !isLoginAttempt) {
-          console.log('[HttpService] Token expired. Attempting to refresh...');
           try {
             await this.refreshAccessToken();
-            return await this.request<T>(url, method, params, authRequired); // Retry once
+            return await this.request<T>(url, method, params, authRequired);
           } catch (refreshError) {
-            console.error('[HttpService] Refresh token failed. Not retrying request.');
             throw refreshError;
           }
         } else if (response.status === 401 && isLoginAttempt) {
@@ -132,7 +123,6 @@ export class HttpService {
         credentials: 'include',
       });
   
-      console.log('[HttpService] Logout successful. Cookies cleared.');
     } catch (error) {
       console.error('[HttpService] Error during logout:', error);
     }
@@ -152,18 +142,14 @@ export class HttpService {
         credentials: 'include',
       });
       if (!response.ok) {
-        console.log("Response me: ", response);
         if (response.status === 401) {
-          console.log('[HttpService] Token expired. Attempting to refresh...');
           try {
             await this.refreshAccessToken();
             return await this.isAuthenticated(fetchUserId); 
           } catch (error) {
-            console.error('[HttpService] Token refresh failed:', error);
             return false; 
           }
         } else {
-          console.error('[HttpService] Unexpected response:', response);
           return false; 
         }
       }
@@ -171,7 +157,6 @@ export class HttpService {
       await fetchUserId();
       return true;
     } catch (error) {
-      console.error('[HttpService] Error during isAuthenticated check:', error);
       return false;
     }
   }
@@ -182,12 +167,10 @@ export class HttpService {
     }
 
     if (!this.refreshToken) {
-      console.error('[HttpService] No refresh token found. Logging out.');
       this.logout();
       throw new Error('No refresh token available');
     }
 
-    console.log('[HttpService] Refreshing access token');
     try {
       const response = await fetch(`${API_BASE_URL}/auth/refresh-token`, {
         method: 'POST',
@@ -202,7 +185,6 @@ export class HttpService {
       });
 
       if (!response.ok) {
-        console.error('[HttpService] Failed to refresh access token. Logging out.');
         this.logout();
         throw new Error('Failed to refresh access token');
       }
@@ -222,9 +204,7 @@ export class HttpService {
       this.accessToken = data.accessToken;
       this.refreshToken = data.refreshToken;
 
-      console.log('[HttpService] Tokens refreshed successfully');
     } catch (error) {
-      console.error('[HttpService] Refresh token failed:', error);
       this.logout();
       throw new Error('Session expired. Please log in again');
     }

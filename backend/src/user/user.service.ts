@@ -147,18 +147,10 @@ export class UserService {
         throw new NotFoundException(`User with id not found`);
       }
 
-      const tokens = this.em.create(Tokens, { user: user, accessToken, refreshToken });
+      const tokens = this.em.create(Tokens, { user, accessToken, refreshToken });
 
       await this.em.persistAndFlush(tokens);
       return tokens;
-    } catch (error) {
-      this.handleUnexpectedError(error);
-    }
-  }
-  
-  async getTokensByUserId(userId: string): Promise<Tokens | null> {
-    try {
-      return this.em.findOne(Tokens, { user_id: userId });
     } catch (error) {
       this.handleUnexpectedError(error);
     }

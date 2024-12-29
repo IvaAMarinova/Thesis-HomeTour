@@ -91,8 +91,13 @@ export class CompanyService {
       if (!isUUID(id)) {
         throw new BadRequestException(`Invalid UUID format for id`);
       }
+
+      const company = await this.em.findOne(Company, { id });
+      if (!company) {
+        throw new NotFoundException(`Company not found`);
+      }
   
-      const properties = await this.em.find(PropertyEntity, { company_id: id });
+      const properties = await this.em.find(PropertyEntity, { company: company });
       return properties;
     } catch (error) {
       this.handleUnexpectedError(error);
