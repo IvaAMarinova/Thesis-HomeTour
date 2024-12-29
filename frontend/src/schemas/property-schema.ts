@@ -2,11 +2,25 @@ import { z } from "zod";
 
 const propertySchema = z.object({
     floor: z
-        .preprocess((val) => parseInt(val as string, 10), z.number())
+        .preprocess((val) => {
+            const parsed = parseInt(val as string, 10);
+            if (isNaN(parsed)) {
+                throw new z.ZodError([
+                    {
+                        code: "custom",
+                        message: "Етажът трябва да бъде число.",
+                        path: ["floor"],
+                    },
+                ]);
+            }
+            return parsed;
+        }, z.number())
         .refine(
             (val) => val > 0 && Number.isInteger(val),
             { message: "Етажът трябва да бъде положително цяло число." }
         ),
+
+
     address: z.object({
         city: z.string().min(1, { message: "Градът не може да бъде празен." }),
         street: z.string().min(1, { message: "Улицата не може да бъде празна." }),
