@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Query } from '@nestjs/common';
 import { PropertyService } from './property.service';
 import { PropertyEntity } from './property.entity';
 import { FileUploadService } from '../upload/upload.service';
@@ -53,6 +53,22 @@ export class PropertyController {
       properties.map((property) => this.mapPresignedUrlsToProperty(property))
     );
 
+    return mappedProperties;
+  }
+
+  @Get('/filter')
+  async getPropertiesByAddress(
+      @Query('cities') cities: string,
+      @Query('neighborhoods') neighborhoods: string,
+      @Query('floor') floors: string
+  ): Promise<TransformedPropertyDto[]> {
+    const citiesArray = cities ? cities.split(',') : [];
+    const neighborhoodsArray = neighborhoods ? neighborhoods.split(',') : [];
+    const floorsArray = floors ? [floors] : [];
+    const properties = await this.propertyService.getPropertiesByAddress(citiesArray, neighborhoodsArray, floorsArray);
+    const mappedProperties = await Promise.all(
+        properties.map((property) => this.mapPresignedUrlsToProperty(property))
+    );
     return mappedProperties;
   }
 

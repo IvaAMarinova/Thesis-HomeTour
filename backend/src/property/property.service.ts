@@ -83,6 +83,35 @@ export class PropertyService {
     }
   }
 
+  async getPropertiesByAddress( cities: string[], neighborhoods: string[], floorsArray?: string[]): Promise<PropertyEntity[]> {
+    try {
+        const filter: any = {};
+
+        if (cities.length > 0) {
+            filter['address'] = {
+                ...filter['address'],
+                city: { $in: cities },
+            };
+        }
+
+        if (neighborhoods.length > 0) {
+            filter['address'] = {
+                ...filter['address'],
+                neighborhood: { $in: neighborhoods },
+            };
+        }
+
+        if (floorsArray?.length > 0) {
+            filter['floor'] = { $in: floorsArray.map((floor) => parseInt(floor, 10)) };
+        }
+
+        const properties = await this.em.find(PropertyEntity, filter);
+        return properties;
+    } catch (error) {
+        this.handleUnexpectedError(error);
+    }
+}
+
   async getPropertyById(id: string): Promise<PropertyEntity> {
     try {
       if (!isUUID(id)) {

@@ -26,12 +26,20 @@ type Property = {
 type FilterProps = {
     companies: string[];
     properties: Property[];
-    setFilteredProperties: React.Dispatch<React.SetStateAction<Property[]>>;
+    setAppliedFilters: React.Dispatch<
+        React.SetStateAction<{
+            cities: string[];
+            neighborhoods: string[];
+            floors: string[];
+            isLikedOnly: boolean;
+            companies: string[];
+        }>
+    >;
 };
 
 const predefinedFloors = ["<0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", ">15"];
 
-function Filter({ companies, properties, setFilteredProperties }: FilterProps) {
+function Filter({ companies, properties, setAppliedFilters }: FilterProps) {
     const [cities, setCities] = useState<string[]>([]);
     const [selectedCities, setSelectedCities] = useState<string[]>([]);
     const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
@@ -46,62 +54,51 @@ function Filter({ companies, properties, setFilteredProperties }: FilterProps) {
         const params = new URLSearchParams(location.search);
         const isLikedOnlyParam = params.get("isLikedOnly") === "true";
         setIsLikedOnly(isLikedOnlyParam);
+    
+        setAppliedFilters({
+            cities: selectedCities,
+            neighborhoods: selectedNeighborhoods,
+            floors: selectedFloors,
+            isLikedOnly: isLikedOnlyParam,
+            companies: selectedCompanies,
+        });
+    
     }, [location.search]);
-
+    
     useEffect(() => {
-        setCities(
-            [...new Set(properties.map((property) => property.address.city))].sort()
-        );
-    }, [properties]);
-
-    useEffect(() => {
-        const updateAvailableNeighborhoods = () => {
-            const neighborhoodsInSelectedCities = properties
-                .filter(
-                    (property) =>
-                        property.address && selectedCities.includes(property.address.city)
-                )
-                .map((property) => property.address.neighborhood);
-            setAvailableNeighborhoods([...new Set(neighborhoodsInSelectedCities)]);
-        };
-        updateAvailableNeighborhoods();
-    }, [selectedCities, properties]);
+        const citiesInSelectedNeighborhoods =
+            selectedNeighborhoods.length > 0
+                ? properties
+                    .filter((property) =>
+                        selectedNeighborhoods.includes(property.address.neighborhood)
+                    )
+                    .map((property) => property.address.city)
+                : properties.map((property) => property.address.city); 
+    
+        setCities([...new Set(citiesInSelectedNeighborhoods)].sort());
+    
+        const neighborhoodsInSelectedCities =
+            selectedCities.length > 0
+                ? properties
+                    .filter((property) => selectedCities.includes(property.address.city))
+                    .map((property) => property.address.neighborhood)
+                : properties.map((property) => property.address.neighborhood);
+    
+        setAvailableNeighborhoods([...new Set(neighborhoodsInSelectedCities)].sort());
+    }, [properties, selectedCities, selectedNeighborhoods]);
 
     const handleApplyFilters = (e: React.MouseEvent) => {
-        e.stopPropagation();   
-        const filtered = properties.filter((property) => {
-            const floor = property.floor;
-    
-            const matchesCity =
-                selectedCities.length === 0 || selectedCities.includes(property.address.city);
-    
-            const matchesCompany =
-                selectedCompanies.length === 0 || selectedCompanies.includes(property.company);
-    
-            const matchesNeighborhood =
-                selectedNeighborhoods.length === 0 ||
-                selectedNeighborhoods.includes(property.address.neighborhood);
-    
-            const matchesFloor =
-                selectedFloors.length === 0 ||
-                selectedFloors.includes(floor.toString()) ||
-                (selectedFloors.includes("<0") && floor < 0) ||
-                (selectedFloors.includes(">15") && floor > 15);
-    
-            return matchesCity && matchesCompany && matchesNeighborhood && matchesFloor;
+        e.stopPropagation();
+        setAppliedFilters({
+            cities: selectedCities,
+            neighborhoods: selectedNeighborhoods,
+            floors: selectedFloors,
+            isLikedOnly: isLikedOnly,
+            companies: selectedCompanies,
         });
-
-        console.log("Filtered properties:", filtered);
-        if(filtered.length === 0) {
-            e.stopPropagation();
-            setIsPopoverOpen(false);
-            return;
-        }
-    
-        setFilteredProperties(filtered);
         setIsPopoverOpen(false);
     };
-    
+
     const handleClearAll = (e: React.MouseEvent) => {
         e.stopPropagation();
         setSelectedCities([]);
@@ -109,7 +106,13 @@ function Filter({ companies, properties, setFilteredProperties }: FilterProps) {
         setSelectedNeighborhoods([]);
         setSelectedFloors([]);
         setIsLikedOnly(false);
-        setFilteredProperties(properties);
+        setAppliedFilters({
+            cities: [],
+            neighborhoods: [],
+            floors: [],
+            isLikedOnly: false,
+            companies: [],
+        });
     };
 
     return (
@@ -124,7 +127,7 @@ function Filter({ companies, properties, setFilteredProperties }: FilterProps) {
                         Филтър
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="p-6 ml-6 space-y-6 w-auto">
+                <PopoverContent className="p-6 relative z-40 ml-6 space-y-6 w-auto">
                     <div className="flex flex-col gap-6">
                         <h2 className="text-lg font-bold text-left mt-4">Избери адрес</h2>
                         <div className="flex flex-col md:flex-row gap-4">
@@ -185,7 +188,7 @@ function Filter({ companies, properties, setFilteredProperties }: FilterProps) {
                     </div>
                     <div className="flex justify-end gap-4 mt-6">
                         <Button
-                            className="px-3 py-2 text-base bg-white text-black border rounded-lg transform transition-transform duration-300 hover:scale-105"
+                            className="px-3 py-2 text-base bg-white text-black border rounded-lg transform transition-transform duration-300 hover:scale-105 hover:bg-white"
                             onClick={handleClearAll}
                         >
                             Изчисти

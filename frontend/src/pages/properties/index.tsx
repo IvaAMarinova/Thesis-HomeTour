@@ -29,73 +29,91 @@ function Properties() {
     const [companies, setCompanies] = useState<string[]>([]);
     const [companyDictionary, setCompanyDictionary] = useState<Record<string, string>>({});
     const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
-
+    const [appliedFilters, setAppliedFilters] = useState<{
+        cities: string[];
+        neighborhoods: string[];
+        floors: string[];
+        isLikedOnly: boolean;
+        companies: string[];
+    }>({
+        cities: [],
+        neighborhoods: [],
+        floors: [],
+        isLikedOnly: false,
+        companies: [],
+    });
     const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
+    const [initialProperties, setInitialProperties] = useState<Property[]>([]);
 
     const { data: likedProperties = [], refetch: refetchLikedProperties } = useQuery({
         queryKey: ["likedProperties", userId],
         queryFn: async () => {
-            console.log("Fetching liked properties for user:", userId);
             if (!userId) return [];
-            const response = await HttpService.get<{ propertyId: string }[]>(
-                `/user-properties/user-id-liked/${userId}`
-            );
+            const response = await HttpService.get<{ propertyId: string }[]>(`/user-properties/user-id-liked/${userId}`);
             return response;
         },
         enabled: !!userId,
     });
 
-    const {
-        data: properties = [],
-        isLoading: isPropertiesLoading,
-    } = useQuery({
-        queryKey: ["properties"],
-        queryFn: async () => {
-            console.log("Fetching all properties...");
-            const response = await HttpService.get<Property[]>("/properties");
-            return response;
-        },
-    });
-
     const { data: companiesResponse = [] } = useQuery({
         queryKey: ["companies"],
         queryFn: async () => {
-            console.log("Fetching companies...");
             const response = await HttpService.get<{ id: string; name: string }[]>("/companies");
             return response;
         },
     });
 
-    useEffect(() => {
-        if (!isInitialLoadComplete && !isPropertiesLoading && properties.length > 0) {
-            setIsInitialLoadComplete(true);
+    const fetchFilteredProperties = async () => {
+        const { cities, neighborhoods, floors, isLikedOnly } = appliedFilters;
+        const queryParams = new URLSearchParams();
+    
+        if (cities.length > 0) queryParams.append("cities", cities.join(","));
+        if (neighborhoods.length > 0) queryParams.append("neighborhoods", neighborhoods.join(","));
+        if (floors.length > 0) queryParams.append("floors", floors.join(","));
+    
+        const endpoint = queryParams.toString()
+            ? `/properties/filter?${queryParams.toString()}`
+            : "/properties";
+    
+        try {
+            const response = await HttpService.get<Property[]>(endpoint);    
+            let filteredProperties = response;
+    
+            if (isLikedOnly) {
+                const likedPropertyIds = likedProperties.map(({ propertyId }) => propertyId);
+    
+                filteredProperties = response
+                    .filter((property) => likedPropertyIds.includes(property.id))
+                    .map((property) => ({
+                        ...property,
+                        isLiked: true,
+                    }));
+            }
+    
+            setFilteredProperties(filteredProperties);
+    
+            if (!queryParams.toString() && !isInitialLoadComplete) {
+                setInitialProperties(filteredProperties);
+                setIsInitialLoadComplete(true);
+            }
+        } catch (error) {
+            console.error("Error fetching properties:", error);
         }
-    }, [isPropertiesLoading, properties, isInitialLoadComplete]);
+    };
+    
+    useEffect(() => {
+        fetchFilteredProperties();
+    }, [appliedFilters, likedProperties]);
 
     useEffect(() => {
-        const companyToNameMap = Object.fromEntries(
-            companiesResponse.map(({ id, name }) => [id, name])
-        );
-        setCompanies((prev) => {
-            const newCompanies = companiesResponse.map((company) => company.name);
-            return JSON.stringify(prev) === JSON.stringify(newCompanies) ? prev : newCompanies;
-        });
-        setCompanyDictionary((prev) => {
-            return JSON.stringify(prev) === JSON.stringify(companyToNameMap) ? prev : companyToNameMap;
-        });
+        const companyToNameMap = Object.fromEntries(companiesResponse.map(({ id, name }) => [id, name]));
+        setCompanies(companiesResponse.map((company) => company.name));
+        setCompanyDictionary(companyToNameMap);
     }, [companiesResponse]);
 
-    
     const filteredBySearch = filteredProperties.filter((property) =>
         property.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-    
-    useEffect(() => {
-        if (!isInitialLoadComplete && !isPropertiesLoading && properties.length > 0) {
-            setFilteredProperties(properties);
-            setIsInitialLoadComplete(true);
-        }
-    }, [isPropertiesLoading, properties, isInitialLoadComplete]);
 
     return (
         <div className="pt-16">
@@ -103,8 +121,8 @@ function Properties() {
                 <div className="flex flex-col lg:flex-row p-4 mb-4 gap-6">
                     <Filter
                         companies={companies}
-                        properties={properties}
-                        setFilteredProperties={setFilteredProperties}
+                        properties={initialProperties}
+                        setAppliedFilters={setAppliedFilters}
                     />
                     <Input
                         id="search"
