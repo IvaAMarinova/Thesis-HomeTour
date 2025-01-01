@@ -52,16 +52,34 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req, @Res() res: Response) {
-    const { accessToken, refreshToken } = await this.authService.login(req.user);
-    this.setAuthCookies(res, accessToken, refreshToken);
-    res.json({ accessToken, refreshToken });
+    try {
+      const { accessToken, refreshToken } = await this.authService.login(req.user);
+      this.setAuthCookies(res, accessToken, refreshToken);
+      res.json({ accessToken, refreshToken });
+    } catch (error) {
+      res.status(401).json({ message: 'Login failed.' });
+    }
   }
 
   @Post('register')
   async register(@Body() registerData: UserInputDto, @Res() res: Response) {
-    const { accessToken, refreshToken } = await this.authService.register(registerData);
-    this.setAuthCookies(res, accessToken, refreshToken);
-    res.json({ accessToken, refreshToken });
+    try {
+      const { accessToken, refreshToken } = await this.authService.register(registerData);
+      this.setAuthCookies(res, accessToken, refreshToken);
+      res.json({ accessToken, refreshToken });
+    } catch (error) {
+      res.status(400).json({ message: 'Registration failed.' });
+    }
+  }
+
+  @Post('google/auth')
+  async googleAuth(@Body() userInfo: { email: string; fullName: string }, @Res() res: Response) {
+    try {
+      const tokens = await this.authService.googleRegistrationService(userInfo);
+      res.json(tokens);
+    } catch (error) {
+      res.status(401).json({ message: 'Invalid Google authentication' });
+    }
   }
 
   @UseGuards(JwtAuthGuard)

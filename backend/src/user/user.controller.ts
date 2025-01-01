@@ -14,7 +14,7 @@ import { UserInputDto } from './dto/user-input.dto';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { Roles } from '../decorators/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { PartialUserInputDto } from './dto/user-partial-input.dtp';
+import { PartialUserInputDto } from './dto/user-partial-input.dto';
 
 @Controller('users')
 export class UserController {

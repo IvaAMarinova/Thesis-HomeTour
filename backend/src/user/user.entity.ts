@@ -39,8 +39,11 @@ export class User {
   @Property({ unique: true })
   email!: string;
 
+  @Property({ default: false })
+  isGoogleUser!: boolean;
+
   @Property()
-  password!: string;
+  password?: string;
 
   @Enum(() => UserType)
   type!: UserType;
@@ -75,8 +78,8 @@ export class User {
       throw new Error('Invalid email address');
     }
 
-    if (typeof this.password !== 'string' || this.password.length < 6) {
-      throw new Error('Password must be at least 6 characters long');
+    if (!this.isGoogleUser && (typeof this.password !== 'string' || this.password.length < 6)) {
+      throw new Error('Password must be at least 6 characters long if not a Google user');
     }
 
     if (!Object.values(UserType).includes(this.type)) {

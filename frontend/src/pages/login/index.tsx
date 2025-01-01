@@ -7,7 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HttpService } from "@/services/http-service";
 import { useUser } from "../../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
-
+import { BrandGoogle } from "@mynaui/icons-react";
+import { useGoogleLogin } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -21,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
 import loginSchema from "@/schemas/login-schema";
 import registerSchema from "@/schemas/register-schema";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface LoginProps {
   onLoginSuccess: () => void;
@@ -30,6 +32,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
   const navigate = useNavigate();
   const { fetchUserId } = useUser();
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -50,6 +53,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
 
   async function onLogin(values: z.infer<typeof loginSchema>) {
     try {
+      setIsLoading(true);
       const response = await HttpService.post<{accessToken: string, refreshToken: string}>('/auth/login', values, undefined, true, true);
       
       HttpService.setAccessToken(response.accessToken);
@@ -57,6 +61,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
       onLoginSuccess();
       await fetchUserId();
       navigate('/');
+      setIsLoading(false);
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === 'Invalid login credentials') {
@@ -67,14 +72,17 @@ export function Login({ onLoginSuccess }: LoginProps) {
       } else {
         toast.error('Неочаквана грешка настъпи. Опитайте отново!');
       }
+      setIsLoading(false);
     }
   }
   
   async function onRegister(values: z.infer<typeof registerSchema>) {
     try {
+      setIsLoading(true);
       const registerData = {
         ...values,
         type: "b2c",
+        isGoogleUser: false,
       };
       const response = await HttpService.post<{accessToken: string, refreshToken: string}>('/auth/register', registerData, undefined, true, true);
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -83,6 +91,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
       onLoginSuccess();
       await fetchUserId();
       navigate('/');
+      setIsLoading(false);
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === "User with this email already exists") {
@@ -93,13 +102,46 @@ export function Login({ onLoginSuccess }: LoginProps) {
       } else {
         toast.error('Неочаквана грешка настъпи. Опитайте отново!');
       }
-      
+      setIsLoading(false);
     }
-  }  
+  }
+
+  const onGoogleLogin = useGoogleLogin({
+    onSuccess: async (response: any) => {
+        setIsLoading(true);
+        const googleAccessToken = response.access_token;  
+        const userInfoResponse = await fetch(
+          "https://www.googleapis.com/oauth2/v2/userinfo",
+          {
+            headers: {
+              Authorization: `Bearer ${googleAccessToken}`,
+            },
+          }
+        );
+  
+        const userInfo = await userInfoResponse.json();
+  
+        const backendResponse = await HttpService.post<{ accessToken: string; refreshToken: string;}>('/auth/google/auth', {
+          email: userInfo.email,
+          fullName: userInfo.name,
+        });
+    
+        HttpService.setAccessToken(backendResponse.accessToken);
+        HttpService.setRefreshToken(backendResponse.refreshToken);
+        onLoginSuccess();
+        await fetchUserId();
+        navigate('/');
+        setIsLoading(false);
+    },
+    onError: () => {
+      toast.error("Получи се грешка докато влизахте. Опитайте отново!");
+      setIsLoading(false);
+    },
+  });
   
   return (
     <div className="flex items-center justify-center h-screen">
-      <div className="rounded-lg shadow-md p-6 w-[400px] border">
+      <div className="rounded-lg shadow-md p-6 w-[400px] border mt-16">
         <Tabs defaultValue="login">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">Влез в акаунт</TabsTrigger>
@@ -223,8 +265,26 @@ export function Login({ onLoginSuccess }: LoginProps) {
             </Form>
           </TabsContent>
         </Tabs>
+        <div className="flex flex-col items-center border-t-2 border-gray-300 mt-5 pt-4">
+          <p className="mb-2 text-sm italic">Или влез чрез...</p>
+          <Button
+            type="button"
+            size="lg"
+            className="bg-white text-black border border-gray-300 shadow-md flex items-center justify-center hover:bg-white"
+            onClick={() => onGoogleLogin()}
+          >
+            <BrandGoogle className="mr-3" />
+            Google
+          </Button>
+        </div>
+        {isLoading && (
+          <div className="flex items-center justify-center min-h-[200px]">
+            <LoadingSpinner size={48} className="mt-20" />
+          </div>
+        )}
       </div>
     </div>
+
   );
 }
 

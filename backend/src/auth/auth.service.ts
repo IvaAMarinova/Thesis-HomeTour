@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '../user/user.entity';
+import { User, UserRole, UserType } from '../user/user.entity';
 import { v4 } from 'uuid';
 import { UserInputDto } from '../user/dto/user-input.dto';
 
@@ -9,7 +9,7 @@ import { UserInputDto } from '../user/dto/user-input.dto';
 export class AuthService {
   constructor(
     private userService: UserService,
-    private jwtService: JwtService
+    private jwtService: JwtService  
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -48,6 +48,28 @@ export class AuthService {
     }
   }
 
+  async googleRegistrationService(userInfo: { email: string; fullName: string }): Promise<{ accessToken: string; refreshToken: string }> {
+    try {
+      const user = await this.userService.findByEmail(userInfo.email);
+
+      if (!user) {
+        const newUser = await this.userService.createInternal({
+          email: userInfo.email,
+          fullName: userInfo.fullName,
+          isGoogleUser: true,
+          roles: [UserRole.USER],
+          type: UserType.B2C,
+        });
+
+        return this.login(newUser);
+      }
+
+      return this.login(user);
+    } catch (error) {
+      throw new Error("Failed to process Google authentication.");
+    }
+  }
+  
   async getMe(userId: string): Promise<User> {  
     try {
       const user = await this.userService.getUserById(userId);

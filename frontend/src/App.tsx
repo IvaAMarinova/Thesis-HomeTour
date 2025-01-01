@@ -22,6 +22,7 @@ import { PrivateRoute } from './pages/unauthorized/private-route';
 import Unauthorized from './pages/unauthorized';
 import { useLocation } from 'react-router-dom';
 import { LoadingSpinner } from './components/ui/loading-spinner';
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const queryClient = new QueryClient();
 
@@ -95,15 +96,17 @@ function AppContent() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <UserProvider>
-        <CookiesProvider>
-          <Router>
-            <AppContent />
-          </Router>
-        </CookiesProvider>
-      </UserProvider>
-    </QueryClientProvider>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <QueryClientProvider client={queryClient}>
+        <UserProvider>
+          <CookiesProvider>
+            <Router>
+              <AppContent />
+            </Router>
+          </CookiesProvider>
+        </UserProvider>
+      </QueryClientProvider>
+    </GoogleOAuthProvider>
   );
 }
 

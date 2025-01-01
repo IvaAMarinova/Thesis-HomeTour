@@ -6,7 +6,8 @@ import { hash, compare } from 'bcrypt';
 import { isUUID } from 'class-validator';
 import { UserInputDto } from './dto/user-input.dto';
 import { Tokens } from '../auth/tokens.entity';
-import { PartialUserInputDto } from './dto/user-partial-input.dtp';
+import { PartialUserInputDto } from './dto/user-partial-input.dto';
+import { UserInternalInputDto } from './dto/user-internal-input.dto';
 
 @Injectable()
 export class UserService {
@@ -15,16 +16,19 @@ export class UserService {
     private readonly em: EntityManager,
   ) {}
 
-  async create(userData: UserInputDto): Promise<User> {
+  async createLogic(userData: UserInputDto | UserInternalInputDto): Promise<User> {
     try {
       const existingUser = await this.em.findOne(User, { email: userData.email });
       if (existingUser) {
         throw new ConflictException(`User with this email already exists`);
       }
-
-      userData.password = await hash(userData.password, 10);
+  
+      if (userData.password) {
+        userData.password = await hash(userData.password, 10);
+      }
+  
       const user = this.em.create(User, userData);
-
+  
       if (userData.company) {
         const company = await this.companyService.getCompanyById(userData.company);
         if (!company) {
@@ -33,7 +37,7 @@ export class UserService {
         }
         user.company = company;
       }
-
+  
       await this.em.persistAndFlush(user);
       return user;
     } catch (error) {
@@ -42,6 +46,14 @@ export class UserService {
       }
       this.handleUnexpectedError(error);
     }
+  }  
+
+  async create(userData: UserInputDto): Promise<User> {
+    return this.createLogic(userData);
+  }
+  
+  async createInternal(userData: UserInternalInputDto): Promise<User> {
+    return this.createLogic(userData);
   }
 
   async update(id: string, userData: PartialUserInputDto): Promise<User> {
