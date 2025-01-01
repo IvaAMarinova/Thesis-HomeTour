@@ -83,9 +83,19 @@ export class PropertyService {
     }
   }
 
-  async getPropertiesByAddress( cities: string[], neighborhoods: string[], floorsArray?: string[]): Promise<PropertyEntity[]> {
+  async getPropertiesByFilter( cities: string[], neighborhoods: string[], floorsArray?: string[], companiesIdsArray?: string[]): Promise<PropertyEntity[]> {
     try {
         const filter: any = {};
+
+        if(companiesIdsArray?.length > 0) {
+            for(const companyId of companiesIdsArray) {
+                const company = await this.em.findOne(Company, { id: companyId });
+                if (company) {
+                    filter['company'] = company;
+                    break;
+                }
+            }
+        }
 
         if (cities.length > 0) {
             filter['address'] = {

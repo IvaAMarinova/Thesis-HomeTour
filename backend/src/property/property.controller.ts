@@ -57,15 +57,17 @@ export class PropertyController {
   }
 
   @Get('/filter')
-  async getPropertiesByAddress(
+  async getPropertiesByFilter(
       @Query('cities') cities: string,
       @Query('neighborhoods') neighborhoods: string,
-      @Query('floor') floors: string
+      @Query('floor') floors: string,
+      @Query('companies') companies: string,
   ): Promise<TransformedPropertyDto[]> {
     const citiesArray = cities ? cities.split(',') : [];
     const neighborhoodsArray = neighborhoods ? neighborhoods.split(',') : [];
     const floorsArray = floors ? [floors] : [];
-    const properties = await this.propertyService.getPropertiesByAddress(citiesArray, neighborhoodsArray, floorsArray);
+    const companiesIdsArray = companies ? companies.split(',') : [];
+    const properties = await this.propertyService.getPropertiesByFilter(citiesArray, neighborhoodsArray, floorsArray, companiesIdsArray);
     const mappedProperties = await Promise.all(
         properties.map((property) => this.mapPresignedUrlsToProperty(property))
     );
