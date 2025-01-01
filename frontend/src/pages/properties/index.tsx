@@ -64,16 +64,26 @@ function Properties() {
     });
 
     const fetchFilteredProperties = async () => {
-        const { cities, neighborhoods, floors, isLikedOnly } = appliedFilters;
+        const { cities, neighborhoods, floors, isLikedOnly, companies } = appliedFilters;
         const queryParams = new URLSearchParams();
     
         if (cities.length > 0) queryParams.append("cities", cities.join(","));
         if (neighborhoods.length > 0) queryParams.append("neighborhoods", neighborhoods.join(","));
         if (floors.length > 0) queryParams.append("floors", floors.join(","));
+        if (companies.length > 0) {
+            const companyIds = companies.map((company) => {
+                const index = Object.values(companyDictionary).indexOf(company);
+                return Object.keys(companyDictionary)[index];
+            });
+            queryParams.append("companies", companyIds.join(","));
+        }
+        
     
         const endpoint = queryParams.toString()
             ? `/properties/filter?${queryParams.toString()}`
             : "/properties";
+
+        console.log(queryParams.toString());
     
         try {
             const response = await HttpService.get<Property[]>(endpoint);    
