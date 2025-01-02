@@ -22,19 +22,6 @@ function EditPropertyText(props: EditPropertyTextProps) {
         props.setPropertySaved(false);
     };
 
-    const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        const updatedAddress: Record<string, string> = { ...props.property.address };
-
-        updatedAddress[name] = value;
-
-        props.setProperty((prevState) => ({
-            ...prevState,
-            address: updatedAddress,
-        }));
-        props.setPropertySaved(false);
-    };
-
     return (
         <div>
             <div className="flex flex-col md:flex-row justify-start md:space-x-12 space-y-6 md:space-y-0">
@@ -87,39 +74,6 @@ function EditPropertyText(props: EditPropertyTextProps) {
                 onChange={handleDescriptionChange}
                 className="mt-2 w-full border shadow-sm h-24 p-2 rounded focus:outline-black"
             />
-            <h2 className="text-xl font-semibold mt-6 mb-4">Адрес на имота</h2>
-            <div className="flex flex-col md:flex-row justify-start md:space-x-12 space-y-6 md:space-y-0 mb-10">
-                <div>
-                    <Label className="mb-2 block">Град / Село</Label>
-                    <input
-                        id="city"
-                        name="city"
-                        value={props.property.address.city}
-                        onChange={handleAddressChange}
-                        className="mt-2 w-full border shadow-sm p-2 rounded focus:outline-black"
-                    />
-                </div>
-                <div>
-                    <Label className="mb-2 block">Квартал</Label>
-                    <input
-                        id="neighborhood"
-                        name="neighborhood"
-                        value={props.property.address.neighborhood}
-                        onChange={handleAddressChange}
-                        className="mt-2 w-full border shadow-sm p-2 rounded focus:outline-black"
-                    />
-                </div>
-                <div>
-                    <Label className="mb-2 block">Улица</Label>
-                    <input
-                        id="street"
-                        name="street"
-                        value={props.property.address.street}
-                        onChange={handleAddressChange}
-                        className="mt-2 w-full border shadow-sm p-2 rounded focus:outline-black"
-                    />
-                </div>                
-            </div>
         </div>
     )
 }

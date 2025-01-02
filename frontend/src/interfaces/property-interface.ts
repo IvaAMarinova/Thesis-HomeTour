@@ -1,6 +1,10 @@
 export default interface Property {
     floor: string;
-    address: Record<string, string>;
+    address: {
+        city: string;
+        neighborhood: string;
+        street: string;
+    }
     phoneNumber: string;
     email: string;
     name: string;

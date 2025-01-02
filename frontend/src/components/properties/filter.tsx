@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { Filter as FilterIcon } from "@mynaui/icons-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLocation } from "react-router-dom";
+import { useUser } from "@/contexts/UserContext";
 
 type Property = {
     id: string;
@@ -49,6 +50,7 @@ function Filter({ companies, properties, setAppliedFilters }: FilterProps) {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isLikedOnly, setIsLikedOnly] = useState(false);
     const location = useLocation();
+    const { userId } = useUser();
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);
@@ -170,20 +172,23 @@ function Filter({ companies, properties, setAppliedFilters }: FilterProps) {
                                     initialSelection={selectedCompanies}
                                 />
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Checkbox
-                                    id="liked-properties"
-                                    checked={isLikedOnly}
-                                    onCheckedChange={(checked) => setIsLikedOnly(checked === true)}
-                                    className="h-6 w-6 border-gray-300 rounded"
-                                />
-                                <label
-                                    htmlFor="liked-properties"
-                                    className="text-sm text-gray-600 cursor-pointer"
-                                >
-                                    Покажи само любими имоти
-                                </label>
-                            </div>
+                            { userId && 
+                                <div className="flex items-center gap-2">
+                                    <Checkbox
+                                        id="liked-properties"
+                                        checked={isLikedOnly}
+                                        onCheckedChange={(checked) => setIsLikedOnly(checked === true)}
+                                        className="h-6 w-6 border-gray-300 rounded"
+                                    />
+                                    <label
+                                        htmlFor="liked-properties"
+                                        className="text-sm text-gray-600 cursor-pointer"
+                                    >
+                                        Покажи само любими имоти
+                                    </label>
+                                </div>
+                            }
+                            
                         </div>
                     </div>
                     <div className="flex justify-end gap-4 mt-6">

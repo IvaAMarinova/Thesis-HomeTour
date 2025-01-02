@@ -14,7 +14,8 @@ import GoBackButton from "@/components/go-back-button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import ConfirmationPopup from "@/components/confirmation-popup";
 import EditSingleImage from "@/components/edit-pages/edit-single-image";
-import EditPropertyText from "@/components/edit-pages/edit-property-text";
+import EditPropertyText from "@/components/edit-pages/edit-property/edit-property-text";
+import EditPropertyAddress from "@/components/edit-pages/edit-property/edit-property-address";
 import propertySchema from "@/schemas/property-schema";
 import Property from "@/interfaces/property-interface";
 import HandlePropertyImages from "./property-images-logic";
@@ -180,9 +181,6 @@ function EditProperty() {
         }
         
     };
-    
-    
-    
 
     if (isPropertyLoading) {
         return (
@@ -236,6 +234,7 @@ function EditProperty() {
                 )}
                 <div className="space-y-6 mt-12">
                     <EditPropertyText property={property} setProperty={setProperty} setPropertySaved={setPropertySaved} />
+                    <EditPropertyAddress property={property} setProperty={setProperty} setPropertySaved={setPropertySaved} />
                     
                     <h1 className="text-2xl font-semibold text-center">Изображения на имота</h1>
 

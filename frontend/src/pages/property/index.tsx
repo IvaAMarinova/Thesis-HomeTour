@@ -10,6 +10,7 @@ import { Heart, HeartSolid, TelephoneCall, Envelope } from "@mynaui/icons-react"
 import { useUser } from "@/contexts/UserContext";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import Map from "@/components/property/map";
 
 function Property() {
     const navigate = useNavigate();
@@ -171,6 +172,7 @@ function Property() {
                                         </h2>
                                         <p>{property.floor}</p>
                                     </div>
+                                    
 
                                     <div className="mt-4">
                                         <h3 className="text-md font-semibold mb-2">
@@ -186,6 +188,7 @@ function Property() {
                                         </div>
                                     </div>
                                 </div>
+                                
 
                                 <div className="flex justify-center items-center md:flex-shrink-0 md:basis-1/2 p-4 w-full md:w-auto">
                                     <div className="w-96">
@@ -196,8 +199,16 @@ function Property() {
                                     </div>
                                 </div>
                             </div>
+                            
                         </div>
-
+                        <div className="border shadow-md h-80 w-full max-w-6xl mx-auto p-4">
+                            <Map
+                                street={property.address.street}
+                                city={property.address.city}
+                                neighborhood={property.address.neighborhood}
+                            />
+                        </div>
+                        
                         <div className="w-full max-w-6xl mx-auto px-4 mt-4">
                             {property?.resources?.galleryImages?.length > 0 && (
                                 <ImagesCarousel galleryImages={property.resources.galleryImages} />

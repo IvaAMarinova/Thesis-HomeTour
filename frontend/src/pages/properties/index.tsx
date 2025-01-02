@@ -43,7 +43,7 @@ function Properties() {
         companies: [],
     });
     const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
-    const [initialProperties, setInitialProperties] = useState<Property[]>([]);
+    const [initialProperties, setInitialProperties] = useState<Property[]>([]);    
 
     const { data: likedProperties = [], refetch: refetchLikedProperties } = useQuery({
         queryKey: ["likedProperties", userId],
@@ -53,6 +53,7 @@ function Properties() {
             return response;
         },
         enabled: !!userId,
+        retry: false,
     });
 
     const { data: companiesResponse = [] } = useQuery({
@@ -78,13 +79,9 @@ function Properties() {
             queryParams.append("companies", companyIds.join(","));
         }
         
-    
         const endpoint = queryParams.toString()
             ? `/properties/filter?${queryParams.toString()}`
-            : "/properties";
-
-        console.log(queryParams.toString());
-    
+            : "/properties";    
         try {
             const response = await HttpService.get<Property[]>(endpoint);    
             let filteredProperties = response;
@@ -113,7 +110,8 @@ function Properties() {
     
     useEffect(() => {
         fetchFilteredProperties();
-    }, [appliedFilters, likedProperties]);
+    }, [appliedFilters]);
+    
 
     useEffect(() => {
         const companyToNameMap = Object.fromEntries(companiesResponse.map(({ id, name }) => [id, name]));
