@@ -46,13 +46,13 @@ function Property() {
 
         const fetchLikedProperties = async () => {
             try {
-                const likedResponse = await HttpService.get<Array<{ property: { id: string } }>>(
+                const likedResponse = await HttpService.get<Record<string, string>[]>(
                     `/user-properties/user-id-liked/${userId}`,
                     undefined,
                     true
                 );
                 const isLikedProperty = likedResponse.some(
-                    (likedItem) => likedItem.property?.id === id
+                    (likedItem) => likedItem.propertyId === id
                 );
                 setIsLiked(isLikedProperty);
             } catch (error) {
@@ -172,7 +172,6 @@ function Property() {
                                         </h2>
                                         <p>{property.floor}</p>
                                     </div>
-                                    
 
                                     <div className="mt-4">
                                         <h3 className="text-md font-semibold mb-2">
@@ -188,7 +187,6 @@ function Property() {
                                         </div>
                                     </div>
                                 </div>
-                                
 
                                 <div className="flex justify-center items-center md:flex-shrink-0 md:basis-1/2 p-4 w-full md:w-auto">
                                     <div className="w-96">
@@ -199,8 +197,8 @@ function Property() {
                                     </div>
                                 </div>
                             </div>
-                            
                         </div>
+
                         <div className="border shadow-md h-80 w-full max-w-6xl mx-auto p-4">
                             <Map
                                 street={property.address.street}
