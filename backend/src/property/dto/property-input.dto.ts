@@ -11,6 +11,7 @@ import {
     ArrayMaxSize,
     IsPositive,
     IsDefined,
+    ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -48,11 +49,11 @@ export class PropertyInputDto {
     @MaxLength(2048, { message: 'Description must be at most 256 characters long' })
     description!: string;
 
-    @IsDefined({ message: 'Floor must be provided' })
+    @ValidateIf((obj) => obj.floor !== null)
     @Type(() => Number)
     @IsInt({ message: 'Floor must be an integer' })
     @IsPositive({ message: 'Floor must be a positive number' })
-    floor!: number;
+    floor: number | null;
 
     @IsString()
     @Matches(/^\+?\d[\d\s]{8,15}$/, { message: 'Invalid phone number.'})

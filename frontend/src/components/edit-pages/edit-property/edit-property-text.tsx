@@ -23,7 +23,7 @@ function EditPropertyText(props: EditPropertyTextProps) {
     };
 
     return (
-        <div>
+        <div className="space-y-6">
             <div className="flex flex-col md:flex-row justify-start md:space-x-12 space-y-6 md:space-y-0">
                 <div>
                     <Label className="mb-2 block">Име на имота</Label>

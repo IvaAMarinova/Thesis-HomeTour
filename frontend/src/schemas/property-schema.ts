@@ -3,6 +3,10 @@ import { z } from "zod";
 const propertySchema = z.object({
     floor: z
         .preprocess((val) => {
+            if (val === null || val === undefined) {
+                return null;
+            }
+        
             const parsed = parseInt(val as string, 10);
             if (isNaN(parsed)) {
                 throw new z.ZodError([
@@ -14,9 +18,9 @@ const propertySchema = z.object({
                 ]);
             }
             return parsed;
-        }, z.number())
+        }, z.union([z.number(), z.null()]))
         .refine(
-            (val) => val > 0 && Number.isInteger(val),
+            (val) => val === null || (val > 0 && Number.isInteger(val)),
             { message: "Етажът трябва да бъде положително цяло число." }
         ),
     address: z.object({

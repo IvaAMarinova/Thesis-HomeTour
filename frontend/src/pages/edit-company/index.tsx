@@ -56,7 +56,7 @@ function EditCompany() {
     const { data: fetchedCompany, isLoading, isError } = useQuery({
         queryKey: ["company", id],
         queryFn: async (): Promise<Company> => {
-            const response = await HttpService.get<Company & { id: string }>(`/companies/${id}`);
+            const response = await HttpService.get<Company>(`/companies/${id}`);
             return response;
         },
     });

@@ -57,25 +57,8 @@ function EditProperty() {
         queryFn: async () => {
             if (isNewProperty) return null;
             try {
-                const response = await HttpService.get<Record<string, any>>(`/properties/${id}`);
-                return {
-                    id: response.id,
-                    floor: response.floor,
-                    address: response.address,
-                    phoneNumber: response.phoneNumber,
-                    email: response.email,
-                    name: response.name,
-                    description: response.description,
-                    resources: {
-                        headerImage: response.resources.headerImage,
-                        galleryImages: response.resources.galleryImages?.map((img: Record<string, string>) => ({
-                            key: img.key,
-                            url: img.url,
-                        })),
-                        visualizationFolder: response.resources.visualizationFolder,
-                    },
-                    companyId: response.companyId,
-                };
+                const response = await HttpService.get<Property>(`/properties/${id}`);
+                return response;
             } catch (err) {
                 throw new Error("Failed to fetch property data.");
             }
@@ -147,8 +130,11 @@ function EditProperty() {
                 neighborhood: property.address.neighborhood,
             };
 
+            const updatedFloor = property.floor === "" ? null : property.floor;
+
             const updatedProperty = {
                 ...property,
+                floor: updatedFloor,
                 address: updatedAddress,
                 resources: updatedResources,
                 company: userCompany
