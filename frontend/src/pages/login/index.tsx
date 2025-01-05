@@ -94,7 +94,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
       setIsLoading(false);
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === "User with this email already exists") {
+        if (error.message === "User with this email already exists.") {
           toast.error('Вече съществува регистриран акаунт с този имейл адрес.');
         } else {
           toast.error('Получи се грешка докато влизахте. Опитайте отново!');

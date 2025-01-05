@@ -1,4 +1,4 @@
-import { Controller, Get, Request, Post, UseGuards, Body, Res } from '@nestjs/common';
+import { Controller, Get, Request, Post, UseGuards, Body, Res, ConflictException, BadRequestException } from '@nestjs/common';
 import { Response, CookieOptions } from 'express';
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -57,7 +57,7 @@ export class AuthController {
       this.setAuthCookies(res, accessToken, refreshToken);
       res.json({ accessToken, refreshToken });
     } catch (error) {
-      res.status(401).json({ message: 'Login failed.' });
+      throw new BadRequestException('Login failed.');
     }
   }
 
@@ -68,7 +68,11 @@ export class AuthController {
       this.setAuthCookies(res, accessToken, refreshToken);
       res.json({ accessToken, refreshToken });
     } catch (error) {
-      res.status(400).json({ message: 'Registration failed.' });
+      if (error instanceof ConflictException) {
+        throw new ConflictException('User with this email already exists.');
+      } else {
+        throw new BadRequestException('Registration failed.');
+      }
     }
   }
 
@@ -78,7 +82,11 @@ export class AuthController {
       const tokens = await this.authService.googleRegistrationService(userInfo);
       res.json(tokens);
     } catch (error) {
-      res.status(401).json({ message: 'Invalid Google authentication' });
+      if (error instanceof ConflictException) {
+        throw new ConflictException('User with this email already exists.');
+      } else {
+        throw new BadRequestException('Login failed.');
+      }
     }
   }
 

@@ -46,9 +46,9 @@ export class PropertyEntity {
 
   @Property({ type: JsonType })
   resources!: {
-    headerImage: string | null;
+    headerImage: string;
     galleryImages: string[];
-    visualizationFolder?: string | null;
+    visualizationFolder?: string;
   };
 
   @ManyToOne(() => Company)
