@@ -8,26 +8,12 @@ import { useUser } from "@/contexts/UserContext";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Input } from "@/components/ui/input";
-
-type Property = {
-    id: string;
-    name: string;
-    description: string;
-    company: string;
-    address: Record<string, string>;
-    floor: number;
-    resources: {
-        headerImage: { key: string; url: string };
-        visualizationFolder?: string;
-    };
-};
+import Property from "@/interfaces/property-interface";
 
 function Properties() {
     const navigate = useNavigate();
     const { userId } = useUser();
     const [searchQuery, setSearchQuery] = useState<string>("");
-    const [companies, setCompanies] = useState<string[]>([]);
-    const [companyDictionary, setCompanyDictionary] = useState<Record<string, string>>({});
     const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
     const [appliedFilters, setAppliedFilters] = useState<{
         cities: string[];
@@ -56,7 +42,7 @@ function Properties() {
         retry: false,
     });
 
-    const { data: companiesResponse = [] } = useQuery({
+    const { data: allCompanies = [] } = useQuery({
         queryKey: ["companies"],
         queryFn: async () => {
             const response = await HttpService.get<{ id: string; name: string }[]>("/companies");
@@ -72,10 +58,11 @@ function Properties() {
         if (neighborhoods.length > 0) queryParams.append("neighborhoods", neighborhoods.join(","));
         if (floors.length > 0) queryParams.append("floors", floors.join(","));
         if (companies.length > 0) {
-            const companyIds = companies.map((company) => {
-                const index = Object.values(companyDictionary).indexOf(company);
-                return Object.keys(companyDictionary)[index];
-            });
+            const companyIds = companies
+                .map((companyName) => {
+                    const matchingCompany = allCompanies.find((company) => company.name === companyName);
+                    return matchingCompany?.id;
+                })
             queryParams.append("companies", companyIds.join(","));
         }
         
@@ -83,7 +70,7 @@ function Properties() {
             ? `/properties/filter?${queryParams.toString()}`
             : "/properties";    
         try {
-            const response = await HttpService.get<Property[]>(endpoint);    
+            const response = await HttpService.get<Property[]>(endpoint);
             let filteredProperties = response;
     
             if (isLikedOnly) {
@@ -96,6 +83,14 @@ function Properties() {
                         isLiked: true,
                     }));
             }
+
+            filteredProperties = filteredProperties.map((property) => {
+                const company = allCompanies.find((company) => company.id === property.companyId);  
+                return {
+                    ...property,
+                    companyName: company?.name,
+                };
+            });
     
             setFilteredProperties(filteredProperties);
     
@@ -112,13 +107,6 @@ function Properties() {
         fetchFilteredProperties();
     }, [appliedFilters]);
     
-
-    useEffect(() => {
-        const companyToNameMap = Object.fromEntries(companiesResponse.map(({ id, name }) => [id, name]));
-        setCompanies(companiesResponse.map((company) => company.name));
-        setCompanyDictionary(companyToNameMap);
-    }, [companiesResponse]);
-
     const filteredBySearch = filteredProperties.filter((property) =>
         property.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -128,7 +116,7 @@ function Properties() {
             <div className="w-full max-w-7xl mt-4 mx-auto px-4 mb-16">
                 <div className="flex flex-col lg:flex-row p-4 mb-4 gap-6">
                     <Filter
-                        companies={companies}
+                        companies={allCompanies.map((company) => company.name)}
                         properties={initialProperties}
                         setAppliedFilters={setAppliedFilters}
                     />
@@ -154,7 +142,7 @@ function Properties() {
 
                             const normalizedProperty = {
                                 ...property,
-                                companyName: companyDictionary[property.company],
+                                companyName: allCompanies.find((company) => company.id === property.companyId)?.name
                             };
 
                             return (

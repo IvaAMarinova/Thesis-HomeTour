@@ -12,12 +12,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import GoBackButton from "@/components/go-back-button";
 import ConfirmationPopup from "@/components/confirmation-popup";
-
-const profileSchema = z.object({
-    fullName: z.string().min(2, {
-        message: "Пълното име трябва да има поне две букви.",
-    })
-});
+import profileSchema from "@/schemas/profile-schema";
 
 function Profile() {
     const navigate = useNavigate();

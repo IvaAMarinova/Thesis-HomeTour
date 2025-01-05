@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import GoUpButton from "@/components/go-up-button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import GoBackButton from "@/components/go-back-button";
+import Company from "@/interfaces/company-interface";
 
 function Companies() {
     const navigate = useNavigate();
@@ -12,12 +13,7 @@ function Companies() {
     const { data: companies = [], isLoading, isError } = useQuery({
         queryKey: ["companies"],
         queryFn: async () => {
-            const response = await HttpService.get<{
-                id: string;
-                name: string;
-                description: string;
-                resources?: { logoImage: { url: string; key: string } };
-            }[]>("/companies");
+            const response = await HttpService.get<Company[]>("/companies");
             return response;
         }
     });

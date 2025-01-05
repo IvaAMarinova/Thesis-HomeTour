@@ -1,15 +1,10 @@
+import Company from "@/interfaces/company-interface";
+
 function CompanyBox({
     company,
     whenClicked,
 }: {
-    company: {
-        id: string;
-        name: string;
-        description: string;
-        resources?: {
-            logoImage: { url: string; key: string };
-        };
-    };
+    company: Company;
     whenClicked: () => void;
 }) {
     return (
@@ -18,7 +13,7 @@ function CompanyBox({
             onClick={whenClicked}
         >
             <div className="flex items-center justify-center mb-4">
-                {company.resources?.logoImage.url ? (
+                {company.resources?.logoImage?.url ? (
                     <img
                         src={company.resources.logoImage.url}
                         alt={company.name}

@@ -22,6 +22,7 @@ function EditCompany() {
     const navigate = useNavigate();
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [company, setCompany] = useState<Company>({
+        id: "",
         name: "",
         description: "",
         email: "",
@@ -56,8 +57,7 @@ function EditCompany() {
         queryKey: ["company", id],
         queryFn: async (): Promise<Company> => {
             const response = await HttpService.get<Company & { id: string }>(`/companies/${id}`);
-            const { id: _, ...sanitizedResponse } = response;
-            return sanitizedResponse;
+            return response;
         },
     });
 

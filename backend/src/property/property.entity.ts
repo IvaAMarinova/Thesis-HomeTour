@@ -82,10 +82,8 @@ export class PropertyEntity {
 
     if (
       typeof this.address.street !== 'string' ||
-      typeof this.address.city !== 'string' ||
-      typeof this.address.neighborhood !== 'string'
-    ) {
-      throw new Error('Invalid address. Street, city, and neighborhood must be strings');
+      typeof this.address.city !== 'string'    ) {
+      throw new Error('Invalid address. Street and city must exist and be strings');
     }
 
     if (

@@ -6,7 +6,7 @@ export class TransformedPropertyDto {
     address: { street: string; city: string; neighborhood: string };
     phoneNumber: string;
     email: string;
-    company: string;
+    companyId: string;
     resources: {
         headerImage: { key: string; url: string } | null;
         galleryImages: { key: string; url: string }[];
@@ -35,7 +35,7 @@ export class TransformedPropertyDto {
         this.address = property.address;
         this.phoneNumber = property.phoneNumber;
         this.email = property.email;
-        this.company = property.company;
+        this.companyId = property.company;
         this.resources = property.resources;
     }
 }

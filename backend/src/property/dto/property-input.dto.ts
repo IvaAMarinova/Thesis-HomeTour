@@ -22,7 +22,7 @@ class AddressDto {
     street!: string;
 
     @IsString({ message: 'Neighborhood must be a string' })
-    neighborhood!: string;
+    neighborhood: string;
 }
     
 class ResourcesDto {

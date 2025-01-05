@@ -9,37 +9,10 @@ import { useUser } from "@/contexts/UserContext";
 import { toast } from "react-toastify";
 import { useState, useEffect } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import type Property from "@/interfaces/property-interface";
+import type Company from "@/interfaces/company-interface";
 
-interface Company {
-    id: string;
-    name: string;
-    description: string;
-    phoneNumber: string;
-    email: string;
-    website: string;
-    resources: {
-        logoImage: { url: string };
-        galleryImage?: { url: string };
-    };
-}
-
-interface Property {
-    id: string;
-    companyName: string;
-    name: string;
-    description: string;
-    resources: {
-        headerImage: { key: string, url: string };
-        visualizationFolder?: string;
-    };
-    address: {
-        city: string;
-        street: string;
-        neighborhood: string;
-    }
-}
-
-function Company() {
+function CompanyPage() {
     const navigate = useNavigate();
     const { id } = useParams();
     const { userId } = useUser();
@@ -204,4 +177,4 @@ function Company() {
     );
 }
 
-export default Company;
+export default CompanyPage;

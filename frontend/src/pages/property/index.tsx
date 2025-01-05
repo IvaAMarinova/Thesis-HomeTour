@@ -10,9 +10,10 @@ import { Heart, HeartSolid, TelephoneCall, Envelope } from "@mynaui/icons-react"
 import { useUser } from "@/contexts/UserContext";
 import { useQuery } from "@tanstack/react-query";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import Map from "@/components/property/map";
+import Property from "@/interfaces/property-interface";
+import Map from "@/components/map";
 
-function Property() {
+function PropertyPage() {
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
     const { userId, fetchUserId } = useUser();
@@ -21,7 +22,7 @@ function Property() {
     const { data: property, isLoading: isPropertyLoading, isError: isPropertyError } = useQuery({
         queryKey: ["property", id],
         queryFn: async () => {
-            const response = await HttpService.get<Record<string, any>>(`/properties/${id}`);
+            const response = await HttpService.get<Property>(`/properties/${id}`);
             return response;
         },
         enabled: !!id,
@@ -127,7 +128,7 @@ function Property() {
                             </div>
                         )}
 
-                        {property?.resources?.headerImage.url && (
+                        {property?.resources?.headerImage?.url && (
                             <div className="h-64 mt-10 overflow-hidden rounded-xl shadow-md">
                                 <img
                                     src={property.resources.headerImage.url}
@@ -146,7 +147,7 @@ function Property() {
 
                                     <div className="max-w-96 overflow-hidden text-ellipsis">
                                         {property.description?.split("\n").map(
-                                            (paragraph: string, index: string) => (
+                                            (paragraph: string, index: number) => (
                                                 <p
                                                     key={index}
                                                     className="mb-4 text-justify"
@@ -191,8 +192,8 @@ function Property() {
                                 <div className="flex justify-center items-center md:flex-shrink-0 md:basis-1/2 p-4 w-full md:w-auto">
                                     <div className="w-96">
                                         <ContactCompanyBox
-                                            company={property.company}
-                                            onClick={() => navigate(`/companies/${property.company}`)}
+                                            company={property.companyId}
+                                            onClick={() => navigate(`/companies/${property.companyId}`)}
                                         />
                                     </div>
                                 </div>
@@ -208,7 +209,7 @@ function Property() {
                         </div>
                         
                         <div className="w-full max-w-6xl mx-auto px-4 mt-4">
-                            {property?.resources?.galleryImages?.length > 0 && (
+                            {property?.resources?.galleryImages && property?.resources?.galleryImages?.length > 0 && (
                                 <ImagesCarousel galleryImages={property.resources.galleryImages} />
                             )}
                         </div>
@@ -232,4 +233,4 @@ function Property() {
     );
 }
 
-export default Property;
+export default PropertyPage;

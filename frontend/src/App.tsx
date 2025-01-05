@@ -4,10 +4,10 @@ import Login from './pages/login';
 import Home from './pages/home';
 import { HttpService } from './services/http-service';
 import Properties from './pages/properties';
-import Property from './pages/property';
+import PropertyPage from './pages/property';
 import './App.css';
 import Header from './components/header';
-import Company from './pages/company';
+import CompanyPage from './pages/company';
 import Companies from './pages/companies';
 import Profile from './pages/profile';
 import { UserProvider, useUser } from './contexts/UserContext';
@@ -73,8 +73,8 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/properties" element={<Properties />} />
-          <Route path="/properties/:id" element={<Property />} />
-          <Route path="/companies/:id" element={<Company />} />
+          <Route path="/properties/:id" element={<PropertyPage />} />
+          <Route path="/companies/:id" element={<CompanyPage />} />
           <Route path="/companies" element={<Companies />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 

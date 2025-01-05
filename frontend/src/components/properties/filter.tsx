@@ -10,19 +10,7 @@ import { Filter as FilterIcon } from "@mynaui/icons-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useLocation } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
-
-type Property = {
-    id: string;
-    name: string;
-    description: string;
-    company: string;
-    address: Record<string, string>;
-    floor: number;
-    resources: {
-        headerImage: { key: string; url: string };
-        visualizationFolder?: string;
-    };
-};
+import Property from "@/interfaces/property-interface";
 
 type FilterProps = {
     companies: string[];

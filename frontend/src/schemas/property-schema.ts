@@ -19,12 +19,10 @@ const propertySchema = z.object({
             (val) => val > 0 && Number.isInteger(val),
             { message: "Етажът трябва да бъде положително цяло число." }
         ),
-
-
     address: z.object({
         city: z.string().min(1, { message: "Градът не може да бъде празен." }),
         street: z.string().min(1, { message: "Улицата не може да бъде празна." }),
-        neighborhood: z.string().min(1, { message: "Кварталът не може да бъде празен." })
+        neighborhood: z.string().nullable(),
     }),
     phoneNumber: z
         .string()
@@ -66,7 +64,7 @@ const propertySchema = z.object({
             }).max(10, {
                 message: "Може да имате максимум 10 изображения.",
             }),
-        vizualizationFolder: z.string().optional(),
+        visualizationFolder: z.string().nullable(),
     }),
 });
 

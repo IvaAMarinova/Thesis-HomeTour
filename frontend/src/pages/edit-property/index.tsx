@@ -26,6 +26,7 @@ function EditProperty() {
     const isNewProperty = id === "0";
     const { userCompany } = useUser();
     const [property, setProperty] = useState<Property>({
+        id: "",
         floor: "",
         address: { city: "", street: "", neighborhood: "" },
         phoneNumber: "",
@@ -34,7 +35,10 @@ function EditProperty() {
         description: "",
         resources: {
             headerImage: { key: "", url: "" },
+            galleryImages: [],
+            visualizationFolder: "",
         },
+        companyId: "",
     });
     const [propertySaved, setPropertySaved] = useState(true);
     const [showConfirmation, setShowConfirmation] = useState(false);
@@ -55,6 +59,7 @@ function EditProperty() {
             try {
                 const response = await HttpService.get<Record<string, any>>(`/properties/${id}`);
                 return {
+                    id: response.id,
                     floor: response.floor,
                     address: response.address,
                     phoneNumber: response.phoneNumber,
@@ -67,8 +72,9 @@ function EditProperty() {
                             key: img.key,
                             url: img.url,
                         })),
-                        vizualizationFolder: response.resources.vizualizationFolder,
+                        visualizationFolder: response.resources.visualizationFolder,
                     },
+                    companyId: response.companyId,
                 };
             } catch (err) {
                 throw new Error("Failed to fetch property data.");
@@ -132,7 +138,7 @@ function EditProperty() {
             const updatedResources = {
                 headerImage: updatedHeaderImage,
                 galleryImages: updatedGalleryImages,
-                vizualizationFolder: property.resources.vizualizationFolder,
+                visualizationFolder: property.resources.visualizationFolder,
             };
 
             const updatedAddress = {

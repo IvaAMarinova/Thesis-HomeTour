@@ -8,6 +8,7 @@ import {
 import { Heart, HeartSolid } from "@mynaui/icons-react";
 import { HttpService } from "@/services/http-service";
 import { useUser } from "@/contexts/UserContext";
+import Property from "@/interfaces/property-interface";
 
 function PropertyBox({
     property,
@@ -15,16 +16,7 @@ function PropertyBox({
     whenClicked,
     onLikeUpdate,
 }: {
-    property: {
-        id: string;
-        name: string;
-        description: string;
-        companyName: string;
-        resources: {
-            headerImage: { key: string; url: string };
-            visualizationFolder?: string;
-        };
-    };
+    property: Property;
     initialLiked: boolean;
     whenClicked: () => void;
     onLikeUpdate: () => void;

@@ -13,21 +13,7 @@ import { toast } from "react-toastify";
 import ConfirmationPopup from "@/components/confirmation-popup";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-
-interface Property {
-    id: string;
-    floor: string;
-    address: Record<string, string>;
-    phoneNumber: string;
-    email: string;
-    name: string;
-    description: string;
-    resources: {
-        headerImage?: { key: string; url: string };
-        galleryImages?: Record<string, string>[];
-        visualizationFolder?: string;
-    };
-}
+import Property from "@/interfaces/property-interface";
 
 function EditProperties() {
     const navigate = useNavigate();
