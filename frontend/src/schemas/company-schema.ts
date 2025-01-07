@@ -25,27 +25,26 @@ const companySchema = z.object({
         .max(2048, {
             message: "Описанието е прекалено дълго.",
         }),
-        resources: z.object({
-            logoImage: z
-                .string()
-                .min(1, {
-                    message: "Не може да имате празно поле за лого.",
-                })
-                .or(z.undefined())
-                .refine((value) => value !== undefined, {
-                    message: "Трябва да има лого изображение.",
-                }),
-            galleryImage: z
-                .string()
-                .min(1, {
-                    message: "Не може да имате празно поле за галерия.",
-                })
-                .or(z.undefined())
-                .refine((value) => value !== undefined, {
-                    message: "Трябва да има снимка на компанията.",
-                }),
-        }),
-        
+    resources: z.object({
+        logoImage: z
+            .string()
+            .min(1, {
+                message: "Не може да имате празно поле за лого.",
+            })
+            .or(z.undefined())
+            .refine((value) => value !== undefined, {
+                message: "Трябва да има лого изображение.",
+            }),
+        galleryImage: z
+            .string()
+            .min(1, {
+                message: "Не може да имате празно поле за галерия.",
+            })
+            .or(z.undefined())
+            .refine((value) => value !== undefined, {
+                message: "Трябва да има снимка на компанията.",
+            }),
+    }),    
 });
 
 z.setErrorMap((issue, _ctx) => {

@@ -104,7 +104,9 @@ function EditCompany() {
                     : company.resources.galleryImage?.key,
             };
 
-            const updatedCompany = { ...company, resources: updatedResources };
+            const { id, ...restOfCompany } = company;
+            const updatedCompany = { ...restOfCompany, resources: updatedResources };
+            console.log(updatedCompany);
 
             companySchema.parse(updatedCompany);
 
