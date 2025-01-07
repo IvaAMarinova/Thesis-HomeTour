@@ -68,8 +68,8 @@ const propertySchema = z.object({
             }).max(10, {
                 message: "Може да имате максимум 10 изображения.",
             }),
-        visualizationFolder: z.string().nullable(),
-    }),
+            visualizationFolder: z.union([z.string(), z.null(), z.undefined()]),    
+        }),
 });
 
 z.setErrorMap((issue, _ctx) => {
