@@ -13,30 +13,22 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import GoBackButton from "@/components/go-back-button";
 import ConfirmationPopup from "@/components/confirmation-popup";
 import profileSchema from "@/schemas/profile-schema";
+import User from "@/interfaces/user-interface";
+import Company from "@/interfaces/company-interface";
 
 function Profile() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { userId } = useUser();
-    const [user, setUser] = useState<Record<string, string>>({
-        fullName: "",
-        email: "",
-        company: "",
-        type: "",
-    });
-    const [initialUser, setInitialUser] = useState<Record<string, string>>({
-        fullName: "",
-        email: "",
-        company: "",
-        type: "",
-    });
-    const [company, setCompany] = useState<Record<string, string>>({});
+    const [user, setUser] = useState<User>();
+    const [initialUser, setInitialUser] = useState<User>();
+    const [company, setCompany] = useState<Company>();
     const [showConfirmation, setShowConfirmation] = useState(false);
 
     const { data: userData, isLoading: isUserLoading, isError: isUserError } = useQuery({
         queryKey: ["userProfile"],
         queryFn: async () => {
-            const user = await HttpService.get<Record<string, string>>(
+            const user = await HttpService.get<User>(
                 `/auth/me`,
                 undefined,
                 true
@@ -48,8 +40,8 @@ function Profile() {
     const { data: companyData, isLoading: isCompanyLoading } = useQuery({
         queryKey: ["companyProfile", user?.company],
         queryFn: async () => {
-            if (user.company) {
-                return await HttpService.get<Record<string, string>>(
+            if (user?.company) {
+                return await HttpService.get<Company>(
                     `/companies/${user.company}`,
                     undefined,
                     true
@@ -57,14 +49,13 @@ function Profile() {
             }
             return null;
         },
-        enabled: !!user.company,
+        enabled: !!user?.company,
     });
 
     useEffect(() => {
         if (userData) {
-            const { fullName, email, company, type } = userData;
-            setUser({ fullName, email, company, type });
-            setInitialUser({ fullName, email, company, type });
+            setUser(userData);
+            setInitialUser(userData);
         }
     }, [userData]);
 
@@ -79,7 +70,7 @@ function Profile() {
             profileSchema.parse(user);
 
             const requestUser = {
-                fullName: user.fullName,
+                fullName: user?.fullName,
             };
 
             await HttpService.put(`/users/${userId}`, requestUser, undefined, true);
@@ -124,16 +115,16 @@ function Profile() {
         );
     }
 
-    if (isUserError) {
+    if (isUserError || !user) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <p>Грешка при зареждане на потребителския профил. Моля, опитайте отново.</p>
+                <p>Грешка при зареждане на потребителския профил. Опитайте отново!</p>
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen mt-20 lg:mt-1 md:mt-1">
+        <div className="flex flex-col items-center justify-center min-h-screen mt-20 lg:mt-10 md:mt-10">
             <div className="w-full flex flex-row px-4 justify-center mb-4">
                 <GoBackButton onClick={handleGoBack} />
             </div>
@@ -166,7 +157,7 @@ function Profile() {
                         <Label className="mb-2 block">Имейл адрес</Label>
                         <p className="text-italic text-sm text-gray-500">{user.email}</p>
                     </div>
-                    {user.company && (
+                    {user.company && company?.name && (
                         <div>
                             <Label className="mb-2 block">Компания</Label>
                             <p className="text-italic text-sm text-gray-500">{company.name}</p>
