@@ -2,19 +2,19 @@ import { useEffect, useState } from 'react';
 import { Leaves, HomeSmile, BrightnessHigh, TelephoneCall, Envelope } from "@mynaui/icons-react";
 import homeImage from '@/assets/home-image.jpg';
 import apartmentScreenhostOne from '@/assets/apartment-screenshot-1.png'
-import homeTextBig from '@/assets/motto-big.png';
-import homeTextSmall from '@/assets/motto-small.png';
 import stockImageOne from '@/assets/stock-image-1.jpeg';
 import stockImageTwo from '@/assets/stock-image-2.jpg';
+import mottoBig from '@/assets/motto-big-svg.svg';
+import mottoSmall from '@/assets/motto-small-svg.svg';
 
 function Home() {
   const phoneNumber = "+359 123 456 789";
   const email = "info@hometour.com";
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
+  const [isBigScreen, setIsBigScreen] = useState(false);
 
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsSmallScreen(window.innerWidth < 640);
+      setIsBigScreen(window.innerWidth >= 640);
     };
     checkScreenSize();
 
@@ -35,17 +35,24 @@ function Home() {
         />
 
         <div className="absolute inset-0 flex justify-center items-center">
-          <div className="w-1/4 h-1/4 rounded-full bg-black opacity-50 blur-2xl absolute z-0" />
+          <div className="lg:w-2/5 md:w-2/5 w-64 relative flex justify-center items-center z-10">
+            <div className="absolute inset-0 bg-black bg-opacity-20 blur-2xl rounded-lg" />
             <img
-              src={isSmallScreen ? homeTextSmall : homeTextBig}
-              alt="sectiontext"
-              className="relative w-3/4 sm:w-1/2 z-10 transform transition-transform duration-300 hover:scale-105"
+              src={isBigScreen ? mottoBig : mottoSmall}
+              alt="Custom SVG"
+              className="w-full relative z-10"
             />
+            <div className="absolute inset-0 flex items-center justify-center text-center z-20">
+              <p className="text-[#f1ebdf] text-sm md:text-lg lg:text-3xl font-bold">
+                Най-добрата<br />технология, с която<br />да визуализираш<br />своя имот.
+              </p>
+            </div>
           </div>
-
-          <div className="absolute inset-0 bg-gradient-to-b from-black opacity-40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black opacity-70" />
         </div>
+
+        <div className="absolute inset-0 bg-gradient-to-b from-black opacity-40 z-0" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black opacity-70 z-0" />
+      </div>
 
       <div className="w-full flex flex-col items-center p-8">
         <div className="flex flex-col lg:flex-row items-center justify-center mt-12 mb-12">
