@@ -180,11 +180,11 @@ function PropertyPage() {
                                         </h3>
                                         <div className="flex flex-row items-center gap-2 mb-1">
                                             <TelephoneCall className="h-5" />
-                                            {property.email}
+                                            {property.phoneNumber}
                                         </div>
                                         <div className="flex flex-row items-center gap-2">
                                             <Envelope className="h-5" />
-                                            {property.phoneNumber}
+                                            {property.email}
                                         </div>
                                     </div>
                                 </div>
@@ -214,7 +214,7 @@ function PropertyPage() {
                             )}
                         </div>
 
-                        <div className="w-full max-w-6xl mx-auto px-4 mt-4">
+                        <div className="w-full max-w-6xl mx-auto px-4">
                             {property?.resources?.visualizationFolder && (
                                 <Visualization visualizationFolder={property.resources.visualizationFolder} />
                             )}

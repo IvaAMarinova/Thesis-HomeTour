@@ -21,9 +21,11 @@ export class HttpService {
   static setAccessToken(token: string) {
     this.accessToken = token;
   }
+  
   static setRefreshToken(token: string) {
     this.refreshToken = token;
   }
+
   static async get<T>(url: string, params?: RequestParams, authRequired = false, isLoginAttempt = false): Promise<T> {
     return await HttpService.request<T>(url, 'GET', params, authRequired, isLoginAttempt);
   }

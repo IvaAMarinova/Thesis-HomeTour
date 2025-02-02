@@ -37,7 +37,6 @@ const resizeFile = (file: File, type: string): Promise<Blob> =>
                 if (uri instanceof Blob) {
                     resolve(uri);
                 } else {
-                    console.error("Resized file is not a Blob.");
                     reject(new Error("Failed to resize image."));
                 }
             },

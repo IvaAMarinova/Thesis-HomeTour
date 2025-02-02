@@ -2,10 +2,10 @@ import { z } from "zod";
 
 const loginSchema = z.object({
     email: z.string().email({
-        message: "Please enter a valid email address.",
+        message: "Невалиден имейл адрес.",
     }),
     password: z.string().min(6, {
-        message: "Password must be at least 6 characters.",
+        message: "Паролата трябва да е поне 6 символа.",
     }),
 });
 

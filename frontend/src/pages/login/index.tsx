@@ -157,7 +157,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                     <FormItem>
                       <FormLabel>Имейл адрес</FormLabel>
                       <FormControl>
-                        <Input placeholder="Type here..." {...field} />
+                        <Input placeholder="Въведи текст тук" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -173,7 +173,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                         <div className="relative">
                           <Input
                             type={showPassword ? "text" : "password"}
-                            placeholder="Enter password"
+                            placeholder="Въведи текст тук"
                             {...field}
                           />
                           <Button
@@ -209,7 +209,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                     <FormItem>
                       <FormLabel>Пълно име</FormLabel>
                       <FormControl>
-                        <Input placeholder="Type here..." {...field} />
+                        <Input placeholder="Въведи текст тук" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -222,7 +222,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                     <FormItem>
                       <FormLabel>Имейл адрес</FormLabel>
                       <FormControl>
-                        <Input placeholder="Type here..." {...field} />
+                        <Input placeholder="Въведи текст тук" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -238,7 +238,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
                         <div className="relative">
                           <Input
                             type={showPassword ? "text" : "password"}
-                            placeholder="Enter password"
+                            placeholder="Въведи текст тук"
                             {...field}
                           />
                           <Button
