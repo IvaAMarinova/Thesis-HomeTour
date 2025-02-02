@@ -145,7 +145,8 @@ function EditProperty() {
             const url = isNewProperty ? "/properties" : `/properties/${id}`;
             const method = isNewProperty ? "post" : "put";
 
-            const response = await HttpService[method]<{ id: string }>(url, updatedProperty, undefined, true, false);
+            const response = await HttpService[method]<Property>(url, updatedProperty, undefined, true, false);
+            setProperty(response);
             setIsUploading(false);
             toast.success(
                 isNewProperty ? "Имотът беше успешно създаден!" : "Имотът беше успешно обновен!"
@@ -159,8 +160,7 @@ function EditProperty() {
                     .map(async (key) => HttpService.delete(`/files/delete?key=${key}`))
             );
             
-            if(isNewProperty) 
-            {
+            if(isNewProperty) {
                 navigate(`/properties/${response.id}`);
             }
         } catch (error) {

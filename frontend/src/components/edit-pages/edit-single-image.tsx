@@ -30,7 +30,7 @@ function EditSingleImage(props: editSinglePageProps) {
             </div>
             <img
                 src={props.image.url}
-                alt="Company gallery image"
+                alt="Image"
                 className="w-auto h-56 object-cover overflow-hidden rounded-lg shadow-md"
             />
             {showImageModal && (

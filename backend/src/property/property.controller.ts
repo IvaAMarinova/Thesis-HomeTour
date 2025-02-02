@@ -26,7 +26,6 @@ export class PropertyController {
   @Put(':id')
   async updateProperty(@Param('id') id: string, @Body() body: Partial<PropertyInputDto>): Promise<TransformedPropertyDto> {
       try {
-        console.log('Received request to update property with ID:', id);
         const property = await this.propertyService.update(id, body);
         return this.mapPresignedUrlsToProperty(property);
       } catch (error) {

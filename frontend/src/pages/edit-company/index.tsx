@@ -110,14 +110,13 @@ function EditCompany() {
 
             companySchema.parse(updatedCompany);
 
-            await HttpService.put<Company>(`/companies/${id}`, updatedCompany, undefined, true, false);
-            
+            const response = await HttpService.put<Company>(`/companies/${id}`, updatedCompany, undefined, true, false);
             setIsUploading(false);
             toast.success("Компанията беше успешно обновенa!");
             setLocalImages({});
             setImagesToDelete([]);
             setCompanySaved(true);
-
+            setCompany(response);
             await Promise.all(
                 imagesToDelete
                     .filter((key) => key !== "")

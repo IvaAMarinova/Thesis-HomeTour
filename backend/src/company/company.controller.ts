@@ -7,7 +7,7 @@ import { TransformedCompanyDto } from './dto/company-transformed-response.dto'
 import { TransformedPropertyDto } from '../property/dto/property-transformed-response.dto'
 import { CompanyInputDto } from './dto/company-input.dto';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
-import { Roles } from 'src/decorators/roles.decorator';
+import { Roles } from '../decorators/roles.decorator';
 
 @Controller('companies')
 export class CompanyController {
@@ -27,8 +27,9 @@ export class CompanyController {
 
   @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async updateCompany(@Param('id') id: string, @Body() body: CompanyInputDto): Promise<Company> {
-    return this.companyService.update(id, body);
+  async updateCompany(@Param('id') id: string, @Body() body: CompanyInputDto): Promise<TransformedCompanyDto> {
+    const updatedCompany = await this.companyService.update(id, body);
+    return this.mapPresignedUrlsToCompany(updatedCompany);
   }
 
   @Roles('admin')
