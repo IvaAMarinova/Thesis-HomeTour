@@ -74,8 +74,6 @@ export class CompanyService {
         throw new BadRequestException(`Invalid UUID format for id`);
       }
 
-      console.log("[SERVICE] getCompanyById called with id:", id);
-
       const company = await this.em.findOne(Company, { id: id });
       if (!company) {
         throw new NotFoundException(`Company not found`);

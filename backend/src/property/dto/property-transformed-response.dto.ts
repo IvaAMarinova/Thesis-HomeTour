@@ -8,7 +8,7 @@ export class TransformedPropertyDto {
     email: string;
     companyId: string;
     resources: {
-        headerImage: { key: string; url: string } | null;
+        headerImage: { key: string; url: string };
         galleryImages: { key: string; url: string }[];
         visualizationFolder?: string | null;
     };
@@ -23,7 +23,7 @@ export class TransformedPropertyDto {
         email: string;
         company: string;
         resources: {
-            headerImage: { key: string; url: string } | null;
+            headerImage: { key: string; url: string };
             galleryImages: { key: string; url: string }[];
             visualizationFolder?: string | null;
         }    

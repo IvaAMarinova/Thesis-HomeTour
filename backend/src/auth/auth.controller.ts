@@ -6,10 +6,15 @@ import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { UserResponseDto } from './../user/dto/user-response.dto';
 import { UserInputDto } from '../user/dto/user-input.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  private readonly isProduction: boolean;
+
+  constructor(private authService: AuthService, private readonly configService: ConfigService) {
+    this.isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+  }
 
   private getCookieExpirationTime(days: number): Date {
     return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
@@ -17,37 +22,40 @@ export class AuthController {
 
   private setAuthCookies(res: Response, accessToken: string, refreshToken: string): void {
     const accessTokenOptions: CookieOptions = {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-      expires: this.getCookieExpirationTime(1),
-      path: '/',
+        httpOnly: true,
+        secure: this.isProduction,
+        sameSite: this.isProduction ? 'strict' : 'lax',
+        expires: this.getCookieExpirationTime(1),
+        path: '/',
     };
 
     const refreshTokenOptions: CookieOptions = {
-      httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
-      expires: this.getCookieExpirationTime(30),
-      path: '/',
+        httpOnly: true,
+        secure: this.isProduction,
+        sameSite: this.isProduction ? 'strict' : 'lax',
+        expires: this.getCookieExpirationTime(30),
+        path: '/',
     };
 
     res.cookie('accessToken', accessToken, accessTokenOptions);
     res.cookie('refreshToken', refreshToken, refreshTokenOptions);
-  }
+}
 
-  private clearAuthCookies(res: Response): void {
+private clearAuthCookies(res: Response): void {
+    const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+
     const clearOptions: CookieOptions = {
-      httpOnly: false,
-      secure: false,
-      sameSite: 'lax',
-      maxAge: 0,
-      path: '/',
+        httpOnly: false,
+        secure: isProduction,
+        sameSite: isProduction ? 'strict' : 'lax',
+        maxAge: 0,
+        path: '/',
     };
 
     res.cookie('accessToken', '', clearOptions);
     res.cookie('refreshToken', '', clearOptions);
-  }
+}
+
 
   @UseGuards(LocalAuthGuard)
   @Post('login')

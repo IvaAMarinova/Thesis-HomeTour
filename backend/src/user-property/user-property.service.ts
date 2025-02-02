@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { InjectRepository } from '@mikro-orm/nestjs';
-import { EntityManager, EntityRepository } from '@mikro-orm/core';
+import { EntityManager } from '@mikro-orm/core';
 import { UserProperty } from './user-property.entity';
 import { User } from '../user/user.entity';
 import { PropertyEntity } from '../property/property.entity';
@@ -37,6 +36,7 @@ export class UserPropertyService {
         user: body.user,
         property: body.property,
       });
+      
       if (existingUserProperty) {
         throw new BadRequestException(
           `UserProperty already exists for User ID and Property ID`,

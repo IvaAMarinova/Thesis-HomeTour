@@ -7,6 +7,7 @@ import { TransformedCompanyDto } from './dto/company-transformed-response.dto'
 import { TransformedPropertyDto } from '../property/dto/property-transformed-response.dto'
 import { CompanyInputDto } from './dto/company-input.dto';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
+import { Roles } from 'src/decorators/roles.decorator';
 
 @Controller('companies')
 export class CompanyController {
@@ -15,6 +16,7 @@ export class CompanyController {
     private readonly fileUploadService: FileUploadService
   ) {}
 
+  @Roles('admin')
   @UseGuards(JwtAuthGuard)
   @Post()
   async createCompany(
@@ -25,10 +27,11 @@ export class CompanyController {
 
   @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async updateCompany(@Param('id') id: string, @Body() body: CompanyInputDto): Promise<Company | null> {
+  async updateCompany(@Param('id') id: string, @Body() body: CompanyInputDto): Promise<Company> {
     return this.companyService.update(id, body);
   }
 
+  @Roles('admin')
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async deleteCompany(@Param('id') id: string): Promise<{ message: string }> {
