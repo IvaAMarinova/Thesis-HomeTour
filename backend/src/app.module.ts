@@ -1,8 +1,6 @@
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { CompanyModule } from './company/company.module';
 import { PropertyModule } from './property/property.module';
@@ -38,7 +36,7 @@ import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
     AuthModule,
     UploadModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
