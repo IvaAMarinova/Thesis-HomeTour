@@ -41,11 +41,27 @@ export class UserController {
     return new UserResponseDto(user);
   }
 
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
   @Put('/make-b2b/:id')
   async makeUserB2B(@Param('id') userId: string, @Body() body: any): Promise<UserResponseDto> {
     const user = await this.userService.makeUserB2B(userId, body.companyId);
+    return new UserResponseDto(user);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Put('/make-b2b-email/:email')
+  async makeUserB2BByEmail(@Param('email') email: string, @Body() body: any): Promise<UserResponseDto> {
+    const user = await this.userService.makeUserB2BByEmail(email, body.companyId);
+    return new UserResponseDto(user);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @Put('/make-b2c/:id')
+  async makeUserB2C(@Param('id') userId: string): Promise<UserResponseDto> {
+    const user = await this.userService.makeUserB2C(userId);
     return new UserResponseDto(user);
   }
 

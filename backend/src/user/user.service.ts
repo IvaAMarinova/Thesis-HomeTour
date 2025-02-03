@@ -231,6 +231,42 @@ export class UserService {
       this.handleUnexpectedError(error);
     }
   }
+  
+  async makeUserB2BByEmail(email: string, companyId: string): Promise<User> {
+    try {
+      const user = await this.em.findOne(User, { email: email });
+      if (!user) {
+        throw new NotFoundException(`User not found`);
+      }
+      const company = await this.companyService.getCompanyById(companyId);
+      if (!company) {
+        throw new NotFoundException(`Company not found`);
+      }
+
+      this.em.assign(user, { company, type: UserType.B2B });
+      await this.em.persistAndFlush(user);
+      return user;
+    } catch (error) {
+      this.handleUnexpectedError(error);
+    }
+  }
+
+  async makeUserB2C(userId: string): Promise<User> {
+    try {
+      const user = await this.em.findOne(User, { id: userId });
+      if (!user) {
+        throw new NotFoundException(`User not found`);
+      }
+
+      this.em.assign(user, { type: UserType.B2C });
+      this.em.assign(user, { company: null });
+      await this.em.persistAndFlush(user);
+      return user;
+
+    } catch (error) {
+      this.handleUnexpectedError(error);
+    }
+  }
 
   private handleUnexpectedError(error: any): never {
     if (error instanceof BadRequestException || 
