@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/core';
 import { PropertyEntity } from './property.entity';
 import { Company } from '../company/company.entity';
@@ -10,7 +14,7 @@ import { PropertyInputDto } from './dto/property-input.dto';
 export class PropertyService {
   constructor(
     private readonly em: EntityManager,
-    private readonly fileUploadService: FileUploadService
+    private readonly fileUploadService: FileUploadService,
   ) {}
 
   async create(propertyData: PropertyInputDto): Promise<PropertyEntity> {
@@ -19,7 +23,9 @@ export class PropertyService {
         throw new BadRequestException(`Invalid UUID format for company id`);
       }
 
-      const companyObject = await this.em.findOne(Company, { id: propertyData.company });
+      const companyObject = await this.em.findOne(Company, {
+        id: propertyData.company,
+      });
       if (!companyObject) {
         throw new NotFoundException(`Company not found`);
       }
@@ -33,7 +39,10 @@ export class PropertyService {
     }
   }
 
-  async update(id: string, propertyData: Partial<PropertyInputDto>): Promise<PropertyEntity> {
+  async update(
+    id: string,
+    propertyData: Partial<PropertyInputDto>,
+  ): Promise<PropertyEntity> {
     try {
       if (!isUUID(id)) {
         throw new BadRequestException(`Invalid UUID format for id`);
@@ -65,7 +74,7 @@ export class PropertyService {
 
       await this.fileUploadService.deleteObject(property.resources.headerImage);
 
-      for(const image of property.resources.galleryImages) {
+      for (const image of property.resources.galleryImages) {
         await this.fileUploadService.deleteObject(image);
       }
 
@@ -83,44 +92,51 @@ export class PropertyService {
     }
   }
 
-  async getPropertiesByFilter( cities: string[], neighborhoods: string[], floorsArray?: string[], companiesIdsArray?: string[]): Promise<PropertyEntity[]> {
+  async getPropertiesByFilter(
+    cities: string[],
+    neighborhoods: string[],
+    floorsArray?: string[],
+    companiesIdsArray?: string[],
+  ): Promise<PropertyEntity[]> {
     try {
-        const filter: any = {};
+      const filter: any = {};
 
-        if(companiesIdsArray?.length > 0) {
-            for(const companyId of companiesIdsArray) {
-                const company = await this.em.findOne(Company, { id: companyId });
-                if (company) {
-                    filter['company'] = company;
-                    break;
-                }
-            }
+      if (companiesIdsArray?.length > 0) {
+        for (const companyId of companiesIdsArray) {
+          const company = await this.em.findOne(Company, { id: companyId });
+          if (company) {
+            filter['company'] = company;
+            break;
+          }
         }
+      }
 
-        if (cities.length > 0) {
-            filter['address'] = {
-                ...filter['address'],
-                city: { $in: cities },
-            };
-        }
+      if (cities.length > 0) {
+        filter['address'] = {
+          ...filter['address'],
+          city: { $in: cities },
+        };
+      }
 
-        if (neighborhoods.length > 0) {
-            filter['address'] = {
-                ...filter['address'],
-                neighborhood: { $in: neighborhoods },
-            };
-        }
+      if (neighborhoods.length > 0) {
+        filter['address'] = {
+          ...filter['address'],
+          neighborhood: { $in: neighborhoods },
+        };
+      }
 
-        if (floorsArray?.length > 0) {
-            filter['floor'] = { $in: floorsArray.map((floor) => parseInt(floor, 10)) };
-        }
+      if (floorsArray?.length > 0) {
+        filter['floor'] = {
+          $in: floorsArray.map((floor) => parseInt(floor, 10)),
+        };
+      }
 
-        const properties = await this.em.find(PropertyEntity, filter);
-        return properties;
+      const properties = await this.em.find(PropertyEntity, filter);
+      return properties;
     } catch (error) {
-        this.handleUnexpectedError(error);
+      this.handleUnexpectedError(error);
     }
-}
+  }
 
   async getPropertyById(id: string): Promise<PropertyEntity> {
     try {
@@ -152,11 +168,16 @@ export class PropertyService {
   }
 
   private handleUnexpectedError(error: any): never {
-    if (error instanceof BadRequestException || error instanceof NotFoundException) {
+    if (
+      error instanceof BadRequestException ||
+      error instanceof NotFoundException
+    ) {
       throw error;
     }
 
     console.error('Unexpected error occurred:', error);
-    throw new BadRequestException(`An unexpected error occurred: ${error.message}`);
+    throw new BadRequestException(
+      `An unexpected error occurred: ${error.message}`,
+    );
   }
 }

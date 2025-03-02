@@ -56,9 +56,9 @@ export class User {
   roles!: UserRole[];
 
   @OneToMany(() => UserProperty, (userProperty) => userProperty.user, {
-      orphanRemoval: true,
-      cascade: [Cascade.REMOVE],
-    })
+    orphanRemoval: true,
+    cascade: [Cascade.REMOVE],
+  })
   userProperties!: UserProperty[];
 
   @OneToMany(() => Tokens, (Tokens) => Tokens.user, {
@@ -78,8 +78,13 @@ export class User {
       throw new Error('Invalid email address');
     }
 
-    if (!this.isGoogleUser && (typeof this.password !== 'string' || this.password.length < 6)) {
-      throw new Error('Password must be at least 6 characters long if not a Google user');
+    if (
+      !this.isGoogleUser &&
+      (typeof this.password !== 'string' || this.password.length < 6)
+    ) {
+      throw new Error(
+        'Password must be at least 6 characters long if not a Google user',
+      );
     }
 
     if (!Object.values(UserType).includes(this.type)) {

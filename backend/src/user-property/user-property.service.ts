@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/core';
 import { UserProperty } from './user-property.entity';
 import { User } from '../user/user.entity';
@@ -9,17 +13,19 @@ import { UserPropertyPartialInputDto } from './dto/user-property-partial-input.d
 
 @Injectable()
 export class UserPropertyService {
-  constructor(
-    private readonly em: EntityManager,
-  ) {}
+  constructor(private readonly em: EntityManager) {}
 
   async create(body: UserPropertyInputDto): Promise<UserProperty> {
     try {
       if (!body.user || !body.property) {
-        throw new BadRequestException('User ID and Property ID must be provided');
+        throw new BadRequestException(
+          'User ID and Property ID must be provided',
+        );
       }
       if (!isUUID(body.user) || !isUUID(body.property)) {
-        throw new BadRequestException('Invalid UUID format for User ID or Property ID');
+        throw new BadRequestException(
+          'Invalid UUID format for User ID or Property ID',
+        );
       }
 
       const existingUser = await this.em.findOne(User, { id: body.user });
@@ -27,7 +33,9 @@ export class UserPropertyService {
         throw new NotFoundException(`User with ID not found`);
       }
 
-      const existingProperty = await this.em.findOne(PropertyEntity, { id: body.property });
+      const existingProperty = await this.em.findOne(PropertyEntity, {
+        id: body.property,
+      });
       if (!existingProperty) {
         throw new NotFoundException(`Property with ID not found`);
       }
@@ -36,7 +44,7 @@ export class UserPropertyService {
         user: body.user,
         property: body.property,
       });
-      
+
       if (existingUserProperty) {
         throw new BadRequestException(
           `UserProperty already exists for User ID and Property ID`,
@@ -48,7 +56,7 @@ export class UserPropertyService {
         existingUser,
         existingProperty,
       });
-  
+
       await this.em.transactional(async (em) => {
         await em.persistAndFlush(userProperty);
       });
@@ -59,13 +67,18 @@ export class UserPropertyService {
     }
   }
 
-  async update(userPropertyId: string, body: Partial<UserPropertyPartialInputDto>): Promise<UserProperty> {
+  async update(
+    userPropertyId: string,
+    body: Partial<UserPropertyPartialInputDto>,
+  ): Promise<UserProperty> {
     try {
       if (!isUUID(userPropertyId)) {
         throw new BadRequestException(`Invalid UUID format for ID`);
       }
 
-      const userProperty = await this.em.findOne(UserProperty, { id: userPropertyId });
+      const userProperty = await this.em.findOne(UserProperty, {
+        id: userPropertyId,
+      });
       if (!userProperty) {
         throw new NotFoundException(`UserProperty not found`);
       }
@@ -106,10 +119,14 @@ export class UserPropertyService {
   async getByIds(userId: string, propertyId: string): Promise<UserProperty> {
     try {
       if (!userId || !propertyId) {
-        throw new BadRequestException('User ID and Property ID must be provided');
+        throw new BadRequestException(
+          'User ID and Property ID must be provided',
+        );
       }
       if (!isUUID(userId) || !isUUID(propertyId)) {
-        throw new BadRequestException('Invalid UUID format for User ID or Property ID');
+        throw new BadRequestException(
+          'Invalid UUID format for User ID or Property ID',
+        );
       }
 
       const userProperty = await this.em.findOne(UserProperty, {
@@ -135,7 +152,10 @@ export class UserPropertyService {
         throw new BadRequestException(`Invalid UUID format for User ID`);
       }
 
-      const likedProperties = await this.em.find(UserProperty, { user: userId, liked: true });
+      const likedProperties = await this.em.find(UserProperty, {
+        user: userId,
+        liked: true,
+      });
 
       return likedProperties;
     } catch (error) {
@@ -144,11 +164,16 @@ export class UserPropertyService {
   }
 
   private handleUnexpectedError(error: any): never {
-    if (error instanceof BadRequestException || error instanceof NotFoundException) {
+    if (
+      error instanceof BadRequestException ||
+      error instanceof NotFoundException
+    ) {
       throw error;
     }
 
     console.error('Unexpected error occurred:', error);
-    throw new BadRequestException(`An unexpected error occurred: ${error.message}`);
+    throw new BadRequestException(
+      `An unexpected error occurred: ${error.message}`,
+    );
   }
 }

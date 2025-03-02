@@ -4,7 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
 export class RolesGuard extends AuthGuard('roles') {
-    canActivate(context: ExecutionContext): boolean {
-        return super.canActivate(context) as boolean;
-    }
+  canActivate(context: ExecutionContext): boolean {
+    return super.canActivate(context) as boolean;
+  }
 }

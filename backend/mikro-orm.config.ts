@@ -6,7 +6,9 @@ import { AppModule } from './src/app.module';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 
 export default async (): Promise<MikroOrmModuleSyncOptions> => {
-  const app = await NestFactory.createApplicationContext(AppModule, { logger: false });
+  const app = await NestFactory.createApplicationContext(AppModule, {
+    logger: false,
+  });
   const configService = app.get(ConfigService);
 
   const options: MikroOrmModuleSyncOptions = {

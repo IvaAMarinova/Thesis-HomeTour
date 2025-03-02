@@ -10,11 +10,10 @@ import { FileUploadService } from './../upload/upload.service';
 @Module({
   imports: [
     MikroOrmModule.forFeature([PropertyEntity, Company]),
-    CompanyModule
+    CompanyModule,
   ],
   providers: [PropertyService, FileUploadService],
   controllers: [PropertyController],
   exports: [PropertyService, MikroOrmModule.forFeature([PropertyEntity])],
 })
 export class PropertyModule {}
-

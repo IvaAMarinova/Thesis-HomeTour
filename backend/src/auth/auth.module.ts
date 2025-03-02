@@ -24,7 +24,14 @@ import { RolesStrategy } from './strategies/roles.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, JwtAuthGuard, RolesStrategy, ConfigModule],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    JwtAuthGuard,
+    RolesStrategy,
+    ConfigModule,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

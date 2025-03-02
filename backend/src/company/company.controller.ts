@@ -1,10 +1,20 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  UseGuards,
+  NotFoundException,
+} from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { Company } from './company.entity';
 import { PropertyEntity } from '../property/property.entity';
 import { FileUploadService } from '../upload/upload.service';
-import { TransformedCompanyDto } from './dto/company-transformed-response.dto'
-import { TransformedPropertyDto } from '../property/dto/property-transformed-response.dto'
+import { TransformedCompanyDto } from './dto/company-transformed-response.dto';
+import { TransformedPropertyDto } from '../property/dto/property-transformed-response.dto';
 import { CompanyInputDto } from './dto/company-input.dto';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { Roles } from '../decorators/roles.decorator';
@@ -13,21 +23,25 @@ import { Roles } from '../decorators/roles.decorator';
 export class CompanyController {
   constructor(
     private readonly companyService: CompanyService,
-    private readonly fileUploadService: FileUploadService
+    private readonly fileUploadService: FileUploadService,
   ) {}
 
   @Roles('admin')
   @UseGuards(JwtAuthGuard)
   @Post()
   async createCompany(
-    @Body() body: CompanyInputDto ): Promise<TransformedCompanyDto> {
+    @Body() body: CompanyInputDto,
+  ): Promise<TransformedCompanyDto> {
     const user = await this.companyService.create(body);
     return this.mapPresignedUrlsToCompany(user);
   }
 
   @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async updateCompany(@Param('id') id: string, @Body() body: CompanyInputDto): Promise<TransformedCompanyDto> {
+  async updateCompany(
+    @Param('id') id: string,
+    @Body() body: CompanyInputDto,
+  ): Promise<TransformedCompanyDto> {
     const updatedCompany = await this.companyService.update(id, body);
     return this.mapPresignedUrlsToCompany(updatedCompany);
   }
@@ -47,7 +61,9 @@ export class CompanyController {
   @Get()
   async getAllCompanies(): Promise<TransformedCompanyDto[]> {
     const companies = await this.companyService.getAllCompanies();
-    const updatedCompanies = await Promise.all(companies.map(async (company) => this.mapPresignedUrlsToCompany(company)));
+    const updatedCompanies = await Promise.all(
+      companies.map(async (company) => this.mapPresignedUrlsToCompany(company)),
+    );
     return updatedCompanies;
   }
 
@@ -62,38 +78,47 @@ export class CompanyController {
     return await this.mapPresignedUrlsToCompany(company);
   }
 
-
   @Get(':id/properties')
-  async getallPropertiesByCompany(@Param('id') id: string): Promise<TransformedPropertyDto[]> {
+  async getallPropertiesByCompany(
+    @Param('id') id: string,
+  ): Promise<TransformedPropertyDto[]> {
     const properties = await this.companyService.getallPropertiesByCompany(id);
 
-    const updatedProperties = await Promise.all(properties.map(async (property) => {
-      return this.mapPresignedUrlsToProperty(property);
-    }));
+    const updatedProperties = await Promise.all(
+      properties.map(async (property) => {
+        return this.mapPresignedUrlsToProperty(property);
+      }),
+    );
 
     return updatedProperties;
   }
 
-  async mapPresignedUrlsToCompany(company: Company): Promise<TransformedCompanyDto> {
+  async mapPresignedUrlsToCompany(
+    company: Company,
+  ): Promise<TransformedCompanyDto> {
     const logoImage = company.resources?.logoImage
       ? {
           key: company.resources.logoImage,
-          url: await this.fileUploadService.getPreSignedURLToViewObject(company.resources.logoImage),
+          url: await this.fileUploadService.getPreSignedURLToViewObject(
+            company.resources.logoImage,
+          ),
         }
       : null;
-  
+
     const galleryImage = company.resources?.galleryImage
       ? {
           key: company.resources.galleryImage,
-          url: await this.fileUploadService.getPreSignedURLToViewObject(company.resources.galleryImage),
+          url: await this.fileUploadService.getPreSignedURLToViewObject(
+            company.resources.galleryImage,
+          ),
         }
       : null;
-  
+
     const transformedResources = {
       logoImage,
       galleryImage,
     };
-  
+
     return new TransformedCompanyDto({
       id: company.id,
       name: company.name,
@@ -104,29 +129,35 @@ export class CompanyController {
       resources: transformedResources,
     });
   }
-  
-  async mapPresignedUrlsToProperty(property: PropertyEntity): Promise<TransformedPropertyDto> {
+
+  async mapPresignedUrlsToProperty(
+    property: PropertyEntity,
+  ): Promise<TransformedPropertyDto> {
     const headerImage = property.resources?.headerImage
       ? {
           key: property.resources.headerImage,
-          url: await this.fileUploadService.getPreSignedURLToViewObject(property.resources.headerImage),
+          url: await this.fileUploadService.getPreSignedURLToViewObject(
+            property.resources.headerImage,
+          ),
         }
       : null;
-  
+
     const galleryImages = property.resources?.galleryImages
       ? await Promise.all(
           property.resources.galleryImages.map(async (imageKey) => ({
             key: imageKey,
-            url: await this.fileUploadService.getPreSignedURLToViewObject(imageKey),
-          }))
+            url: await this.fileUploadService.getPreSignedURLToViewObject(
+              imageKey,
+            ),
+          })),
         )
       : [];
-  
+
     const transformedResources = {
       headerImage,
       galleryImages,
     };
-  
+
     return new TransformedPropertyDto({
       id: property.id,
       name: property.name,
@@ -139,5 +170,4 @@ export class CompanyController {
       resources: transformedResources,
     });
   }
-  
 }

@@ -1,20 +1,26 @@
-import { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserCircle, Heart, Building, Briefcase, Menu } from "@mynaui/icons-react";
-import { HttpService } from '../services/http-service';
-import { useUser } from '../contexts/UserContext';
-import logoLight from '@/assets/logo-HomeTour-cropped.png';
+import {
+  UserCircle,
+  Heart,
+  Building,
+  Briefcase,
+  Menu,
+} from "@mynaui/icons-react";
+import { HttpService } from "../services/http-service";
+import { useUser } from "../contexts/UserContext";
+import logoLight from "@/assets/logo-HomeTour-cropped.png";
 
 function Header() {
   const location = useLocation();
   const navigate = useNavigate();
-  const isHomePage = location.pathname === '/';
+  const isHomePage = location.pathname === "/";
   const [isScrolled, setIsScrolled] = useState(false);
   const { userId, setUserId } = useUser();
   const { userCompany } = useUser();
@@ -47,23 +53,23 @@ function Header() {
     };
 
     if (isHomePage) {
-      window.addEventListener('scroll', handleScroll);
+      window.addEventListener("scroll", handleScroll);
     }
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [isHomePage]);
 
   const handleLogout = () => {
     HttpService.logout();
     setUserId(null);
-    navigate('/');
+    navigate("/");
     setIsUserMenuOpen(false);
   };
 
   const handleHeartClick = () => {
-    navigate('/properties?isLikedOnly=true');
+    navigate("/properties?isLikedOnly=true");
     setIsMainMenuOpen(false);
     setIsUserMenuOpen(false);
   };
@@ -74,18 +80,29 @@ function Header() {
   };
 
   return (
-    <header className={`p-4 fixed top-0 left-0 right-0 z-50 ${isHomePage && !isScrolled ? 'bg-transparent' : 'bg-black'} text-[#F2ECDD] transition-colors duration-400 ease-in-out`}>
+    <header
+      className={`p-4 fixed top-0 left-0 right-0 z-50 ${isHomePage && !isScrolled ? "bg-transparent" : "bg-black"} text-[#F2ECDD] transition-colors duration-400 ease-in-out`}
+    >
       <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="flex items-center cursor-pointer transform ml-4 transition-transform duration-300 hover:scale-105">
+        <Link
+          to="/"
+          className="flex items-center cursor-pointer transform ml-4 transition-transform duration-300 hover:scale-105"
+        >
           <img src={logoLight} alt="logo" className="h-10 w-10 mr-4" />
           <span className="font-bold text-xl">HomeTour</span>
         </Link>
         {!isSmallScreen ? (
           <nav className="flex items-center space-x-8 mt-1 mb-1 mr-4">
-            <Link to="/properties" className="text-[#F2ECDD] text-xl font-bold py-2 cursor-pointer transform transition-transform duration-300 hover:scale-105">
+            <Link
+              to="/properties"
+              className="text-[#F2ECDD] text-xl font-bold py-2 cursor-pointer transform transition-transform duration-300 hover:scale-105"
+            >
               Жилища
             </Link>
-            <Link to="/companies" className="text-[#F2ECDD] text-xl font-bold py-2 cursor-pointer transform transition-transform duration-300 hover:scale-105">
+            <Link
+              to="/companies"
+              className="text-[#F2ECDD] text-xl font-bold py-2 cursor-pointer transform transition-transform duration-300 hover:scale-105"
+            >
               Партньори
             </Link>
 
@@ -97,33 +114,42 @@ function Header() {
             )}
 
             <DropdownMenu>
-              <DropdownMenuTrigger onClick={() => { setIsUserMenuOpen(!isUserMenuOpen); setIsMainMenuOpen(false); }}>
+              <DropdownMenuTrigger
+                onClick={() => {
+                  setIsUserMenuOpen(!isUserMenuOpen);
+                  setIsMainMenuOpen(false);
+                }}
+              >
                 <UserCircle className="h-8 w-8" />
               </DropdownMenuTrigger>
               {isUserMenuOpen && (
                 <DropdownMenuContent className="p-1">
                   {userId ? (
                     <div>
-                      {userType === "b2b" &&
+                      {userType === "b2b" && (
                         <div>
                           <DropdownMenuItem onClick={closeMenus}>
-                            <Link to={`/edit-properties/${userId}`} className="flex flex-row items-center mt-1">
+                            <Link
+                              to={`/edit-properties/${userId}`}
+                              className="flex flex-row items-center mt-1"
+                            >
                               <p className="font-bold">Моите имоти</p>
                               <Building className="h-4" />
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={closeMenus}>
-                            <Link to={`/edit-company/${userCompany}`} className="flex flex-row items-center">
+                            <Link
+                              to={`/edit-company/${userCompany}`}
+                              className="flex flex-row items-center"
+                            >
                               <p className="font-bold">Моята компания</p>
                               <Briefcase className="h-4" />
                             </Link>
                           </DropdownMenuItem>
                         </div>
-                      }
+                      )}
                       <DropdownMenuItem onClick={closeMenus}>
-                        <Link to="/profile">
-                          Профил
-                        </Link>
+                        <Link to="/profile">Профил</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={handleLogout}>
                         Изход
@@ -131,9 +157,7 @@ function Header() {
                     </div>
                   ) : (
                     <DropdownMenuItem onClick={closeMenus}>
-                      <Link to="/login">
-                        Вход
-                      </Link>
+                      <Link to="/login">Вход</Link>
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
@@ -143,18 +167,29 @@ function Header() {
         ) : (
           <div className="flex items-center space-x-4">
             <DropdownMenu>
-              <DropdownMenuTrigger onClick={() => { setIsMainMenuOpen(!isMainMenuOpen); setIsUserMenuOpen(false); }}>
+              <DropdownMenuTrigger
+                onClick={() => {
+                  setIsMainMenuOpen(!isMainMenuOpen);
+                  setIsUserMenuOpen(false);
+                }}
+              >
                 <Menu className="h-8 w-8" />
               </DropdownMenuTrigger>
               {isMainMenuOpen && (
                 <DropdownMenuContent className="p-1 bg-white shadow-md rounded-md">
                   <DropdownMenuItem onClick={closeMenus}>
-                    <Link to="/properties" className="block font-semibold px-3 py-1 text-center w-full">
+                    <Link
+                      to="/properties"
+                      className="block font-semibold px-3 py-1 text-center w-full"
+                    >
                       Жилища
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={closeMenus}>
-                    <Link to="/companies" className="block font-semibold px-3 py-1 text-center w-full">
+                    <Link
+                      to="/companies"
+                      className="block font-semibold px-3 py-1 text-center w-full"
+                    >
                       Партньори
                     </Link>
                   </DropdownMenuItem>
@@ -162,7 +197,12 @@ function Header() {
               )}
             </DropdownMenu>
             <DropdownMenu>
-              <DropdownMenuTrigger onClick={() => { setIsUserMenuOpen(!isUserMenuOpen); setIsMainMenuOpen(false); }}>
+              <DropdownMenuTrigger
+                onClick={() => {
+                  setIsUserMenuOpen(!isUserMenuOpen);
+                  setIsMainMenuOpen(false);
+                }}
+              >
                 <UserCircle className="h-8 w-8" />
               </DropdownMenuTrigger>
               {isUserMenuOpen && (
@@ -172,13 +212,19 @@ function Header() {
                       {userType === "b2b" && (
                         <div>
                           <DropdownMenuItem onClick={closeMenus}>
-                            <Link to={`/edit-properties/${userId}`} className="flex items-center justify-center text-center font-bold px-3 py-1 w-full">
+                            <Link
+                              to={`/edit-properties/${userId}`}
+                              className="flex items-center justify-center text-center font-bold px-3 py-1 w-full"
+                            >
                               Моите имоти
                               <Building className="h-5 ml-1" />
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={closeMenus}>
-                            <Link to={`/edit-company/${userCompany}`} className="flex items-center justify-center text-center font-bold px-3 py-1 w-full">
+                            <Link
+                              to={`/edit-company/${userCompany}`}
+                              className="flex items-center justify-center text-center font-bold px-3 py-1 w-full"
+                            >
                               Моята компания
                               <Briefcase className="h-5 ml-1" />
                             </Link>
@@ -186,7 +232,10 @@ function Header() {
                         </div>
                       )}
                       <DropdownMenuItem onClick={closeMenus}>
-                        <Link to="/profile" className="flex items-center justify-center text-center font-semibold px-3 py-1 w-full">
+                        <Link
+                          to="/profile"
+                          className="flex items-center justify-center text-center font-semibold px-3 py-1 w-full"
+                        >
                           Профил
                           <UserCircle className="h-5 ml-1" />
                         </Link>
@@ -199,7 +248,10 @@ function Header() {
                     </div>
                   ) : (
                     <DropdownMenuItem onClick={closeMenus}>
-                      <Link to="/login" className="flex items-center justify-center text-center font-semibold px-3 py-1 w-full">
+                      <Link
+                        to="/login"
+                        className="flex items-center justify-center text-center font-semibold px-3 py-1 w-full"
+                      >
                         Вход
                       </Link>
                     </DropdownMenuItem>

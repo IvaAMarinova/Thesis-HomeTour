@@ -19,4 +19,3 @@ import { PropertyModule } from '../property/property.module';
   exports: [UserPropertyService],
 })
 export class UserPropertyModule {}
-

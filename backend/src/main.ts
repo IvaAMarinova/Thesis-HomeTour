@@ -25,7 +25,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: allowedOrigins,
-    credentials: true
+    credentials: true,
   });
 
   const cookieSecret = configService.get<string>('COOKIE_SECRET');

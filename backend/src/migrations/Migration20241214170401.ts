@@ -1,7 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
 export class MigrationYYYYMMDDHHMMSS extends Migration {
-
   async up(): Promise<void> {
     this.addSql(`
       ALTER TABLE "property_entity" 
@@ -26,5 +25,4 @@ export class MigrationYYYYMMDDHHMMSS extends Migration {
       COMMENT ON COLUMN "property_entity"."address" IS NULL;
     `);
   }
-
 }
