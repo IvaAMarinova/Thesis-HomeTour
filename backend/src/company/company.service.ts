@@ -8,12 +8,20 @@ import { Company } from './company.entity';
 import { PropertyEntity } from '../property/property.entity';
 import { isUUID } from 'class-validator';
 import { CompanyInputDto } from './dto/company-input.dto';
+import { validateOrReject } from 'class-validator';
 
 @Injectable()
 export class CompanyService {
   constructor(private readonly em: EntityManager) {}
 
   async create(companyData: CompanyInputDto): Promise<Company> {
+    try {
+      await validateOrReject(Object.assign(new CompanyInputDto(), companyData));
+    } catch (errors) {
+      console.log(errors);
+      throw new BadRequestException(errors);
+    }
+
     const company = this.em.create(Company, companyData);
 
     try {
