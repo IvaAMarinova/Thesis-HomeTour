@@ -14,21 +14,7 @@ import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    MikroOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        dbName: configService.get<string>('POSTGRES_DB'),
-        host: configService.get<string>('POSTGRES_HOST'),
-        port: configService.get<number>('POSTGRES_PORT'),
-        user: configService.get<string>('POSTGRES_USER'),
-        password: configService.get<string>('POSTGRES_PASSWORD'),
-        entities: ['dist/**/*.entity.js'],
-        entitiesTs: ['src/**/*.entity.ts'],
-        metadataProvider: TsMorphMetadataProvider,
-        driver: require('@mikro-orm/postgresql').PostgreSqlDriver,
-        debug: true,
-      }),
-    }),
+    MikroOrmModule.forRoot(),
     UserModule,
     CompanyModule,
     PropertyModule,
