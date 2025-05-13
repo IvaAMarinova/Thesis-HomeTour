@@ -1,4 +1,11 @@
-import { Entity, PrimaryKey, Property, BeforeCreate, BeforeUpdate, JsonType } from '@mikro-orm/core';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  BeforeCreate,
+  BeforeUpdate,
+  JsonType,
+} from '@mikro-orm/core';
 import { v4 } from 'uuid';
 
 @Entity()
@@ -57,7 +64,9 @@ export class Company {
       typeof this.resources.logoImage !== 'string' ||
       typeof this.resources.galleryImage !== 'string'
     ) {
-      throw new Error('Invalid resources format. Both logoImage and galleryImage must be strings.');
+      throw new Error(
+        'Invalid resources format. Both logoImage and galleryImage must be strings.',
+      );
     }
   }
 }

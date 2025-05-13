@@ -10,7 +10,7 @@ const loadGoogleMapsApi = () => {
     console.error("Google Maps API key is missing.");
     return;
   } else {
-    console.log("Key found.")
+    console.log("Key found.");
   }
 
   const script = document.createElement("script");
@@ -28,5 +28,5 @@ loadGoogleMapsApi();
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />
-  </StrictMode>
+  </StrictMode>,
 );

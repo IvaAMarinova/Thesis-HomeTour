@@ -1,17 +1,27 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/core';
 import { Company } from './company.entity';
 import { PropertyEntity } from '../property/property.entity';
 import { isUUID } from 'class-validator';
 import { CompanyInputDto } from './dto/company-input.dto';
+import { validateOrReject } from 'class-validator';
 
 @Injectable()
 export class CompanyService {
-  constructor(
-    private readonly em: EntityManager
-  ) {}
+  constructor(private readonly em: EntityManager) {}
 
   async create(companyData: CompanyInputDto): Promise<Company> {
+    try {
+      await validateOrReject(Object.assign(new CompanyInputDto(), companyData));
+    } catch (errors) {
+      console.log(errors);
+      throw new BadRequestException(errors);
+    }
+
     const company = this.em.create(Company, companyData);
 
     try {
@@ -22,7 +32,10 @@ export class CompanyService {
     }
   }
 
-  async update(id: string, companyData: Partial<CompanyInputDto>): Promise<Company> {
+  async update(
+    id: string,
+    companyData: Partial<CompanyInputDto>,
+  ): Promise<Company> {
     try {
       if (!isUUID(id)) {
         throw new BadRequestException(`Invalid UUID format for id`);
@@ -94,21 +107,27 @@ export class CompanyService {
       if (!company) {
         throw new NotFoundException(`Company not found`);
       }
-  
-      const properties = await this.em.find(PropertyEntity, { company: company });
+
+      const properties = await this.em.find(PropertyEntity, {
+        company: company,
+      });
       return properties;
     } catch (error) {
       this.handleUnexpectedError(error);
     }
   }
-  
 
   private handleUnexpectedError(error: any): never {
-    if (error instanceof BadRequestException || error instanceof NotFoundException) {
+    if (
+      error instanceof BadRequestException ||
+      error instanceof NotFoundException
+    ) {
       throw error;
     }
 
     console.error('Unexpected error occurred:', error);
-    throw new BadRequestException(`An unexpected error occurred: ${error.message}`);
+    throw new BadRequestException(
+      `An unexpected error occurred: ${error.message}`,
+    );
   }
 }

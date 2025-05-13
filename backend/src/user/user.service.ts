@@ -1,5 +1,14 @@
-import { Injectable, NotFoundException, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
-import { EntityManager, UniqueConstraintViolationException } from '@mikro-orm/core';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
+import {
+  EntityManager,
+  UniqueConstraintViolationException,
+} from '@mikro-orm/core';
 import { User, UserRole, UserType } from './user.entity';
 import { CompanyService } from '../company/company.service';
 import { hash, compare } from 'bcrypt';
@@ -16,28 +25,34 @@ export class UserService {
     private readonly em: EntityManager,
   ) {}
 
-  async createLogic(userData: UserInputDto | UserInternalInputDto): Promise<User> {
+  async createLogic(
+    userData: UserInputDto | UserInternalInputDto,
+  ): Promise<User> {
     try {
-      const existingUser = await this.em.findOne(User, { email: userData.email });
+      const existingUser = await this.em.findOne(User, {
+        email: userData.email,
+      });
       if (existingUser) {
         throw new ConflictException(`User with this email already exists`);
       }
-  
+
       if (userData.password) {
         userData.password = await hash(userData.password, 10);
       }
-  
+
       const user = this.em.create(User, userData);
-  
+
       if (userData.company) {
-        const company = await this.companyService.getCompanyById(userData.company);
+        const company = await this.companyService.getCompanyById(
+          userData.company,
+        );
         if (!company) {
-          console.log("Company with this id not found");
+          console.log('Company with this id not found');
           throw new NotFoundException(`Company not found`);
         }
         user.company = company;
       }
-  
+
       await this.em.persistAndFlush(user);
       return user;
     } catch (error) {
@@ -46,12 +61,12 @@ export class UserService {
       }
       this.handleUnexpectedError(error);
     }
-  }  
+  }
 
   async create(userData: UserInputDto): Promise<User> {
     return this.createLogic(userData);
   }
-  
+
   async createInternal(userData: UserInternalInputDto): Promise<User> {
     return this.createLogic(userData);
   }
@@ -74,7 +89,10 @@ export class UserService {
     }
   }
 
-  async updateAdmin(id: string, userData: Partial<UserInputDto>): Promise<User> {
+  async updateAdmin(
+    id: string,
+    userData: Partial<UserInputDto>,
+  ): Promise<User> {
     try {
       if (!isUUID(id)) {
         throw new BadRequestException(`Invalid ID format for id`);
@@ -85,7 +103,9 @@ export class UserService {
       }
 
       if (userData.company) {
-        const company = await this.companyService.getCompanyById(userData.company);
+        const company = await this.companyService.getCompanyById(
+          userData.company,
+        );
         if (!company) {
           throw new NotFoundException(`Company not found`);
         }
@@ -141,25 +161,33 @@ export class UserService {
 
   async validateUser(email: string, password: string): Promise<User> {
     try {
-      const user = await this.em.findOne(User, { email })
+      const user = await this.em.findOne(User, { email });
       if (!user || !(await this.validatePassword(user, password))) {
         throw new UnauthorizedException(`Invalid user or password.`);
       }
-  
+
       return user;
     } catch (error) {
       this.handleUnexpectedError(error);
     }
   }
 
-  async saveTokens(id: string, accessToken: string, refreshToken: string): Promise<Tokens> {
+  async saveTokens(
+    id: string,
+    accessToken: string,
+    refreshToken: string,
+  ): Promise<Tokens> {
     try {
       const user = await this.em.findOne(User, { id });
       if (!user) {
         throw new NotFoundException(`User with id not found`);
       }
 
-      const tokens = this.em.create(Tokens, { user, accessToken, refreshToken });
+      const tokens = this.em.create(Tokens, {
+        user,
+        accessToken,
+        refreshToken,
+      });
 
       await this.em.persistAndFlush(tokens);
       return tokens;
@@ -168,9 +196,15 @@ export class UserService {
     }
   }
 
-  async getUserByTokens(accessToken: string, refreshToken: string): Promise<User | null> {
+  async getUserByTokens(
+    accessToken: string,
+    refreshToken: string,
+  ): Promise<User | null> {
     try {
-      const tokens = await this.em.findOne(Tokens, { accessToken, refreshToken });
+      const tokens = await this.em.findOne(Tokens, {
+        accessToken,
+        refreshToken,
+      });
       if (!tokens) {
         return null;
       }
@@ -213,8 +247,8 @@ export class UserService {
 
   async makeUserB2B(userId: string, companyId: string): Promise<User> {
     try {
-      console.log("User ID:", userId);
-      console.log("Company ID:", companyId);
+      console.log('User ID:', userId);
+      console.log('Company ID:', companyId);
       const user = await this.em.findOne(User, { id: userId });
       if (!user) {
         throw new NotFoundException(`User not found`);
@@ -231,7 +265,7 @@ export class UserService {
       this.handleUnexpectedError(error);
     }
   }
-  
+
   async makeUserB2BByEmail(email: string, companyId: string): Promise<User> {
     try {
       const user = await this.em.findOne(User, { email: email });
@@ -262,21 +296,24 @@ export class UserService {
       this.em.assign(user, { company: null });
       await this.em.persistAndFlush(user);
       return user;
-
     } catch (error) {
       this.handleUnexpectedError(error);
     }
   }
 
   private handleUnexpectedError(error: any): never {
-    if (error instanceof BadRequestException || 
-        error instanceof NotFoundException || 
-        error instanceof UnauthorizedException || 
-        error instanceof ConflictException) {
+    if (
+      error instanceof BadRequestException ||
+      error instanceof NotFoundException ||
+      error instanceof UnauthorizedException ||
+      error instanceof ConflictException
+    ) {
       throw error;
     }
-  
-    console.error("Unexpected error occurred:", error);
-    throw new BadRequestException(`An unexpected error occurred: ${error.message}`);
+
+    console.error('Unexpected error occurred:', error);
+    throw new BadRequestException(
+      `An unexpected error occurred: ${error.message}`,
+    );
   }
 }

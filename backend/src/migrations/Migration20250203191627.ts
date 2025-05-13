@@ -1,7 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
 export class Migration20250203191627 extends Migration {
-
   async up(): Promise<void> {
     this.addSql(`
       ALTER TABLE "user_property"
@@ -31,5 +30,4 @@ export class Migration20250203191627 extends Migration {
       ON DELETE NO ACTION;
     `);
   }
-
 }

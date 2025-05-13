@@ -1,4 +1,10 @@
-import { Injectable, UnauthorizedException, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { User, UserRole, UserType } from '../user/user.entity';
@@ -9,7 +15,7 @@ import { UserInputDto } from '../user/dto/user-input.dto';
 export class AuthService {
   constructor(
     private userService: UserService,
-    private jwtService: JwtService  
+    private jwtService: JwtService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<any> {
@@ -22,7 +28,9 @@ export class AuthService {
     }
   }
 
-  async login(user: User): Promise<{ accessToken: string; refreshToken: string }> {
+  async login(
+    user: User,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const payload = { email: user.email, sub: user.id, roles: user.roles };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '1d' });
     const refreshToken = v4();
@@ -35,20 +43,27 @@ export class AuthService {
     };
   }
 
-  async register(userData: UserInputDto): Promise<{ accessToken: string; refreshToken: string }> {
+  async register(
+    userData: UserInputDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const existingUser = await this.userService.findByEmail(userData.email);
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
-    }  
+    }
     try {
       const user = await this.userService.create(userData);
       return this.login(user);
     } catch (error) {
-      throw new BadRequestException(`Failed to register user: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to register user: ${error.message}`,
+      );
     }
   }
 
-  async googleRegistrationService(userInfo: { email: string; fullName: string }): Promise<{ accessToken: string; refreshToken: string }> {
+  async googleRegistrationService(userInfo: {
+    email: string;
+    fullName: string;
+  }): Promise<{ accessToken: string; refreshToken: string }> {
     try {
       const user = await this.userService.findByEmail(userInfo.email);
 
@@ -66,38 +81,48 @@ export class AuthService {
 
       return this.login(user);
     } catch (error) {
-      throw new Error("Failed to process Google authentication.");
+      throw new Error('Failed to process Google authentication.');
     }
   }
-  
-  async getMe(userId: string): Promise<User> {  
+
+  async getMe(userId: string): Promise<User> {
     try {
       const user = await this.userService.getUserById(userId);
-  
+
       if (!user) {
         throw new NotFoundException(`User not found`);
-      }      
+      }
 
       return user;
     } catch (error) {
-      throw new Error("An unexpected error occurred while retrieving the user");
+      throw new Error('An unexpected error occurred while retrieving the user');
     }
   }
 
-  async refreshToken(accessToken: string, refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+  async refreshToken(
+    accessToken: string,
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     try {
-      const user = await this.userService.getUserByTokens(accessToken, refreshToken);
+      const user = await this.userService.getUserByTokens(
+        accessToken,
+        refreshToken,
+      );
 
-      if(!user) {
+      if (!user) {
         throw new UnauthorizedException('Invalid or expired tokens');
       }
-    
+
       const payload = { email: user.email, sub: user.id, roles: user.roles };
       const newAccessToken = this.jwtService.sign(payload);
       const newRefreshToken = v4();
-  
-      await this.userService.saveTokens(user.id, newAccessToken, newRefreshToken);
-  
+
+      await this.userService.saveTokens(
+        user.id,
+        newAccessToken,
+        newRefreshToken,
+      );
+
       return {
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
@@ -105,5 +130,5 @@ export class AuthService {
     } catch (error) {
       throw new UnauthorizedException('Invalid or expired tokens');
     }
-  } 
+  }
 }

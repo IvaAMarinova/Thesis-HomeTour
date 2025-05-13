@@ -1,6 +1,12 @@
-import { createContext, useState, useContext, ReactNode, useCallback } from 'react';
-import { HttpService } from '../services/http-service';
-import User from '@/interfaces/user-interface';
+import {
+  createContext,
+  useState,
+  useContext,
+  ReactNode,
+  useCallback,
+} from "react";
+import { HttpService } from "../services/http-service";
+import User from "@/interfaces/user-interface";
 
 interface UserContextType {
   userId: string | null;
@@ -22,7 +28,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const fetchUserId = useCallback(async () => {
     try {
       const isAuthenticated = await HttpService.isAuthenticated(async () => {
-        const response = await HttpService.get<User>('/auth/me/', undefined, true, false);
+        const response = await HttpService.get<User>(
+          "/auth/me/",
+          undefined,
+          true,
+          false,
+        );
         setUserId(response.id);
         setUserCompany(response.company);
 
@@ -44,7 +55,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ userId, setUserId, fetchUserId, userType, userCompany }}>
+    <UserContext.Provider
+      value={{ userId, setUserId, fetchUserId, userType, userCompany }}
+    >
       {children}
     </UserContext.Provider>
   );
@@ -53,7 +66,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) {
-    throw new Error('useUser must be used within a UserProvider');
+    throw new Error("useUser must be used within a UserProvider");
   }
   return context;
 };

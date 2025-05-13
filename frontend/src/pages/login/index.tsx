@@ -54,28 +54,31 @@ export function Login({ onLoginSuccess }: LoginProps) {
   async function onLogin(values: z.infer<typeof loginSchema>) {
     try {
       setIsLoading(true);
-      const response = await HttpService.post<{accessToken: string, refreshToken: string}>('/auth/login', values, undefined, true, true);
-      
+      const response = await HttpService.post<{
+        accessToken: string;
+        refreshToken: string;
+      }>("/auth/login", values, undefined, true, true);
+
       HttpService.setAccessToken(response.accessToken);
       HttpService.setRefreshToken(response.refreshToken);
       onLoginSuccess();
       await fetchUserId();
-      navigate('/');
+      navigate("/");
       setIsLoading(false);
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === 'Invalid login credentials') {
-          toast.error('Невалиден имейл или парола. Опитайте отново!');
+        if (error.message === "Invalid login credentials") {
+          toast.error("Невалиден имейл или парола. Опитайте отново!");
         } else {
-          toast.error('Получи се грешка докато влизахте. Опитайте отново!');
+          toast.error("Получи се грешка докато влизахте. Опитайте отново!");
         }
       } else {
-        toast.error('Неочаквана грешка настъпи. Опитайте отново!');
+        toast.error("Неочаквана грешка настъпи. Опитайте отново!");
       }
       setIsLoading(false);
     }
   }
-  
+
   async function onRegister(values: z.infer<typeof registerSchema>) {
     try {
       setIsLoading(true);
@@ -84,23 +87,26 @@ export function Login({ onLoginSuccess }: LoginProps) {
         type: "b2c",
         isGoogleUser: false,
       };
-      const response = await HttpService.post<{accessToken: string, refreshToken: string}>('/auth/register', registerData, undefined, true, true);
+      const response = await HttpService.post<{
+        accessToken: string;
+        refreshToken: string;
+      }>("/auth/register", registerData, undefined, true, true);
       await new Promise((resolve) => setTimeout(resolve, 100));
       HttpService.setAccessToken(response.accessToken);
       HttpService.setRefreshToken(response.refreshToken);
       onLoginSuccess();
       await fetchUserId();
-      navigate('/');
+      navigate("/");
       setIsLoading(false);
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === "User with this email already exists.") {
-          toast.error('Вече съществува регистриран акаунт с този имейл адрес.');
+          toast.error("Вече съществува регистриран акаунт с този имейл адрес.");
         } else {
-          toast.error('Получи се грешка докато влизахте. Опитайте отново!');
+          toast.error("Получи се грешка докато влизахте. Опитайте отново!");
         }
       } else {
-        toast.error('Неочаквана грешка настъпи. Опитайте отново!');
+        toast.error("Неочаквана грешка настъпи. Опитайте отново!");
       }
       setIsLoading(false);
     }
@@ -108,37 +114,40 @@ export function Login({ onLoginSuccess }: LoginProps) {
 
   const onGoogleLogin = useGoogleLogin({
     onSuccess: async (response: any) => {
-        setIsLoading(true);
-        const googleAccessToken = response.access_token;  
-        const userInfoResponse = await fetch(
-          "https://www.googleapis.com/oauth2/v2/userinfo",
-          {
-            headers: {
-              Authorization: `Bearer ${googleAccessToken}`,
-            },
-          }
-        );
-  
-        const userInfo = await userInfoResponse.json();
-  
-        const backendResponse = await HttpService.post<{ accessToken: string; refreshToken: string;}>('/auth/google/auth', {
-          email: userInfo.email,
-          fullName: userInfo.name,
-        });
-    
-        HttpService.setAccessToken(backendResponse.accessToken);
-        HttpService.setRefreshToken(backendResponse.refreshToken);
-        onLoginSuccess();
-        await fetchUserId();
-        navigate('/');
-        setIsLoading(false);
+      setIsLoading(true);
+      const googleAccessToken = response.access_token;
+      const userInfoResponse = await fetch(
+        "https://www.googleapis.com/oauth2/v2/userinfo",
+        {
+          headers: {
+            Authorization: `Bearer ${googleAccessToken}`,
+          },
+        },
+      );
+
+      const userInfo = await userInfoResponse.json();
+
+      const backendResponse = await HttpService.post<{
+        accessToken: string;
+        refreshToken: string;
+      }>("/auth/google/auth", {
+        email: userInfo.email,
+        fullName: userInfo.name,
+      });
+
+      HttpService.setAccessToken(backendResponse.accessToken);
+      HttpService.setRefreshToken(backendResponse.refreshToken);
+      onLoginSuccess();
+      await fetchUserId();
+      navigate("/");
+      setIsLoading(false);
     },
     onError: () => {
       toast.error("Получи се грешка докато влизахте. Опитайте отново!");
       setIsLoading(false);
     },
   });
-  
+
   return (
     <div className="flex items-center justify-center h-screen">
       <div className="rounded-lg shadow-md p-6 w-[400px] border mt-16">
@@ -149,7 +158,10 @@ export function Login({ onLoginSuccess }: LoginProps) {
           </TabsList>
           <TabsContent value="login">
             <Form {...loginForm}>
-              <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-8">
+              <form
+                onSubmit={loginForm.handleSubmit(onLogin)}
+                className="space-y-8"
+              >
                 <FormField
                   control={loginForm.control}
                   name="email"
@@ -201,7 +213,10 @@ export function Login({ onLoginSuccess }: LoginProps) {
           </TabsContent>
           <TabsContent value="register">
             <Form {...registerForm}>
-              <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-8">
+              <form
+                onSubmit={registerForm.handleSubmit(onRegister)}
+                className="space-y-8"
+              >
                 <FormField
                   control={registerForm.control}
                   name="fullName"
@@ -284,7 +299,6 @@ export function Login({ onLoginSuccess }: LoginProps) {
         )}
       </div>
     </div>
-
   );
 }
 

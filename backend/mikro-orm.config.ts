@@ -2,7 +2,6 @@ import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import * as dotenv from 'dotenv';
 
-// Load env variables
 dotenv.config();
 
 export default {

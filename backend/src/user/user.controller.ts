@@ -44,7 +44,10 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Put('/make-b2b/:id')
-  async makeUserB2B(@Param('id') userId: string, @Body() body: any): Promise<UserResponseDto> {
+  async makeUserB2B(
+    @Param('id') userId: string,
+    @Body() body: any,
+  ): Promise<UserResponseDto> {
     const user = await this.userService.makeUserB2B(userId, body.companyId);
     return new UserResponseDto(user);
   }
@@ -52,8 +55,14 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Put('/make-b2b-email/:email')
-  async makeUserB2BByEmail(@Param('email') email: string, @Body() body: any): Promise<UserResponseDto> {
-    const user = await this.userService.makeUserB2BByEmail(email, body.companyId);
+  async makeUserB2BByEmail(
+    @Param('email') email: string,
+    @Body() body: any,
+  ): Promise<UserResponseDto> {
+    const user = await this.userService.makeUserB2BByEmail(
+      email,
+      body.companyId,
+    );
     return new UserResponseDto(user);
   }
 
@@ -67,7 +76,10 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard)
   @Put(':id')
-  async updateUser(@Param('id') id: string, @Body() userData: PartialUserInputDto): Promise<UserResponseDto> {
+  async updateUser(
+    @Param('id') id: string,
+    @Body() userData: PartialUserInputDto,
+  ): Promise<UserResponseDto> {
     const user = await this.userService.update(id, userData);
     return new UserResponseDto(user);
   }
@@ -75,7 +87,10 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @Put('/admin/:id')
-  async updateUserAdmin(@Param('id') id: string, @Body() userData: Partial<UserInputDto>): Promise<UserResponseDto> {
+  async updateUserAdmin(
+    @Param('id') id: string,
+    @Body() userData: Partial<UserInputDto>,
+  ): Promise<UserResponseDto> {
     const user = await this.userService.updateAdmin(id, userData);
     return new UserResponseDto(user);
   }
@@ -98,5 +113,5 @@ export class UserController {
   async makeUserAdmin(@Param('id') id: string): Promise<UserResponseDto> {
     const user = await this.userService.makeUserAdmin(id);
     return new UserResponseDto(user);
-  }  
+  }
 }

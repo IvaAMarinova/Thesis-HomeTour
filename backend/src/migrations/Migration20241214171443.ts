@@ -1,7 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
 export class MigrationYYYYMMDDHHMMSS extends Migration {
-
   async up(): Promise<void> {
     this.addSql(`
       COMMENT ON COLUMN "property_entity"."address" IS 
@@ -15,5 +14,4 @@ export class MigrationYYYYMMDDHHMMSS extends Migration {
       'Structure: { street: string, city: string, neighborhood: string, number?: string }';
     `);
   }
-
 }

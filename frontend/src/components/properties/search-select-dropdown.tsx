@@ -1,7 +1,7 @@
-import { ArrowUpDownIcon, Check} from "lucide-react"
-import { useEffect, useState } from "react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { ArrowUpDownIcon, Check } from "lucide-react";
+import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -9,12 +9,12 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/components/ui/popover";
 
 interface SearchSelectDropdownProps {
   options: string[];
@@ -27,10 +27,11 @@ export function SearchSelectDropdown({
   options,
   placeholder,
   onSelectionChange,
-  initialSelection = []
+  initialSelection = [],
 }: SearchSelectDropdownProps) {
-  const [open, setOpen] = useState(false)
-  const [selectedValues, setSelectedValues] = useState<string[]>(initialSelection)
+  const [open, setOpen] = useState(false);
+  const [selectedValues, setSelectedValues] =
+    useState<string[]>(initialSelection);
 
   useEffect(() => {
     setSelectedValues(initialSelection);
@@ -38,7 +39,7 @@ export function SearchSelectDropdown({
 
   const handleSelect = (currentValue: string) => {
     const updatedSelection = selectedValues.includes(currentValue)
-      ? selectedValues.filter(val => val !== currentValue)
+      ? selectedValues.filter((val) => val !== currentValue)
       : [...selectedValues, currentValue];
     setSelectedValues(updatedSelection);
     onSelectionChange(updatedSelection);
@@ -61,7 +62,9 @@ export function SearchSelectDropdown({
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder={`Search ${placeholder.toLowerCase()}...`} />
+          <CommandInput
+            placeholder={`Search ${placeholder.toLowerCase()}...`}
+          />
           <CommandList>
             <CommandEmpty>Не бяха открити опции</CommandEmpty>
             <CommandGroup>
@@ -74,7 +77,9 @@ export function SearchSelectDropdown({
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      selectedValues.includes(option) ? "opacity-100" : "opacity-0"
+                      selectedValues.includes(option)
+                        ? "opacity-100"
+                        : "opacity-0",
                     )}
                   />
                   {option}
@@ -85,5 +90,5 @@ export function SearchSelectDropdown({
         </Command>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

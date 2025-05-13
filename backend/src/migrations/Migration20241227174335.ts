@@ -1,7 +1,6 @@
 import { Migration } from '@mikro-orm/migrations';
 
 export class Migration20241227174335 extends Migration {
-
   async up(): Promise<void> {
     this.addSql(`
       ALTER TABLE "user_property"
@@ -30,5 +29,4 @@ export class Migration20241227174335 extends Migration {
       REFERENCES "property_entity" ("id");
     `);
   }
-
 }

@@ -1,4 +1,14 @@
-import { Controller, Get, Request, Post, UseGuards, Body, Res, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Request,
+  Post,
+  UseGuards,
+  Body,
+  Res,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { Response, CookieOptions } from 'express';
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -12,56 +22,66 @@ import { ConfigService } from '@nestjs/config';
 export class AuthController {
   private readonly isProduction: boolean;
 
-  constructor(private authService: AuthService, private readonly configService: ConfigService) {
-    this.isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+  constructor(
+    private authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {
+    this.isProduction =
+      this.configService.get<string>('NODE_ENV') === 'production';
   }
 
   private getCookieExpirationTime(days: number): Date {
     return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
   }
 
-  private setAuthCookies(res: Response, accessToken: string, refreshToken: string): void {
+  private setAuthCookies(
+    res: Response,
+    accessToken: string,
+    refreshToken: string,
+  ): void {
     const accessTokenOptions: CookieOptions = {
-        httpOnly: true,
-        secure: this.isProduction,
-        sameSite: this.isProduction ? 'strict' : 'lax',
-        expires: this.getCookieExpirationTime(1),
-        path: '/',
+      httpOnly: true,
+      secure: this.isProduction,
+      sameSite: this.isProduction ? 'strict' : 'lax',
+      expires: this.getCookieExpirationTime(1),
+      path: '/',
     };
 
     const refreshTokenOptions: CookieOptions = {
-        httpOnly: true,
-        secure: this.isProduction,
-        sameSite: this.isProduction ? 'strict' : 'lax',
-        expires: this.getCookieExpirationTime(30),
-        path: '/',
+      httpOnly: true,
+      secure: this.isProduction,
+      sameSite: this.isProduction ? 'strict' : 'lax',
+      expires: this.getCookieExpirationTime(30),
+      path: '/',
     };
 
     res.cookie('accessToken', accessToken, accessTokenOptions);
     res.cookie('refreshToken', refreshToken, refreshTokenOptions);
-}
+  }
 
-private clearAuthCookies(res: Response): void {
-    const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+  private clearAuthCookies(res: Response): void {
+    const isProduction =
+      this.configService.get<string>('NODE_ENV') === 'production';
 
     const clearOptions: CookieOptions = {
-        httpOnly: false,
-        secure: isProduction,
-        sameSite: isProduction ? 'strict' : 'lax',
-        maxAge: 0,
-        path: '/',
+      httpOnly: false,
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
+      maxAge: 0,
+      path: '/',
     };
 
     res.cookie('accessToken', '', clearOptions);
     res.cookie('refreshToken', '', clearOptions);
-}
-
+  }
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req, @Res() res: Response) {
     try {
-      const { accessToken, refreshToken } = await this.authService.login(req.user);
+      const { accessToken, refreshToken } = await this.authService.login(
+        req.user,
+      );
       this.setAuthCookies(res, accessToken, refreshToken);
       res.json({ accessToken, refreshToken });
     } catch (error) {
@@ -72,7 +92,8 @@ private clearAuthCookies(res: Response): void {
   @Post('register')
   async register(@Body() registerData: UserInputDto, @Res() res: Response) {
     try {
-      const { accessToken, refreshToken } = await this.authService.register(registerData);
+      const { accessToken, refreshToken } =
+        await this.authService.register(registerData);
       this.setAuthCookies(res, accessToken, refreshToken);
       res.json({ accessToken, refreshToken });
     } catch (error) {
@@ -85,7 +106,10 @@ private clearAuthCookies(res: Response): void {
   }
 
   @Post('google/auth')
-  async googleAuth(@Body() userInfo: { email: string; fullName: string }, @Res() res: Response) {
+  async googleAuth(
+    @Body() userInfo: { email: string; fullName: string },
+    @Res() res: Response,
+  ) {
     try {
       const tokens = await this.authService.googleRegistrationService(userInfo);
       res.json(tokens);
@@ -106,7 +130,9 @@ private clearAuthCookies(res: Response): void {
     }
 
     if (!req.user || !req.user.userId) {
-      throw new UnauthorizedException('User information is missing in the token');
+      throw new UnauthorizedException(
+        'User information is missing in the token',
+      );
     }
 
     const { userId } = req.user;
@@ -115,9 +141,15 @@ private clearAuthCookies(res: Response): void {
   }
 
   @Post('refresh-token')
-  async refreshToken(@Body() body: { refreshToken: string; accessToken: string }, @Res() res: Response) {
+  async refreshToken(
+    @Body() body: { refreshToken: string; accessToken: string },
+    @Res() res: Response,
+  ) {
     try {
-      const { accessToken, refreshToken } = await this.authService.refreshToken(body.accessToken, body.refreshToken);
+      const { accessToken, refreshToken } = await this.authService.refreshToken(
+        body.accessToken,
+        body.refreshToken,
+      );
       this.setAuthCookies(res, accessToken, refreshToken);
       res.json({ message: 'Tokens refreshed successfully' });
     } catch (error) {

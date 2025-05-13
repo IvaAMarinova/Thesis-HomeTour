@@ -1,4 +1,12 @@
-import { Entity, PrimaryKey, Property, ManyToOne, BeforeCreate, BeforeUpdate, Index} from '@mikro-orm/core';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  ManyToOne,
+  BeforeCreate,
+  BeforeUpdate,
+  Index,
+} from '@mikro-orm/core';
 import { v4 } from 'uuid';
 import { User } from '../user/user.entity';
 import { PropertyEntity } from '../property/property.entity';

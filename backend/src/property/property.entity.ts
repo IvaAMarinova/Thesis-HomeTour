@@ -68,7 +68,10 @@ export class PropertyEntity {
       throw new Error('Description must be between 64 and 2048 characters');
     }
 
-    if (this.floor !== null && (!Number.isInteger(this.floor) || this.floor <= 0)) {
+    if (
+      this.floor !== null &&
+      (!Number.isInteger(this.floor) || this.floor <= 0)
+    ) {
       throw new Error('Floor must be a positive integer');
     }
 
@@ -82,8 +85,11 @@ export class PropertyEntity {
 
     if (
       typeof this.address.street !== 'string' ||
-      typeof this.address.city !== 'string'    ) {
-      throw new Error('Invalid address. Street and city must exist and be strings');
+      typeof this.address.city !== 'string'
+    ) {
+      throw new Error(
+        'Invalid address. Street and city must exist and be strings',
+      );
     }
 
     if (
