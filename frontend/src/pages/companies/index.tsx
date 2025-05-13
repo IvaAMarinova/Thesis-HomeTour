@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import GoUpButton from "@/components/go-up-button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import GoBackButton from "@/components/go-back-button";
-import Company from "@/interfaces/company-interface";
+import Company from "@/interfaces/company-interface.tsx";
 
 function Companies() {
   const navigate = useNavigate();
@@ -40,6 +40,17 @@ function Companies() {
           </p>
           <p className="text-md">Пробвайте пак по-късно!</p>
         </div>
+      </div>
+    );
+  }
+
+  if (!Array.isArray(companies)) {
+    console.error("Expected companies to be an array but got:", companies);
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-center text-gray-700">
+          Възникна грешка при зареждането на компаниите.
+        </p>
       </div>
     );
   }
@@ -90,3 +101,4 @@ function Companies() {
 }
 
 export default Companies;
+

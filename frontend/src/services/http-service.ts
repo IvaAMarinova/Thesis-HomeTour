@@ -3,6 +3,7 @@ const cookies = new Cookies();
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+
 export interface RequestParams {
   headers?: { [key: string]: string };
   query?: { [key: string]: string };
@@ -115,8 +116,10 @@ export class HttpService {
       if (!this.accessToken && !isLoginAttempt) {
         this.loadTokensFromCookies();
       }
-
-      const requestUrl = new URL(url, API_BASE_URL);
+      
+      const apiBase = API_BASE_URL.endsWith("/") ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+      const requestPath = url.startsWith("/") ? url : `/${url}`;
+      const requestUrl = new URL(`${apiBase}${requestPath}`);
 
       if (params?.query) {
         Object.keys(params.query).forEach((key) =>

@@ -155,19 +155,77 @@ function PropertyPage() {
                   <h1 className="text-3xl font-bold mb-4 text-center md:text-left">
                     {property.name}
                   </h1>
+                                    <div className="max-w-96 overflow-hidden text-ellipsis">
+                                        {property.description?.split("\n").map(
+                                            (paragraph: string, index: number) => (
+                                                <p
+                                                    key={index}
+                                                    className="mb-4 text-justify"
+                                                    style={{ textIndent: "2em" }}
+                                                >
+                                                    {paragraph}
+                                                </p>
+                                            )
+                                        )}
+                                    </div>
 
-                  <div className="max-w-96 overflow-hidden text-ellipsis">
-                    {property.description
-                      ?.split("\n")
-                      .map((paragraph: string, index: number) => (
-                        <p
-                          key={index}
-                          className="mb-4 text-justify"
-                          style={{
-                            textIndent: "2em",
-                          }}
-                        >
-                          {paragraph}
+                                    <div className="mt-4">
+                                        <h2 className="text-xl font-semibold mb-2">
+                                            Адрес на имота
+                                        </h2>
+                                        <p>
+                                            {[property.address?.city, property.address?.neighborhood, property.address?.street]
+                                                .filter(Boolean)
+                                                .join(", ")}
+                                        </p>
+                                        <h2 className="text-md font-semibold mt-4">
+                                            Етаж
+                                        </h2>
+                                        <p>{property.floor}</p>
+                                    </div>
+
+                                    <div className="mt-4">
+                                        <h3 className="text-md font-semibold mb-2">
+                                            За повече информация за този обект потърси:
+                                        </h3>
+                                        <div className="flex flex-row items-center gap-2 mb-1">
+                                            <TelephoneCall className="h-5" />
+                                            {property.phoneNumber}
+                                        </div>
+                                        <div className="flex flex-row items-center gap-2">
+                                            <Envelope className="h-5" />
+                                            {property.email}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-center items-center md:flex-shrink-0 md:basis-1/2 p-4 w-full md:w-auto">
+                                    <div className="w-96">
+                                        <ContactCompanyBox
+                                            company={property.companyId}
+                                            onClick={() => navigate(`/companies/${property.companyId}`)}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+			<div className="border shadow-md h-80 w-full max-w-6xl mx-auto p-4">
+                            <Map
+                                street={property.address.street}
+                                city={property.address.city}
+                                neighborhood={property.address.neighborhood}
+                            />
+                        </div>
+                        <div className="w-full max-w-6xl mx-auto px-4 mt-4">
+                            {property?.resources?.galleryImages && property?.resources?.galleryImages?.length > 0 && (
+                                <ImagesCarousel galleryImages={property.resources.galleryImages} />
+                            )}
+                        </div>
+
+                        <div className="w-full max-w-6xl mx-auto px-4">
+                            {property?.resources?.visualizationFolder && (
+                       
                         </p>
                       ))}
                   </div>

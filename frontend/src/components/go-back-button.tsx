@@ -1,5 +1,4 @@
 import { ArrowLeft } from "@mynaui/icons-react";
-import React from "react";
 
 function GoBackButton({ onClick }: { onClick?: () => void }) {
   return (

@@ -27,8 +27,8 @@ export class UserController {
     return new UserResponseDto(user);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  //@UseGuards(JwtAuthGuard, RolesGuard)
+  //@Roles('admin')
   @Get()
   async getAllUsers(): Promise<UserResponseDto[]> {
     const users = await this.userService.getAllUsers();
@@ -113,5 +113,5 @@ export class UserController {
   async makeUserAdmin(@Param('id') id: string): Promise<UserResponseDto> {
     const user = await this.userService.makeUserAdmin(id);
     return new UserResponseDto(user);
-  }
+  }  
 }

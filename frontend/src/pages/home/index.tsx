@@ -1,21 +1,17 @@
-import { useEffect, useState } from "react";
-import {
-  Leaves,
-  HomeSmile,
-  BrightnessHigh,
-  TelephoneCall,
-  Envelope,
-} from "@mynaui/icons-react";
-import homeImage from "@/assets/home-image.jpg";
-import apartmentScreenhostOne from "@/assets/apartment-screenshot-1.png";
-import stockImageOne from "@/assets/stock-image-1.jpeg";
-import stockImageTwo from "@/assets/stock-image-2.jpg";
-import mottoBig from "@/assets/motto-big-svg.svg";
-import mottoSmall from "@/assets/motto-small-svg.svg";
+import { useEffect, useState } from 'react';
+import { Leaves, HomeSmile, BrightnessHigh, TelephoneCall, Envelope } from "@mynaui/icons-react";
+import homeImage from '@/assets/home-image.jpg';
+import apartmentScreenhostOne from '@/assets/apartment-screenshot-1.png'
+import stockImageOne from '@/assets/stock-image-1.jpeg';
+import stockImageTwo from '@/assets/stock-image-2.jpg';
+import mottoBig from '@/assets/motto-big-svg.svg';
+import mottoSmall from '@/assets/motto-small-svg.svg';
+// import TranslationPopup from "@/components/translation-popup"
+import MovieClip from "@/components/youtube-embed.tsx"
 
 function Home() {
-  const phoneNumber = "+359 123 456 789";
-  const email = "info@hometour.com";
+  const phoneNumber = "0895780881";
+  const email = "ivamarinova06@gmail.com";
   const [isBigScreen, setIsBigScreen] = useState(false);
 
   useEffect(() => {
@@ -39,6 +35,7 @@ function Home() {
           alt="sectionimage"
           className="w-full h-full object-cover"
         />
+
 
         <div className="absolute inset-0 flex justify-center items-center">
           <div className="lg:w-2/5 md:w-2/5 w-64 relative flex justify-center items-center z-10">
@@ -65,9 +62,12 @@ function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-black opacity-40 z-0" />
         <div className="absolute inset-0 bg-gradient-to-t from-black opacity-70 z-0" />
       </div>
+      <div className="mt-16">
+        <MovieClip />
+      </div>
 
       <div className="w-full flex flex-col items-center p-8">
-        <div className="flex flex-col lg:flex-row items-center justify-center mt-12 mb-12">
+        <div className="flex flex-col lg:flex-row items-center justify-center mt-6 mb-12">
           <div className="flex flex-col items-center lg:items-center lg:mr-5 w-full lg:w-2/3">
             <h2 className="text-3xl font-bold text-center mt-12">
               Информация за проекта

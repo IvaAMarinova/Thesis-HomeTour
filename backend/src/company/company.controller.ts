@@ -26,8 +26,8 @@ export class CompanyController {
     private readonly fileUploadService: FileUploadService,
   ) {}
 
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard)
+  //@Roles('admin')
+  //@UseGuards(JwtAuthGuard)
   @Post()
   async createCompany(
     @Body() body: CompanyInputDto,

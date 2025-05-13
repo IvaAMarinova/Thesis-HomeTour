@@ -15,7 +15,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import ConfirmationPopup from "@/components/confirmation-popup";
 import EditSingleImage from "@/components/edit-pages/edit-single-image";
 import EditPropertyText from "@/components/edit-pages/edit-property/edit-property-text";
-import EditPropertyAddress from "@/components/edit-pages/edit-property/edit-property-address";
+// import EditPropertyAddress from "@/components/edit-pages/edit-property/edit-property-address";
 import propertySchema from "@/schemas/property-schema";
 import Property from "@/interfaces/property-interface";
 import HandlePropertyImages from "./property-images-logic";
