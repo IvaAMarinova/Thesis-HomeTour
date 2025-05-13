@@ -57,7 +57,11 @@ This project is an online platform for virtual apartment tours. It allows buyers
    docker compose up
    ```
    This will start all the necessary services defined in your docker-compose.yml file.
-5. Start the backend server:
+5. Migrate the database
+   ```
+   npx mikro-orm migration:up
+   ```
+6. Start the backend server:
    ```
    npm run start
    ```
