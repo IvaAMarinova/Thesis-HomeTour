@@ -116,8 +116,9 @@ export class HttpService {
         this.loadTokensFromCookies();
       }
 
-      const requestUrl = new URL(url, API_BASE_URL);
-
+      const apiBase = API_BASE_URL.endsWith("/") ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+      const requestPath = url.startsWith("/") ? url : `/${url}`;
+      const requestUrl = new URL(`${apiBase}${requestPath}`);
       if (params?.query) {
         Object.keys(params.query).forEach((key) =>
           requestUrl.searchParams.append(key, params.query![key]),
