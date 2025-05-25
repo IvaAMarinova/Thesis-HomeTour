@@ -10,8 +10,8 @@ import homeImage from "@/assets/home-image.jpg";
 import apartmentScreenhostOne from "@/assets/apartment-screenshot-1.png";
 import stockImageOne from "@/assets/stock-image-1.jpeg";
 import stockImageTwo from "@/assets/stock-image-2.jpg";
-import mottoBig from "@/assets/motto-big-svg.svg";
-import mottoSmall from "@/assets/motto-small-svg.svg";
+import mottoBig from "@/assets/motto-big.png";
+import mottoSmall from "@/assets/motto-small.png";
 
 function Home() {
   const phoneNumber = "+359 123 456 789";
@@ -45,20 +45,9 @@ function Home() {
             <div className="absolute inset-0 bg-black bg-opacity-20 blur-2xl rounded-lg" />
             <img
               src={isBigScreen ? mottoBig : mottoSmall}
-              alt="Custom SVG"
+              alt="Custom PNG"
               className="w-full relative z-10"
             />
-            <div className="absolute inset-0 flex items-center justify-center text-center z-20">
-              <p className="text-[#f1ebdf] text-sm md:text-lg lg:text-3xl font-bold">
-                Най-добрата
-                <br />
-                технология, с която
-                <br />
-                да визуализираш
-                <br />
-                своя имот.
-              </p>
-            </div>
           </div>
         </div>
 
