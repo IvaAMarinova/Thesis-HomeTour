@@ -9,6 +9,7 @@ import { Company } from '../company/company.entity';
 import { isUUID } from 'class-validator';
 import { FileUploadService } from '../upload/upload.service';
 import { PropertyInputDto } from './dto/property-input.dto';
+import { TransformedPropertyDto } from './dto/property-transformed-response.dto';
 
 @Injectable()
 export class PropertyService {
@@ -179,5 +180,51 @@ export class PropertyService {
     throw new BadRequestException(
       `An unexpected error occurred: ${error.message}`,
     );
+  }
+
+  async mapPresignedUrlsToProperty(
+    property: PropertyEntity,
+  ): Promise<TransformedPropertyDto> {
+    const headerImage = property.resources?.headerImage
+      ? {
+          key: property.resources.headerImage,
+          url: await this.fileUploadService.getPreSignedURLToViewObject(
+            property.resources.headerImage,
+          ),
+        }
+      : null;
+
+    const galleryImages = property.resources?.galleryImages
+      ? await Promise.all(
+          property.resources.galleryImages.map(async (imageKey) => ({
+            key: imageKey,
+            url: await this.fileUploadService.getPreSignedURLToViewObject(
+              imageKey,
+            ),
+          })),
+        )
+      : [];
+
+    const transformedResources = {
+      headerImage,
+      galleryImages,
+      visualizationFolder: property.resources?.visualizationFolder,
+    };
+
+    return new TransformedPropertyDto({
+      id: property.id,
+      name: property.name,
+      description: property.description,
+      floor: property.floor,
+      address: property.address as {
+        street: string;
+        city: string;
+        neighborhood: string;
+      },
+      phoneNumber: property.phoneNumber,
+      email: property.email,
+      company: property.company.id,
+      resources: transformedResources,
+    });
   }
 }

@@ -37,7 +37,7 @@ function Properties() {
       queryFn: async () => {
         if (!userId) return [];
         const response = await HttpService.get<{ propertyId: string }[]>(
-          `/user-properties/user-id-liked/${userId}`,
+          `/user-properties/users/${userId}/liked-properties`
         );
         return response;
       },
@@ -48,8 +48,9 @@ function Properties() {
   const { data: allCompanies = [] } = useQuery({
     queryKey: ["companies"],
     queryFn: async () => {
-      const response =
-        await HttpService.get<{ id: string; name: string }[]>("/companies");
+      const response = await HttpService.get<{ id: string; name: string }[]>(
+        "/companies"
+      );
       return response;
     },
   });
@@ -66,7 +67,7 @@ function Properties() {
     if (companies.length > 0) {
       const companyIds = companies.map((companyName) => {
         const matchingCompany = allCompanies.find(
-          (company) => company.name === companyName,
+          (company) => company.name === companyName
         );
         return matchingCompany?.id;
       });
@@ -82,7 +83,7 @@ function Properties() {
 
       if (isLikedOnly) {
         const likedPropertyIds = likedProperties.map(
-          ({ propertyId }) => propertyId,
+          ({ propertyId }) => propertyId
         );
 
         filteredProperties = response
@@ -95,7 +96,7 @@ function Properties() {
 
       filteredProperties = filteredProperties.map((property) => {
         const company = allCompanies.find(
-          (company) => company.id === property.companyId,
+          (company) => company.id === property.companyId
         );
         return {
           ...property,
@@ -119,7 +120,7 @@ function Properties() {
   }, [appliedFilters]);
 
   const filteredBySearch = filteredProperties.filter((property) =>
-    property.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    property.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -148,13 +149,13 @@ function Properties() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {filteredBySearch.map((property) => {
               const isLiked = likedProperties.some(
-                (liked) => liked.propertyId === property.id,
+                (liked) => liked.propertyId === property.id
               );
 
               const normalizedProperty = {
                 ...property,
                 companyName: allCompanies.find(
-                  (company) => company.id === property.companyId,
+                  (company) => company.id === property.companyId
                 )?.name,
               };
 

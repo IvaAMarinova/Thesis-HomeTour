@@ -33,7 +33,7 @@ function CompanyPage() {
     queryFn: async () => {
       if (!companyQuery.data?.id || !companyQuery.data?.name) return [];
       const properties = await HttpService.get<Property[]>(
-        `/companies/${companyQuery.data.id}/properties`,
+        `/companies/${companyQuery.data.id}/properties`
       );
       return properties.map((property) => ({
         ...property,
@@ -47,9 +47,9 @@ function CompanyPage() {
     if (!userId) return;
     try {
       const response = await HttpService.get<{ propertyId: string }[]>(
-        `/user-properties/user-id-liked/${userId}`,
+        `/user-properties/users/${userId}/liked-properties`,
         undefined,
-        true,
+        true
       );
       setLikedProperties(response);
     } catch (error) {
@@ -170,7 +170,7 @@ function CompanyPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 -mx-2">
               {properties.map((property) => {
                 const isLiked = likedProperties.some(
-                  (liked) => liked.propertyId === property.id,
+                  (liked) => liked.propertyId === property.id
                 );
                 return (
                   <div

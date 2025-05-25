@@ -9,10 +9,16 @@ import { PropertyEntity } from '../property/property.entity';
 import { isUUID } from 'class-validator';
 import { CompanyInputDto } from './dto/company-input.dto';
 import { validateOrReject } from 'class-validator';
+import { FileUploadService } from '../upload/upload.service';
+import { TransformedPropertyDto } from 'src/property/dto/property-transformed-response.dto';
+import { TransformedCompanyDto } from './dto/company-transformed-response.dto';
 
 @Injectable()
 export class CompanyService {
-  constructor(private readonly em: EntityManager) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly fileUploadService: FileUploadService,
+  ) {}
 
   async create(companyData: CompanyInputDto): Promise<Company> {
     try {
@@ -129,5 +135,83 @@ export class CompanyService {
     throw new BadRequestException(
       `An unexpected error occurred: ${error.message}`,
     );
+  }
+
+  async mapPresignedUrlsToCompany(
+    company: Company,
+  ): Promise<TransformedCompanyDto> {
+    const logoImage = company.resources?.logoImage
+      ? {
+          key: company.resources.logoImage,
+          url: await this.fileUploadService.getPreSignedURLToViewObject(
+            company.resources.logoImage,
+          ),
+        }
+      : null;
+
+    const galleryImage = company.resources?.galleryImage
+      ? {
+          key: company.resources.galleryImage,
+          url: await this.fileUploadService.getPreSignedURLToViewObject(
+            company.resources.galleryImage,
+          ),
+        }
+      : null;
+
+    const transformedResources = {
+      logoImage,
+      galleryImage,
+    };
+
+    return new TransformedCompanyDto({
+      id: company.id,
+      name: company.name,
+      description: company.description,
+      phoneNumber: company.phoneNumber,
+      email: company.email,
+      website: company.website,
+      resources: transformedResources,
+    });
+  }
+
+  async mapPresignedUrlsToProperty(
+    property: PropertyEntity,
+  ): Promise<TransformedPropertyDto> {
+    const headerImage = property.resources?.headerImage
+      ? {
+          key: property.resources.headerImage,
+          url: await this.fileUploadService.getPreSignedURLToViewObject(
+            property.resources.headerImage,
+          ),
+        }
+      : null;
+
+    const galleryImages = property.resources?.galleryImages
+      ? await Promise.all(
+          property.resources.galleryImages.map(async (imageKey) => ({
+            key: imageKey,
+            url: await this.fileUploadService.getPreSignedURLToViewObject(
+              imageKey,
+            ),
+          })),
+        )
+      : [];
+
+    const transformedResources = {
+      headerImage,
+      galleryImages,
+    };
+
+    return new TransformedPropertyDto({
+      id: property.id,
+      name: property.name,
+      description: property.description,
+      floor: property.floor,
+      address: property.address,
+      phoneNumber: property.phoneNumber,
+      email: property.email,
+      company: property.company.id,
+      resources: transformedResources,
+    });
   }
 }

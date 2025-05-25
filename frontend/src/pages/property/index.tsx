@@ -57,16 +57,16 @@ function PropertyPage() {
     const fetchLikedProperties = async () => {
       try {
         const likedResponse = await HttpService.get<Record<string, string>[]>(
-          `/user-properties/user-id-liked/${userId}`,
+          `/user-properties/users/${userId}/liked-properties`,
           undefined,
-          true,
+          true
         );
         const isLikedProperty = likedResponse.some(
-          (likedItem) => likedItem.propertyId === id,
+          (likedItem) => likedItem.propertyId === id
         );
         setIsLiked(isLikedProperty);
       } catch (error) {
-        // console.error("Error fetching liked properties:", error);
+        console.error("Error fetching liked properties:", error);
       }
     };
 
@@ -88,12 +88,12 @@ function PropertyPage() {
         },
         undefined,
         true,
-        false,
+        false
       );
 
       setIsLiked(newLikedState);
       console.log(
-        `Property ${newLikedState ? "liked" : "unliked"} successfully.`,
+        `Property ${newLikedState ? "liked" : "unliked"} successfully.`
       );
     } catch (error) {
       console.error("Error updating like status:", error);

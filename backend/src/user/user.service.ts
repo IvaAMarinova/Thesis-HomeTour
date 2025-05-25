@@ -245,20 +245,28 @@ export class UserService {
     }
   }
 
-  async makeUserB2B(userId: string, companyId: string): Promise<User> {
+  async changeUserType(
+    userId: string,
+    userType: string,
+    companyId?: string,
+  ): Promise<User> {
     try {
-      console.log('User ID:', userId);
-      console.log('Company ID:', companyId);
       const user = await this.em.findOne(User, { id: userId });
       if (!user) {
         throw new NotFoundException(`User not found`);
       }
-      const company = await this.companyService.getCompanyById(companyId);
-      if (!company) {
-        throw new NotFoundException(`Company not found`);
+
+      if (userType == 'b2c') {
+        const company = await this.companyService.getCompanyById(companyId);
+        if (!company) {
+          throw new NotFoundException(`Company not found`);
+        }
+
+        this.em.assign(user, { company, type: UserType.B2B });
+      } else {
+        this.em.assign(user, { company: null, type: UserType.B2C });
       }
 
-      this.em.assign(user, { company, type: UserType.B2B });
       await this.em.persistAndFlush(user);
       return user;
     } catch (error) {

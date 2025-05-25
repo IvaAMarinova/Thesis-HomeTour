@@ -10,20 +10,13 @@ import {
   Query,
 } from '@nestjs/common';
 import { PropertyService } from './property.service';
-import { PropertyEntity } from './property.entity';
-import { FileUploadService } from '../upload/upload.service';
 import { TransformedPropertyDto } from './dto/property-transformed-response.dto';
 import { PropertyInputDto } from './dto/property-input.dto';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
-import { Roles } from '../decorators/roles.decorator';
-import { RolesGuard } from '../auth/guards/roles-auth.guard';
 
 @Controller('properties')
 export class PropertyController {
-  constructor(
-    private readonly propertyService: PropertyService,
-    private readonly fileUploadService: FileUploadService,
-  ) {}
+  constructor(private readonly propertyService: PropertyService) {}
 
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -31,7 +24,7 @@ export class PropertyController {
     @Body() body: PropertyInputDto,
   ): Promise<TransformedPropertyDto> {
     const property = await this.propertyService.create(body);
-    return await this.mapPresignedUrlsToProperty(property);
+    return await this.propertyService.mapPresignedUrlsToProperty(property);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -42,7 +35,7 @@ export class PropertyController {
   ): Promise<TransformedPropertyDto> {
     try {
       const property = await this.propertyService.update(id, body);
-      return this.mapPresignedUrlsToProperty(property);
+      return this.propertyService.mapPresignedUrlsToProperty(property);
     } catch (error) {
       throw error;
     }
@@ -64,7 +57,9 @@ export class PropertyController {
     const properties = await this.propertyService.getAllProperties();
 
     const mappedProperties = await Promise.all(
-      properties.map((property) => this.mapPresignedUrlsToProperty(property)),
+      properties.map((property) =>
+        this.propertyService.mapPresignedUrlsToProperty(property),
+      ),
     );
 
     return mappedProperties;
@@ -88,7 +83,9 @@ export class PropertyController {
       companiesIdsArray,
     );
     const mappedProperties = await Promise.all(
-      properties.map((property) => this.mapPresignedUrlsToProperty(property)),
+      properties.map((property) =>
+        this.propertyService.mapPresignedUrlsToProperty(property),
+      ),
     );
     return mappedProperties;
   }
@@ -99,64 +96,6 @@ export class PropertyController {
   ): Promise<TransformedPropertyDto> {
     const property = await this.propertyService.getPropertyById(id);
     if (!property) return null;
-    return this.mapPresignedUrlsToProperty(property);
-  }
-
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
-  @Delete('all')
-  async deleteAllProperties(): Promise<{ message: string }> {
-    try {
-      await this.propertyService.deleteAllProperties();
-      return { message: 'All properties deleted successfully' };
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async mapPresignedUrlsToProperty(
-    property: PropertyEntity,
-  ): Promise<TransformedPropertyDto> {
-    const headerImage = property.resources?.headerImage
-      ? {
-          key: property.resources.headerImage,
-          url: await this.fileUploadService.getPreSignedURLToViewObject(
-            property.resources.headerImage,
-          ),
-        }
-      : null;
-
-    const galleryImages = property.resources?.galleryImages
-      ? await Promise.all(
-          property.resources.galleryImages.map(async (imageKey) => ({
-            key: imageKey,
-            url: await this.fileUploadService.getPreSignedURLToViewObject(
-              imageKey,
-            ),
-          })),
-        )
-      : [];
-
-    const transformedResources = {
-      headerImage,
-      galleryImages,
-      visualizationFolder: property.resources?.visualizationFolder,
-    };
-
-    return new TransformedPropertyDto({
-      id: property.id,
-      name: property.name,
-      description: property.description,
-      floor: property.floor,
-      address: property.address as {
-        street: string;
-        city: string;
-        neighborhood: string;
-      },
-      phoneNumber: property.phoneNumber,
-      email: property.email,
-      company: property.company.id,
-      resources: transformedResources,
-    });
+    return this.propertyService.mapPresignedUrlsToProperty(property);
   }
 }

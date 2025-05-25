@@ -10,8 +10,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CompanyService } from './company.service';
-import { Company } from './company.entity';
-import { PropertyEntity } from '../property/property.entity';
 import { FileUploadService } from '../upload/upload.service';
 import { TransformedCompanyDto } from './dto/company-transformed-response.dto';
 import { TransformedPropertyDto } from '../property/dto/property-transformed-response.dto';
@@ -33,7 +31,7 @@ export class CompanyController {
     @Body() body: CompanyInputDto,
   ): Promise<TransformedCompanyDto> {
     const user = await this.companyService.create(body);
-    return this.mapPresignedUrlsToCompany(user);
+    return this.companyService.mapPresignedUrlsToCompany(user);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -43,7 +41,7 @@ export class CompanyController {
     @Body() body: CompanyInputDto,
   ): Promise<TransformedCompanyDto> {
     const updatedCompany = await this.companyService.update(id, body);
-    return this.mapPresignedUrlsToCompany(updatedCompany);
+    return this.companyService.mapPresignedUrlsToCompany(updatedCompany);
   }
 
   @Roles('admin')
@@ -62,7 +60,9 @@ export class CompanyController {
   async getAllCompanies(): Promise<TransformedCompanyDto[]> {
     const companies = await this.companyService.getAllCompanies();
     const updatedCompanies = await Promise.all(
-      companies.map(async (company) => this.mapPresignedUrlsToCompany(company)),
+      companies.map(async (company) =>
+        this.companyService.mapPresignedUrlsToCompany(company),
+      ),
     );
     return updatedCompanies;
   }
@@ -75,7 +75,7 @@ export class CompanyController {
       throw new NotFoundException('Company not found');
     }
 
-    return await this.mapPresignedUrlsToCompany(company);
+    return await this.companyService.mapPresignedUrlsToCompany(company);
   }
 
   @Get(':id/properties')
@@ -86,88 +86,10 @@ export class CompanyController {
 
     const updatedProperties = await Promise.all(
       properties.map(async (property) => {
-        return this.mapPresignedUrlsToProperty(property);
+        return this.companyService.mapPresignedUrlsToProperty(property);
       }),
     );
 
     return updatedProperties;
-  }
-
-  async mapPresignedUrlsToCompany(
-    company: Company,
-  ): Promise<TransformedCompanyDto> {
-    const logoImage = company.resources?.logoImage
-      ? {
-          key: company.resources.logoImage,
-          url: await this.fileUploadService.getPreSignedURLToViewObject(
-            company.resources.logoImage,
-          ),
-        }
-      : null;
-
-    const galleryImage = company.resources?.galleryImage
-      ? {
-          key: company.resources.galleryImage,
-          url: await this.fileUploadService.getPreSignedURLToViewObject(
-            company.resources.galleryImage,
-          ),
-        }
-      : null;
-
-    const transformedResources = {
-      logoImage,
-      galleryImage,
-    };
-
-    return new TransformedCompanyDto({
-      id: company.id,
-      name: company.name,
-      description: company.description,
-      phoneNumber: company.phoneNumber,
-      email: company.email,
-      website: company.website,
-      resources: transformedResources,
-    });
-  }
-
-  async mapPresignedUrlsToProperty(
-    property: PropertyEntity,
-  ): Promise<TransformedPropertyDto> {
-    const headerImage = property.resources?.headerImage
-      ? {
-          key: property.resources.headerImage,
-          url: await this.fileUploadService.getPreSignedURLToViewObject(
-            property.resources.headerImage,
-          ),
-        }
-      : null;
-
-    const galleryImages = property.resources?.galleryImages
-      ? await Promise.all(
-          property.resources.galleryImages.map(async (imageKey) => ({
-            key: imageKey,
-            url: await this.fileUploadService.getPreSignedURLToViewObject(
-              imageKey,
-            ),
-          })),
-        )
-      : [];
-
-    const transformedResources = {
-      headerImage,
-      galleryImages,
-    };
-
-    return new TransformedPropertyDto({
-      id: property.id,
-      name: property.name,
-      description: property.description,
-      floor: property.floor,
-      address: property.address,
-      phoneNumber: property.phoneNumber,
-      email: property.email,
-      company: property.company.id,
-      resources: transformedResources,
-    });
   }
 }

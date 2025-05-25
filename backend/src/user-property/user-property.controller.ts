@@ -60,7 +60,7 @@ export class UserPropertyController {
     }
   }
 
-  @Get('/user-id-liked/:userId')
+  @Get('/users/:userId/liked-properties')
   async getLikedUserProperties(
     @Param('userId') userId: string,
   ): Promise<UserPropertyResponseDto[]> {
