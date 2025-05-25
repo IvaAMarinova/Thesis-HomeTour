@@ -2,6 +2,8 @@
 
 🔴 IN PROGRESS
 
+🔗 CHECK IT OUT - [hometour.dev](https://hometour.dev)
+
 ## 📄 Project Overview
 
 This project is an online platform for virtual apartment tours. It allows buyers and sellers to interact through a web interface, featuring 3D property visualizations and virtual tours.
@@ -52,11 +54,11 @@ This project is an online platform for virtual apartment tours. It allows buyers
    npm install
    ```
 3. Create a `.env` file in the backend directory and add necessary environment variables (e.g., database connection string, JWT secret).
-4. Start the Docker containers:
+4. Start the Docker container:
    ```
    docker compose up
    ```
-   This will start all the necessary services defined in your docker-compose.yml file.
+   This will start the necessary container for the server.
 5. Migrate the database
    ```
    npx mikro-orm migration:up
