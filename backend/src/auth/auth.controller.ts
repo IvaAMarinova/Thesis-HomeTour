@@ -42,7 +42,7 @@ export class AuthController {
     const accessTokenOptions: CookieOptions = {
       httpOnly: true,
       secure: this.isProduction,
-      sameSite: this.isProduction ? 'strict' : 'lax',
+      sameSite: 'lax',
       expires: this.getCookieExpirationTime(1),
       path: '/',
     };
@@ -50,7 +50,7 @@ export class AuthController {
     const refreshTokenOptions: CookieOptions = {
       httpOnly: true,
       secure: this.isProduction,
-      sameSite: this.isProduction ? 'strict' : 'lax',
+      sameSite: 'lax',
       expires: this.getCookieExpirationTime(30),
       path: '/',
     };
@@ -66,7 +66,7 @@ export class AuthController {
     const clearOptions: CookieOptions = {
       httpOnly: false,
       secure: isProduction,
-      sameSite: isProduction ? 'strict' : 'lax',
+      sameSite: 'lax',
       maxAge: 0,
       path: '/',
     };
