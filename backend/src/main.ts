@@ -28,8 +28,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const cookieSecret = configService.get<string>('COOKIE_SECRET');
-  app.use(cookieParser(cookieSecret));
+  app.use(cookieParser());
 
   await app.listen(3000);
 }

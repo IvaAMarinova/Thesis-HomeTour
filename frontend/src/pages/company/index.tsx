@@ -53,7 +53,7 @@ function CompanyPage() {
       );
       setLikedProperties(response);
     } catch (error) {
-      toast.error("Грешка при зареждане на харесаните имоти. Опитайте отново.");
+      // toast.error("Грешка при зареждане на харесаните имоти. Опитайте отново.");
     }
   };
 
