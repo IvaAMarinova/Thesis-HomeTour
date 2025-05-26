@@ -14,7 +14,7 @@ import mottoBig from "@/assets/motto-big.png";
 import mottoSmall from "@/assets/motto-small.png";
 
 function Home() {
-  const phoneNumber = "+359 123 456 789";
+  const phoneNumber = "+359 895 780 881";
   const email = "info@hometour.com";
   const [isBigScreen, setIsBigScreen] = useState(false);
 
