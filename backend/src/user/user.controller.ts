@@ -46,7 +46,7 @@ export class UserController {
   @Put(':id/type')
   async updateUserType(
     @Param('id') userId: string,
-    @Body() body: any,
+    @Body() body: { companyId: string; type: string },
   ): Promise<UserResponseDto> {
     const user = await this.userService.changeUserType(
       userId,

@@ -6,7 +6,6 @@ import PropertyBox from "../../components/property-box";
 import GoUpButton from "../../components/go-up-button";
 import GoBackButton from "../../components/go-back-button";
 import { useUser } from "@/contexts/UserContext";
-import { toast } from "react-toastify";
 import { useState, useEffect } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import type Property from "@/interfaces/property-interface";
@@ -53,7 +52,7 @@ function CompanyPage() {
       );
       setLikedProperties(response);
     } catch (error) {
-      // toast.error("Грешка при зареждане на харесаните имоти. Опитайте отново.");
+      //console.error("Грешка при зареждане на харесаните имоти. Опитайте отново.");
     }
   };
 

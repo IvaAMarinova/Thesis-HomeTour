@@ -163,7 +163,7 @@ export class UserPropertyService {
     }
   }
 
-  private handleUnexpectedError(error: any): never {
+  private handleUnexpectedError(error: unknown): never {
     if (
       error instanceof BadRequestException ||
       error instanceof NotFoundException
@@ -171,9 +171,13 @@ export class UserPropertyService {
       throw error;
     }
 
-    console.error('Unexpected error occurred:', error);
-    throw new BadRequestException(
-      `An unexpected error occurred: ${error.message}`,
-    );
+    if (error instanceof Error) {
+      console.error('Unexpected error occurred:', error);
+      throw new BadRequestException(
+        `An unexpected error occurred: ${error.message}`,
+      );
+    }
+
+    throw new BadRequestException('An unknown error occurred.');
   }
 }

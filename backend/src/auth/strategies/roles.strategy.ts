@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-custom';
 import { Reflector } from '@nestjs/core';
+import { Request } from 'express';
 
 @Injectable()
 export class RolesStrategy extends PassportStrategy(Strategy, 'roles') {
@@ -9,29 +10,31 @@ export class RolesStrategy extends PassportStrategy(Strategy, 'roles') {
     super();
   }
 
-  async validate(req: any, done: Function): Promise<any> {
+  async validate(
+    req: Request,
+    done: (err: unknown, user: boolean) => void,
+  ): Promise<void> {
     const requiredRoles = this.reflector.get<string[]>(
       'roles',
-      req.route.stack[0].handle,
+      req.route?.stack?.[0]?.handle,
     );
+
     if (!requiredRoles) {
       return done(null, true);
     }
 
-    const user = req.user;
+    const user = req.user as { roles?: string[] };
 
     if (
-      user &&
-      user.roles &&
-      requiredRoles.some((role) => user.roles.includes(role))
+      user?.roles &&
+      requiredRoles.some((role) => user.roles?.includes(role))
     ) {
       return done(null, true);
     }
 
     return done(
       new UnauthorizedException(
-        'User does not have the required role. User roles: ',
-        user.roles,
+        `User does not have the required role. User roles: ${user?.roles?.join(', ')}`,
       ),
       false,
     );

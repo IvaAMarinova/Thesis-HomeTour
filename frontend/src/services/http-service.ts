@@ -30,14 +30,14 @@ export class HttpService {
     url: string,
     params?: RequestParams,
     authRequired = false,
-    isLoginAttempt = false,
+    isLoginAttempt = false
   ): Promise<T> {
     return await HttpService.request<T>(
       url,
       "GET",
       params,
       authRequired,
-      isLoginAttempt,
+      isLoginAttempt
     );
   }
 
@@ -46,14 +46,14 @@ export class HttpService {
     body: object,
     params?: RequestParams,
     authRequired = false,
-    isLoginAttempt = false,
+    isLoginAttempt = false
   ): Promise<T> {
     return await HttpService.request<T>(
       url,
       "POST",
       { ...params, body },
       authRequired,
-      isLoginAttempt,
+      isLoginAttempt
     );
   }
 
@@ -62,14 +62,14 @@ export class HttpService {
     body: object,
     params?: RequestParams,
     authRequired = false,
-    isLoginAttempt = false,
+    isLoginAttempt = false
   ): Promise<T> {
     return await HttpService.request<T>(
       url,
       "PUT",
       { ...params, body },
       authRequired,
-      isLoginAttempt,
+      isLoginAttempt
     );
   }
 
@@ -78,14 +78,14 @@ export class HttpService {
     body: object,
     params?: RequestParams,
     authRequired = false,
-    isLoginAttempt = false,
+    isLoginAttempt = false
   ): Promise<T> {
     return await HttpService.request<T>(
       url,
       "PATCH",
       { ...params, body },
       authRequired,
-      isLoginAttempt,
+      isLoginAttempt
     );
   }
 
@@ -93,14 +93,14 @@ export class HttpService {
     url: string,
     params?: RequestParams,
     authRequired = false,
-    isLoginAttempt = false,
+    isLoginAttempt = false
   ): Promise<T> {
     return await HttpService.request<T>(
       url,
       "DELETE",
       params,
       authRequired,
-      isLoginAttempt,
+      isLoginAttempt
     );
   }
 
@@ -109,19 +109,21 @@ export class HttpService {
     method: string,
     params?: RequestParams,
     authRequired = true,
-    isLoginAttempt = false,
+    isLoginAttempt = false
   ): Promise<T> {
     try {
       if (!this.accessToken && !isLoginAttempt) {
         this.loadTokensFromCookies();
       }
 
-      const apiBase = API_BASE_URL.endsWith("/") ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+      const apiBase = API_BASE_URL.endsWith("/")
+        ? API_BASE_URL.slice(0, -1)
+        : API_BASE_URL;
       const requestPath = url.startsWith("/") ? url : `/${url}`;
       const requestUrl = new URL(`${apiBase}${requestPath}`);
       if (params?.query) {
         Object.keys(params.query).forEach((key) =>
-          requestUrl.searchParams.append(key, params.query![key]),
+          requestUrl.searchParams.append(key, params.query![key])
         );
       }
 
@@ -143,8 +145,8 @@ export class HttpService {
           params?.body instanceof FormData
             ? (params.body as BodyInit)
             : params?.body
-              ? JSON.stringify(params.body)
-              : undefined,
+            ? JSON.stringify(params.body)
+            : undefined,
       });
 
       if (!response.ok) {
@@ -162,9 +164,7 @@ export class HttpService {
           const errorMessage =
             errorData?.message ||
             `Request failed with status ${response.status}`;
-          const error = new Error(errorMessage);
-          (error as any).response = errorData;
-          throw error;
+          throw new Error(errorMessage);
         }
       }
 
@@ -193,7 +193,7 @@ export class HttpService {
   }
 
   public static async isAuthenticated(
-    fetchUserId: () => Promise<void>,
+    fetchUserId: () => Promise<void>
   ): Promise<boolean> {
     if (!this.accessToken && !this.refreshToken) {
       this.loadTokensFromCookies();

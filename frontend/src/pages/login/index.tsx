@@ -8,7 +8,7 @@ import { HttpService } from "@/services/http-service";
 import { useUser } from "../../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import { BrandGoogle } from "@mynaui/icons-react";
-import { useGoogleLogin } from "@react-oauth/google";
+import { useGoogleLogin, TokenResponse } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -113,7 +113,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
   }
 
   const onGoogleLogin = useGoogleLogin({
-    onSuccess: async (response: any) => {
+    onSuccess: async (response: TokenResponse) => {
       setIsLoading(true);
       const googleAccessToken = response.access_token;
       const userInfoResponse = await fetch(
@@ -122,7 +122,7 @@ export function Login({ onLoginSuccess }: LoginProps) {
           headers: {
             Authorization: `Bearer ${googleAccessToken}`,
           },
-        },
+        }
       );
 
       const userInfo = await userInfoResponse.json();

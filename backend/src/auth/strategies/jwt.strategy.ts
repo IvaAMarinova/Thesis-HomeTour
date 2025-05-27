@@ -4,6 +4,12 @@ import { Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 
+interface JwtPayload {
+  sub: string;
+  email: string;
+  roles: string[];
+}
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly configService: ConfigService) {
@@ -12,11 +18,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         (req: Request) => {
           const authHeader = req?.headers?.authorization;
           if (authHeader && authHeader.startsWith('Bearer ')) {
-            const token = authHeader.split(' ')[1];
-            return token;
+            return authHeader.split(' ')[1];
           }
-          const cookieToken = req?.cookies?.accessToken || null;
-          return cookieToken;
+          return req?.cookies?.accessToken || null;
         },
       ]),
       ignoreExpiration: false,
@@ -24,7 +28,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
-    return { userId: payload.sub, email: payload.email, roles: payload.roles };
+  async validate(payload: JwtPayload) {
+    return {
+      userId: payload.sub,
+      email: payload.email,
+      roles: payload.roles,
+    };
   }
 }

@@ -10,6 +10,7 @@ import { isUUID } from 'class-validator';
 import { FileUploadService } from '../upload/upload.service';
 import { PropertyInputDto } from './dto/property-input.dto';
 import { TransformedPropertyDto } from './dto/property-transformed-response.dto';
+import { FilterQuery } from '@mikro-orm/core';
 
 @Injectable()
 export class PropertyService {
@@ -100,7 +101,7 @@ export class PropertyService {
     companiesIdsArray?: string[],
   ): Promise<PropertyEntity[]> {
     try {
-      const filter: any = {};
+      const filter: FilterQuery<PropertyEntity> = {};
 
       if (companiesIdsArray?.length > 0) {
         for (const companyId of companiesIdsArray) {
@@ -168,7 +169,7 @@ export class PropertyService {
     }
   }
 
-  private handleUnexpectedError(error: any): never {
+  private handleUnexpectedError(error: unknown): never {
     if (
       error instanceof BadRequestException ||
       error instanceof NotFoundException
@@ -176,10 +177,14 @@ export class PropertyService {
       throw error;
     }
 
-    console.error('Unexpected error occurred:', error);
-    throw new BadRequestException(
-      `An unexpected error occurred: ${error.message}`,
-    );
+    if (error instanceof Error) {
+      console.error('Unexpected error occurred:', error);
+      throw new BadRequestException(
+        `An unexpected error occurred: ${error.message}`,
+      );
+    }
+
+    throw new BadRequestException('An unknown error occurred.');
   }
 
   async mapPresignedUrlsToProperty(

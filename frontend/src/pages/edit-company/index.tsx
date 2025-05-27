@@ -79,7 +79,7 @@ function EditCompany() {
         const resizedImage = await resizeFile(image, type);
         const imageKey = v4();
         const response = await HttpService.get<{ url: string }>(
-          `/files/to-upload?key=${imageKey}&contentType=${image.type}`,
+          `/files/to-upload?key=${imageKey}&contentType=${image.type}`
         );
 
         if (response.url) {
@@ -113,7 +113,6 @@ function EditCompany() {
         ...restOfCompany,
         resources: updatedResources,
       };
-      console.log(updatedCompany);
 
       companySchema.parse(updatedCompany);
 
@@ -122,7 +121,7 @@ function EditCompany() {
         updatedCompany,
         undefined,
         true,
-        false,
+        false
       );
       setIsUploading(false);
       toast.success("Компанията беше успешно обновенa!");
@@ -133,7 +132,7 @@ function EditCompany() {
       await Promise.all(
         imagesToDelete
           .filter((key) => key !== "")
-          .map(async (key) => HttpService.delete(`/files/delete?key=${key}`)),
+          .map(async (key) => HttpService.delete(`/files/delete?key=${key}`))
       );
     } catch (error) {
       setIsUploading(false);
@@ -206,7 +205,7 @@ function EditCompany() {
               onChange={(e) =>
                 handleSelectImage(
                   "logo",
-                  e.target.files ? e.target.files[0] : null,
+                  e.target.files ? e.target.files[0] : null
                 )
               }
             />
@@ -226,7 +225,7 @@ function EditCompany() {
               onChange={(e) =>
                 handleSelectImage(
                   "gallery",
-                  e.target.files ? e.target.files[0] : null,
+                  e.target.files ? e.target.files[0] : null
                 )
               }
             />
